@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
@@ -70,13 +71,36 @@ const dashboardData = {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [mesSeleccionado, setMesSeleccionado] = useState("2024-04")
   const [periodoComparacion, setPeriodoComparacion] = useState("mensual")
+  const [mesHabilitadoCuentaCobro, setMesHabilitadoCuentaCobro] = useState("2024-04")
 
   const { resumenFinanciero, estadoLotes, datosGraficas, alertas } = dashboardData
 
   // Calcular máximo para las barras
   const maxValor = Math.max(...datosGraficas.porMes.map(item => item.valor))
+
+  // Funciones de navegación
+  const handleCardClick = (path: string) => {
+    navigate(path)
+  }
+
+  const handleAlertClick = (alertType: string) => {
+    switch(alertType) {
+      case 'warning':
+        navigate('/pagos-aprobar')
+        break
+      case 'info':
+        navigate('/prestamos')
+        break
+      case 'error':
+        navigate('/sin-lote')
+        break
+      default:
+        break
+    }
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -111,9 +135,51 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Control de mes habilitado para cuenta de cobro */}
+      <Card className="bg-blue-50/50 border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Calendar className="h-5 w-5 text-blue-600" />
+              <div>
+                <h3 className="font-medium text-blue-900">Mes Habilitado para Cuenta de Cobro</h3>
+                <p className="text-sm text-blue-700">Los proveedores podrán generar cuentas de cobro para este período</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Select value={mesHabilitadoCuentaCobro} onValueChange={setMesHabilitadoCuentaCobro}>
+                <SelectTrigger className="w-40">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2024-01">Enero 2024</SelectItem>
+                  <SelectItem value="2024-02">Febrero 2024</SelectItem>
+                  <SelectItem value="2024-03">Marzo 2024</SelectItem>
+                  <SelectItem value="2024-04">Abril 2024</SelectItem>
+                  <SelectItem value="2024-05">Mayo 2024</SelectItem>
+                  <SelectItem value="2024-06">Junio 2024</SelectItem>
+                  <SelectItem value="2024-07">Julio 2024</SelectItem>
+                  <SelectItem value="2024-08">Agosto 2024</SelectItem>
+                  <SelectItem value="2024-09">Septiembre 2024</SelectItem>
+                  <SelectItem value="2024-10">Octubre 2024</SelectItem>
+                  <SelectItem value="2024-11">Noviembre 2024</SelectItem>
+                  <SelectItem value="2024-12">Diciembre 2024</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button 
+                onClick={() => handleCardClick('/cuenta-cobro')}
+                size="sm"
+              >
+                Gestionar Cuentas
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Métricas principales */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/pagos-preparar')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Valor Total Bruto</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
@@ -129,7 +195,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/pagos-procesar')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Descuentos</CardTitle>
             <TrendingDown className="h-4 w-4 text-destructive" />
@@ -144,7 +210,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/pagados')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Valor Neto</CardTitle>
             <CheckCircle className="h-4 w-4 text-success" />
@@ -159,7 +225,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/prestamos')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Préstamos Activos</CardTitle>
             <CreditCard className="h-4 w-4 text-blue-600" />
@@ -180,11 +246,15 @@ export default function Dashboard() {
         {alertas.map((alerta, index) => {
           const IconComponent = alerta.icono
           return (
-            <Card key={index} className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${
-              alerta.tipo === 'warning' ? 'border-l-warning bg-warning/5' :
-              alerta.tipo === 'error' ? 'border-l-destructive bg-destructive/5' :
-              'border-l-blue-500 bg-blue-50/50'
-            }`}>
+            <Card 
+              key={index} 
+              className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${
+                alerta.tipo === 'warning' ? 'border-l-warning bg-warning/5' :
+                alerta.tipo === 'error' ? 'border-l-destructive bg-destructive/5' :
+                'border-l-blue-500 bg-blue-50/50'
+              }`}
+              onClick={() => handleAlertClick(alerta.tipo)}
+            >
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <IconComponent className={`h-5 w-5 ${
@@ -277,7 +347,7 @@ export default function Dashboard() {
 
       {/* Estado detallado por módulo */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-aprobar')}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Clock className="h-5 w-5 text-warning" />
@@ -293,7 +363,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-procesar')}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <Package className="h-5 w-5 text-blue-600" />
@@ -309,7 +379,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/lotes-aprobados')}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <CheckCircle className="h-5 w-5 text-success" />
@@ -325,7 +395,7 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagados')}>
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-base">
               <DollarSign className="h-5 w-5 text-green-600" />
@@ -383,15 +453,27 @@ export default function Dashboard() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Button className="h-16 flex flex-col gap-2" variant="outline">
+            <Button 
+              className="h-16 flex flex-col gap-2" 
+              variant="outline"
+              onClick={() => handleCardClick('/pagos-preparar')}
+            >
               <Package className="h-6 w-6" />
               <span>Crear Nuevo Lote</span>
             </Button>
-            <Button className="h-16 flex flex-col gap-2" variant="outline">
+            <Button 
+              className="h-16 flex flex-col gap-2" 
+              variant="outline"
+              onClick={() => handleCardClick('/cuenta-cobro')}
+            >
               <FileText className="h-6 w-6" />
               <span>Generar Reporte</span>
             </Button>
-            <Button className="h-16 flex flex-col gap-2" variant="outline">
+            <Button 
+              className="h-16 flex flex-col gap-2" 
+              variant="outline"
+              onClick={() => handleCardClick('/prestamos')}
+            >
               <CreditCard className="h-6 w-6" />
               <span>Gestionar Préstamos</span>
             </Button>

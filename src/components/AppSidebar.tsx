@@ -26,14 +26,12 @@ const navigationItems = [
   {
     title: "Dashboard",
     url: "/",
-    icon: BarChart3,
-    subItems: [
-      {
-        title: "Cuentas de Cobro",
-        url: "/cuenta-cobro",
-        icon: Receipt
-      }
-    ]
+    icon: BarChart3
+  },
+  {
+    title: "Cuentas de Cobro",
+    url: "/cuenta-cobro",
+    icon: Receipt
   },
   {
     title: "Gestión de Pagos",
