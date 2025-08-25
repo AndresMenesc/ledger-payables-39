@@ -229,39 +229,64 @@ export default function SinLote() {
     </div>
   )
 
-  return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Sin Lote de Pago</h1>
-        <p className="text-muted-foreground">Cuentas de cobro aprobadas que aún no están asociadas a ningún lote</p>
+  // Vista principal
+  if (!showMoveDialog && !showCreateLoteDialog) {
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Sin Lote de Pago</h1>
+          <p className="text-muted-foreground">Cuentas de cobro aprobadas que aún no están asociadas a ningún lote</p>
+        </div>
+
+        <DataTable
+          title="Cuentas Sin Lote de Pago"
+          columns={columns}
+          data={cuentasSinLote}
+          actions={actions}
+          renderCell={renderCell}
+          summary={summary}
+          searchable={true}
+          filterable={false}
+          exportable={true}
+        />
       </div>
+    )
+  }
 
-      <DataTable
-        title="Cuentas Sin Lote de Pago"
-        columns={columns}
-        data={cuentasSinLote}
-        actions={actions}
-        renderCell={renderCell}
-        summary={summary}
-        searchable={true}
-        filterable={false}
-        exportable={true}
-      />
+  // Vista de mover a lote existente
+  if (showMoveDialog) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowMoveDialog(false)}
+          >
+            ← Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Mover a Lote Existente</h1>
+            <p className="text-muted-foreground">Selecciona el lote de destino para las cuentas seleccionadas</p>
+          </div>
+        </div>
 
-      {/* Dialog para mover a lote existente */}
-      <Dialog open={showMoveDialog} onOpenChange={setShowMoveDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Mover a Lote Existente</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Cuentas seleccionadas: {selectedCuentas.length}
-              </p>
-              <p className="text-sm font-medium">
-                Valor total: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalSeleccionado)}
-              </p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Cuentas Seleccionadas</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-accent/50 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-muted-foreground">Cuentas seleccionadas:</span>
+                <span className="font-medium">{selectedCuentas.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Valor total:</span>
+                <span className="text-lg font-bold text-primary">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalSeleccionado)}
+                </span>
+              </div>
             </div>
             
             <div>
@@ -292,24 +317,46 @@ export default function SinLote() {
                 Mover Cuentas
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
-      {/* Dialog para crear nuevo lote */}
-      <Dialog open={showCreateLoteDialog} onOpenChange={setShowCreateLoteDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crear Nuevo Lote con Cuentas Seleccionadas</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">
-                Cuentas a incluir: {selectedCuentas.length}
-              </p>
-              <p className="text-sm font-medium">
-                Valor total: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalSeleccionado)}
-              </p>
+  // Vista de crear nuevo lote
+  if (showCreateLoteDialog) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowCreateLoteDialog(false)}
+          >
+            ← Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Crear Nuevo Lote</h1>
+            <p className="text-muted-foreground">Crear un nuevo lote con las cuentas seleccionadas</p>
+          </div>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Información del Nuevo Lote</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-accent/50 p-4 rounded-lg">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm text-muted-foreground">Cuentas a incluir:</span>
+                <span className="font-medium">{selectedCuentas.length}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">Valor total:</span>
+                <span className="text-lg font-bold text-primary">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalSeleccionado)}
+                </span>
+              </div>
             </div>
             
             <div>
@@ -361,9 +408,11 @@ export default function SinLote() {
                 Crear Lote
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return null
 }

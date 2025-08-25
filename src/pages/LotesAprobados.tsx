@@ -81,6 +81,7 @@ const columns = [
 
 export default function LotesAprobados() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
+  const [showDetail, setShowDetail] = useState(false)
   const [filtroProveedor, setFiltroProveedor] = useState("todos")
   const [filtroEstado, setFiltroEstado] = useState("todos")
   const [busqueda, setBusqueda] = useState("")
@@ -138,141 +139,17 @@ export default function LotesAprobados() {
 
   const actions = (row: any) => (
     <div className="flex gap-2">
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setSelectedLote(row)}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Ver Detalle
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
-              Lote Aprobado - {selectedLote?.numero}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedLote && (
-            <div className="space-y-6">
-              {/* Información General */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Información General</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha Aprobación</p>
-                    <p className="font-medium">{new Date(selectedLote.fecha_aprobacion).toLocaleDateString('es-CO')}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha Pago</p>
-                    <p className="font-medium">
-                      {selectedLote.fecha_pago ? new Date(selectedLote.fecha_pago).toLocaleDateString('es-CO') : 'Pendiente'}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Aprobado Por</p>
-                    <p className="font-medium">{selectedLote.aprobado_por}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Estado</p>
-                    <Badge variant={selectedLote.estado === 'pagado' ? 'success' : 'success-light'}>
-                      {selectedLote.estado === 'pagado' ? 'Pagado' : 'Aprobado'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Resumen Financiero */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Resumen Financiero</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center p-4 bg-accent/50 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Valor Bruto</p>
-                      <p className="text-2xl font-bold">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.valor_bruto)}
-                      </p>
-                    </div>
-                    
-                    <div className="text-center p-4 bg-destructive/10 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Descuentos</p>
-                      <p className="text-2xl font-bold text-destructive">
-                        -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.descuentos_totales)}
-                      </p>
-                    </div>
-                    
-                    <div className="text-center p-4 bg-success/10 rounded-lg">
-                      <p className="text-sm text-muted-foreground">Valor Neto</p>
-                      <p className="text-2xl font-bold text-success">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.valor_neto)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Detalle de Cuentas */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Cuentas de Cobro ({selectedLote.total_cuentas})</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-2 px-3 font-medium text-muted-foreground">No. Cuenta</th>
-                          <th className="text-left py-2 px-3 font-medium text-muted-foreground">Proveedor</th>
-                          <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Original</th>
-                          <th className="text-right py-2 px-3 font-medium text-muted-foreground">Descuentos</th>
-                          <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Final</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {selectedLote.cuentas.map((cuenta: any, index: number) => (
-                          <tr key={index} className="border-b hover:bg-accent/50">
-                            <td className="py-3 px-3 font-medium">{cuenta.numero}</td>
-                            <td className="py-3 px-3">{cuenta.proveedor}</td>
-                            <td className="py-3 px-3 text-right">
-                              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
-                            </td>
-                            <td className="py-3 px-3 text-right text-destructive">
-                              {cuenta.descuentos > 0 
-                                ? `-${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.descuentos)}`
-                                : '-'
-                              }
-                            </td>
-                            <td className="py-3 px-3 text-right font-semibold">
-                              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor - cuenta.descuentos)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  
-                  <div className="flex justify-end mt-6">
-                    <Button 
-                      onClick={() => handleDownloadReport(selectedLote.id)}
-                    >
-                      <Download className="h-4 w-4 mr-2" />
-                      Descargar Reporte Completo
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => {
+          setSelectedLote(row)
+          setShowDetail(true)
+        }}
+      >
+        <Eye className="h-4 w-4 mr-2" />
+        Ver Detalle
+      </Button>
       
       <Button 
         size="sm"
@@ -391,24 +268,167 @@ export default function LotesAprobados() {
     </div>
   )
 
-  return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Lotes Aprobados</h1>
-        <p className="text-muted-foreground">Consulta consolidada de todos los lotes aprobados con filtros avanzados</p>
-      </div>
+  // Lista principal
+  if (!showDetail) {
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Lotes Aprobados</h1>
+          <p className="text-muted-foreground">Consulta consolidada de todos los lotes aprobados con filtros avanzados</p>
+        </div>
 
-      <DataTable
-        title="Todos los Lotes Aprobados"
-        columns={columns}
-        data={filteredData}
-        actions={actions}
-        renderCell={renderCell}
-        summary={summary}
-        searchable={false}
-        filterable={false}
-        exportable={true}
-      />
-    </div>
-  )
+        <DataTable
+          title="Todos los Lotes Aprobados"
+          columns={columns}
+          data={filteredData}
+          actions={actions}
+          renderCell={renderCell}
+          summary={summary}
+          searchable={false}
+          filterable={false}
+          exportable={true}
+        />
+      </div>
+    )
+  }
+
+  // Vista de detalle
+  if (showDetail && selectedLote) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setShowDetail(false)
+              setSelectedLote(null)
+            }}
+          >
+            ← Volver a Lista
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Lote Aprobado: {selectedLote.numero}</h1>
+            <p className="text-muted-foreground">Aprobado por {selectedLote.aprobado_por} • {new Date(selectedLote.fecha_aprobacion).toLocaleDateString('es-CO')}</p>
+          </div>
+        </div>
+
+        {/* Información General */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Información General
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Fecha Aprobación</p>
+              <p className="font-medium">{new Date(selectedLote.fecha_aprobacion).toLocaleDateString('es-CO')}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Fecha Pago</p>
+              <p className="font-medium">
+                {selectedLote.fecha_pago ? new Date(selectedLote.fecha_pago).toLocaleDateString('es-CO') : 'Pendiente'}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Aprobado Por</p>
+              <p className="font-medium">{selectedLote.aprobado_por}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Estado</p>
+              <Badge variant={selectedLote.estado === 'pagado' ? 'success' : 'success-light'}>
+                {selectedLote.estado === 'pagado' ? 'Pagado' : 'Aprobado'}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Resumen Financiero */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Resumen Financiero</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-accent/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Valor Bruto</p>
+                <p className="text-2xl font-bold">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.valor_bruto)}
+                </p>
+              </div>
+              
+              <div className="text-center p-4 bg-destructive/10 rounded-lg">
+                <p className="text-sm text-muted-foreground">Descuentos</p>
+                <p className="text-2xl font-bold text-destructive">
+                  -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.descuentos_totales)}
+                </p>
+              </div>
+              
+              <div className="text-center p-4 bg-success/10 rounded-lg">
+                <p className="text-sm text-muted-foreground">Valor Neto</p>
+                <p className="text-2xl font-bold text-success">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.valor_neto)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Detalle de Cuentas */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Cuentas de Cobro ({selectedLote.total_cuentas})</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground">No. Cuenta</th>
+                    <th className="text-left py-2 px-3 font-medium text-muted-foreground">Proveedor</th>
+                    <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Original</th>
+                    <th className="text-right py-2 px-3 font-medium text-muted-foreground">Descuentos</th>
+                    <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Final</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selectedLote.cuentas.map((cuenta: any, index: number) => (
+                    <tr key={index} className="border-b hover:bg-accent/50">
+                      <td className="py-3 px-3 font-medium">{cuenta.numero}</td>
+                      <td className="py-3 px-3">{cuenta.proveedor}</td>
+                      <td className="py-3 px-3 text-right">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
+                      </td>
+                      <td className="py-3 px-3 text-right text-destructive">
+                        {cuenta.descuentos > 0 
+                          ? `-${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.descuentos)}`
+                          : '-'
+                        }
+                      </td>
+                      <td className="py-3 px-3 text-right font-semibold">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor - cuenta.descuentos)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="flex justify-end mt-6">
+              <Button 
+                onClick={() => handleDownloadReport(selectedLote.id)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Descargar Reporte Completo
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return null
 }
