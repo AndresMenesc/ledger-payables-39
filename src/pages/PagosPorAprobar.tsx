@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Eye, CheckCircle, XCircle, Package, AlertTriangle } from "lucide-react"
+import { Eye, CheckCircle, XCircle, Package, AlertTriangle, ArrowLeft, Truck, MapPin, Clock, DollarSign, AlertCircle, CreditCard, Receipt } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
-// Datos de ejemplo - servicios de transporte
+// Datos de ejemplo - servicios de transporte con descuentos y préstamos detallados
 const lotesPendientesAprobacion = [
   {
     id: 1,
@@ -15,14 +15,39 @@ const lotesPendientesAprobacion = [
     fecha_envio: "2024-01-25",
     estado: "pendiente_aprobacion",
     total_cuentas: 3,
-    valor_total: 8500000,
+    valor_total: 9250000,
     enviado_por: "María González",
     cuentas: [
       { 
         numero: "CC-2024-001", 
         proveedor: "TRANSPORTES BOGOTÁ EXPRESS S.A.S", 
         valor: 2500000, 
-        descuentos: 0,
+        descuentos: 125000,
+        valor_pagado: 2375000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 4.0,
+            valor: 100000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Retención ICA",
+            porcentaje: 1.0,
+            valor: 25000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-001",
+            concepto: "Anticipo para combustible y peajes",
+            valor: 500000,
+            fecha_otorgado: "2024-01-15",
+            estado: "vigente",
+            cuotas_restantes: 1
+          }
+        ],
         servicios: [
           {
             id: "SRV-001",
@@ -47,13 +72,38 @@ const lotesPendientesAprobacion = [
       { 
         numero: "CC-2024-002", 
         proveedor: "FLOTA NACIONAL DE CARGA LTDA", 
-        valor: 1800000, 
-        descuentos: 100000,
+        valor: 3200000, 
+        descuentos: 320000,
+        valor_pagado: 2880000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 6.0,
+            valor: 192000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Retención ICA",
+            porcentaje: 4.0,
+            valor: 128000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-002",
+            concepto: "Préstamo para reparación de vehículo",
+            valor: 800000,
+            fecha_otorgado: "2024-01-10",
+            estado: "vigente",
+            cuotas_restantes: 2
+          }
+        ],
         servicios: [
           {
             id: "SRV-003",
             descripcion: "Transporte de carga Bogotá-Cali",
-            valor: 1800000,
+            valor: 3200000,
             ruta: "Bogotá → Cali",
             vehiculo: "Camión Volvo FH 2022 - XYZ789",
             fecha: "2024-01-22",
@@ -65,13 +115,32 @@ const lotesPendientesAprobacion = [
       { 
         numero: "CC-2024-004", 
         proveedor: "SERVITAXIS EMPRESARIALES SAS", 
-        valor: 4200000, 
-        descuentos: 0,
+        valor: 3550000, 
+        descuentos: 177500,
+        valor_pagado: 3372500,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 5.0,
+            valor: 177500,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-003",
+            concepto: "Anticipo servicios enero",
+            valor: 600000,
+            fecha_otorgado: "2024-01-01",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
         servicios: [
           {
             id: "SRV-004",
             descripcion: "Servicios de taxi corporativo",
-            valor: 4200000,
+            valor: 3550000,
             ruta: "Múltiples destinos zona empresarial",
             vehiculo: "Flota Chevrolet Spark GT 2023",
             fecha: "2024-01-23",
@@ -87,19 +156,35 @@ const lotesPendientesAprobacion = [
     fecha_envio: "2024-01-26",
     estado: "pendiente_aprobacion",
     total_cuentas: 2,
-    valor_total: 3200000,
+    valor_total: 4500000,
     enviado_por: "Carlos Ramírez",
     cuentas: [
       { 
         numero: "CC-2024-007", 
         proveedor: "TRANSPORTES INTERURBANOS LTDA", 
-        valor: 1200000, 
-        descuentos: 100000,
+        valor: 2200000, 
+        descuentos: 220000,
+        valor_pagado: 1980000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 6.0,
+            valor: 132000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Multa por retraso en servicio",
+            porcentaje: 4.0,
+            valor: 88000,
+            tipo: "multa"
+          }
+        ],
+        prestamos: [],
         servicios: [
           {
             id: "SRV-005",
             descripcion: "Transporte intermunicipal ejecutivo",
-            valor: 1200000,
+            valor: 2200000,
             ruta: "Bogotá → Bucaramanga",
             vehiculo: "Bus Mercedes Benz 2023 - GHI789",
             fecha: "2024-01-24",
@@ -110,13 +195,32 @@ const lotesPendientesAprobacion = [
       { 
         numero: "CC-2024-008", 
         proveedor: "LOGÍSTICA Y TRANSPORTE ABC", 
-        valor: 2000000, 
-        descuentos: 0,
+        valor: 2300000, 
+        descuentos: 115000,
+        valor_pagado: 2185000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 5.0,
+            valor: 115000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-004",
+            concepto: "Anticipo para gastos operativos",
+            valor: 400000,
+            fecha_otorgado: "2024-01-20",
+            estado: "vigente",
+            cuotas_restantes: 1
+          }
+        ],
         servicios: [
           {
             id: "SRV-006",
             descripcion: "Distribución urbana y logística",
-            valor: 2000000,
+            valor: 2300000,
             ruta: "Centro → Zona Industrial",
             vehiculo: "Camión NPR 2022 - JKL456",
             fecha: "2024-01-25",
@@ -132,24 +236,44 @@ const lotesPendientesAprobacion = [
     fecha_envio: "2024-01-24",
     estado: "rechazado",
     total_cuentas: 1,
-    valor_total: 1500000,
+    valor_total: 1800000,
     enviado_por: "Ana Torres",
-    motivo_rechazo: "Documentación incompleta en servicios de transporte",
+    motivo_rechazo: "Documentación incompleta - faltan pólizas de seguros actualizadas",
     cuentas: [
       { 
         numero: "CC-2024-009", 
         proveedor: "TRANSPORTE DE MATERIALES XYZ", 
-        valor: 1500000, 
-        descuentos: 0,
+        valor: 1800000, 
+        descuentos: 108000,
+        valor_pagado: 1692000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 6.0,
+            valor: 108000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-005",
+            concepto: "Préstamo para mantenimiento de vehículos",
+            valor: 350000,
+            fecha_otorgado: "2024-01-18",
+            estado: "vigente",
+            cuotas_restantes: 3
+          }
+        ],
         servicios: [
           {
             id: "SRV-007",
             descripcion: "Transporte de materiales de construcción",
-            valor: 1500000,
+            valor: 1800000,
             ruta: "Planta → Obra Zona Norte",
             vehiculo: "Volqueta Kenworth 2022 - MNO123",
             fecha: "2024-01-23",
-            estado: "pendiente_documentacion"
+            estado: "pendiente_documentacion",
+            carga: "Materiales de construcción - 20 toneladas"
           }
         ]
       }
@@ -168,9 +292,13 @@ const columns = [
 
 export default function PagosPorAprobar() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
-  const [showDetail, setShowDetail] = useState(false)
-  const [selectedCuentaDetail, setSelectedCuentaDetail] = useState<any>(null)
-  const [showCuentaDetail, setShowCuentaDetail] = useState(false)
+  const [selectedCuenta, setSelectedCuenta] = useState<any>(null)
+  const [currentView, setCurrentView] = useState<'list' | 'lote-detail' | 'cuenta-detail'>('list')
+
+  const handleVerCuentaDetalle = (cuenta: any) => {
+    setSelectedCuenta(cuenta)
+    setCurrentView('cuenta-detail')
+  }
 
   const handleApproveLote = (loteId: number) => {
     // Implementar lógica para aprobar lote
@@ -189,7 +317,7 @@ export default function PagosPorAprobar() {
         size="sm"
         onClick={() => {
           setSelectedLote(row)
-          setShowDetail(true)
+          setCurrentView('lote-detail')
         }}
       >
         <Eye className="h-4 w-4 mr-2" />
@@ -252,7 +380,7 @@ export default function PagosPorAprobar() {
   )
 
   // Lista principal
-  if (!showDetail && !showCuentaDetail) {
+  if (currentView === 'list') {
     return (
       <div className="p-6 space-y-6">
         <div>
@@ -271,8 +399,8 @@ export default function PagosPorAprobar() {
     )
   }
 
-  // Vista de detalle
-  if (showDetail && selectedLote) {
+  // Vista de detalle del lote
+  if (currentView === 'lote-detail' && selectedLote) {
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-3">
@@ -280,11 +408,12 @@ export default function PagosPorAprobar() {
             variant="outline" 
             size="sm"
             onClick={() => {
-              setShowDetail(false)
+              setCurrentView('list')
               setSelectedLote(null)
             }}
           >
-            ← Volver a Lista
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver a Lista
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Lote para Aprobación: {selectedLote.numero}</h1>
@@ -373,14 +502,10 @@ export default function PagosPorAprobar() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          setSelectedCuentaDetail(cuenta)
-                          setShowDetail(false)
-                          setShowCuentaDetail(true)
-                        }}
+                        onClick={() => handleVerCuentaDetalle(cuenta)}
                       >
                         <Eye className="h-4 w-4 mr-2" />
-                        Ver Servicios
+                        Ver Detalle
                       </Button>
                     </div>
                   </div>
@@ -455,162 +580,246 @@ export default function PagosPorAprobar() {
     )
   }
 
-  // Vista de detalle de cuenta de cobro
-  if (showCuentaDetail && selectedCuentaDetail) {
+  // Vista de detalle de cuenta individual
+  if (currentView === 'cuenta-detail' && selectedCuenta) {
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-3">
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => {
-              setShowCuentaDetail(false)
-              setSelectedCuentaDetail(null)
-              setShowDetail(true)
-            }}
+            onClick={() => setCurrentView('lote-detail')}
           >
-            ← Volver al Lote
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver al Lote
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Servicios de Transporte: {selectedCuentaDetail.numero}</h1>
-            <p className="text-muted-foreground">{selectedCuentaDetail.proveedor}</p>
+            <h1 className="text-2xl font-bold text-foreground">Cuenta: {selectedCuenta.numero}</h1>
+            <p className="text-muted-foreground">{selectedCuenta.proveedor}</p>
           </div>
         </div>
 
-        {/* Información de la cuenta */}
+        {/* Información de la Cuenta */}
         <Card>
           <CardHeader>
-            <CardTitle>Resumen de la Cuenta de Cobro</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Información de la Cuenta
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Número de Cuenta</p>
+              <p className="font-medium">{selectedCuenta.numero}</p>
+            </div>
             <div>
               <p className="text-sm text-muted-foreground">Proveedor</p>
-              <p className="font-medium">{selectedCuentaDetail.proveedor}</p>
+              <p className="font-medium">{selectedCuenta.proveedor}</p>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Total Servicios</p>
-              <p className="font-medium">{selectedCuentaDetail.servicios?.length || 0}</p>
+              <p className="text-sm text-muted-foreground">Estado</p>
+              <Badge variant="warning-light">Pendiente Aprobación</Badge>
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Valor Total</p>
-              <p className="text-xl font-bold text-primary">
-                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor)}
-              </p>
+              <p className="text-sm text-muted-foreground">Servicios</p>
+              <p className="font-medium">{selectedCuenta.servicios?.length || 0}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Servicios de Transporte */}
+        {/* Resumen Financiero de la Cuenta */}
         <Card>
           <CardHeader>
-            <CardTitle>Servicios de Transporte Detallados</CardTitle>
+            <CardTitle className="text-lg">Resumen Financiero</CardTitle>
           </CardHeader>
           <CardContent>
-            {selectedCuentaDetail.servicios && selectedCuentaDetail.servicios.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-accent/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Valor Original</p>
+                <p className="text-2xl font-bold">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor)}
+                </p>
+              </div>
+              
+              <div className="text-center p-4 bg-destructive/10 rounded-lg">
+                <p className="text-sm text-muted-foreground">Descuentos</p>
+                <p className="text-2xl font-bold text-destructive">
+                  -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.descuentos || 0)}
+                </p>
+              </div>
+              
+              <div className="text-center p-4 bg-success/10 rounded-lg">
+                <p className="text-sm text-muted-foreground">Valor a Pagar</p>
+                <p className="text-2xl font-bold text-success">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor_pagado || selectedCuenta.valor)}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Detalle de Descuentos Aplicados */}
+        {selectedCuenta.descuentos_detalle && selectedCuenta.descuentos_detalle.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Detalle de Descuentos Aplicados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-4">
-                {selectedCuentaDetail.servicios.map((servicio: any, index: number) => (
-                  <Card key={index} className="border-l-4 border-l-primary">
-                    <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h4 className="font-semibold text-lg mb-1">{servicio.descripcion}</h4>
-                          <p className="text-xl font-bold text-primary">
-                            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Badge variant="success-light">
-                            {servicio.id}
-                          </Badge>
+                {selectedCuenta.descuentos_detalle.map((descuento: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-destructive/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{descuento.concepto}</h4>
+                        <div className="flex items-center gap-2 mt-1">
                           <Badge variant={
-                            servicio.estado === 'completado' ? 'success' :
-                            servicio.estado === 'pendiente_documentacion' ? 'warning' : 'pending'
+                            descuento.tipo === 'retencion' ? 'secondary' : 
+                            descuento.tipo === 'multa' ? 'destructive' : 'outline'
                           }>
-                            {servicio.estado === 'completado' ? 'Completado' :
-                             servicio.estado === 'pendiente_documentacion' ? 'Pendiente Doc.' : 'Pendiente'}
+                            {descuento.tipo === 'retencion' ? 'Retención' : 
+                             descuento.tipo === 'multa' ? 'Multa' : 'Descuento'}
                           </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {descuento.porcentaje}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg text-destructive">
+                          -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(descuento.valor)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Detalle de Préstamos */}
+        {selectedCuenta.prestamos && selectedCuenta.prestamos.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Préstamos y Anticipos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.prestamos.map((prestamo: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-blue-50/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{prestamo.concepto}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant={prestamo.estado === 'vigente' ? 'outline' : 'secondary'}>
+                            {prestamo.estado === 'vigente' ? 'Vigente' : 'Descontado'}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            Otorgado: {new Date(prestamo.fecha_otorgado).toLocaleDateString('es-CO')}
+                          </span>
+                          {prestamo.cuotas_restantes > 0 && (
+                            <span className="text-sm text-orange-600 font-medium">
+                              {prestamo.cuotas_restantes} cuotas restantes
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg text-blue-600">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamo.valor)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">ID: {prestamo.id}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Detalle de Servicios de Transporte */}
+        {selectedCuenta.servicios && selectedCuenta.servicios.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                Servicios de Transporte
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.servicios.map((servicio: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-medium text-lg">{servicio.descripcion}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{servicio.ruta}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                        </p>
+                        <Badge variant={
+                          servicio.estado === 'completado' ? 'success' : 
+                          servicio.estado === 'pendiente_documentacion' ? 'warning' : 'outline'
+                        }>
+                          {servicio.estado === 'completado' ? 'Completado' : 
+                           servicio.estado === 'pendiente_documentacion' ? 'Pendiente Doc.' : servicio.estado}
+                        </Badge>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-muted-foreground">Vehículo</p>
+                          <p className="font-medium">{servicio.vehiculo}</p>
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-3 rounded-lg">
-                        <div className="space-y-2">
-                          <div>
-                            <p className="text-xs text-muted-foreground">Fecha del Servicio</p>
-                            <p className="font-medium">{new Date(servicio.fecha).toLocaleDateString('es-CO')}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Ruta</p>
-                            <p className="font-medium">{servicio.ruta}</p>
-                          </div>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div>
-                            <p className="text-xs text-muted-foreground">Vehículo</p>
-                            <p className="font-medium">{servicio.vehiculo}</p>
-                          </div>
-                          {servicio.carga && (
-                            <div>
-                              <p className="text-xs text-muted-foreground">Carga</p>
-                              <p className="font-medium">{servicio.carga}</p>
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <div>
-                            <p className="text-xs text-muted-foreground">Estado</p>
-                            <Badge variant={
-                              servicio.estado === 'completado' ? 'success' :
-                              servicio.estado === 'pendiente_documentacion' ? 'warning' : 'pending'
-                            }>
-                              {servicio.estado === 'completado' ? 'Servicio Completado' :
-                               servicio.estado === 'pendiente_documentacion' ? 'Documentación Pendiente' : 'En Proceso'}
-                            </Badge>
-                          </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-muted-foreground">Fecha</p>
+                          <p className="font-medium">{new Date(servicio.fecha).toLocaleDateString('es-CO')}</p>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                ))}
-                
-                {/* Resumen financiero de servicios */}
-                <Card className="bg-accent/50">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
-                      <span className="text-lg font-medium">Total de Servicios:</span>
-                      <span className="text-2xl font-bold text-primary">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(
-                          selectedCuentaDetail.servicios.reduce((sum: number, s: any) => sum + s.valor, 0)
-                        )}
-                      </span>
+                      
+                      {servicio.carga && (
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-muted-foreground">Carga</p>
+                            <p className="font-medium">{servicio.carga}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    
-                    {selectedCuentaDetail.descuentos > 0 && (
-                      <>
-                        <Separator className="my-2" />
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-muted-foreground">Descuentos aplicados:</span>
-                          <span className="text-lg font-medium text-destructive">
-                            -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.descuentos)}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center mt-2">
-                          <span className="text-lg font-bold">Total neto a pagar:</span>
-                          <span className="text-2xl font-bold text-success">
-                            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor - selectedCuentaDetail.descuentos)}
-                          </span>
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
+                  </div>
+                ))}
               </div>
-            ) : (
-              <p className="text-muted-foreground">No hay servicios asociados a esta cuenta de cobro.</p>
-            )}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Acciones */}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline">
+            <Receipt className="h-4 w-4 mr-2" />
+            Descargar Cuenta
+          </Button>
+        </div>
       </div>
     )
   }
