@@ -109,6 +109,8 @@ export default function PagosPorProcesar() {
     setLoteToAddCuenta(null)
   }
 
+
+  // Define summary and actions first, before any conditional returns
   const summary = (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <Card>
