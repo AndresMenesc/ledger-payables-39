@@ -1,14 +1,403 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { 
+  TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle, 
+  AlertTriangle, Package, FileText, Calendar, ArrowRight,
+  Truck, Building2, CreditCard, BarChart3, PieChart as PieChartIcon
+} from "lucide-react"
 
-const Index = () => {
+// Datos de ejemplo para el dashboard
+const dashboardData = {
+  resumenFinanciero: {
+    totalBruto: 45300000,
+    totalDescuentos: 2265000,
+    totalNeto: 43035000,
+    totalPrestamos: 3890000,
+    variacionMensual: 12.5
+  },
+  estadoLotes: {
+    pendientesAprobacion: 8,
+    enProceso: 12,
+    aprobados: 25,
+    pagados: 15,
+    rechazados: 3
+  },
+  datosGraficas: {
+    porMes: [
+      { mes: "Ene", valor: 8500000, pagado: 7200000, pendiente: 1300000 },
+      { mes: "Feb", valor: 12400000, pagado: 10800000, pendiente: 1600000 },
+      { mes: "Mar", valor: 15200000, pagado: 14100000, pendiente: 1100000 },
+      { mes: "Abr", valor: 9800000, pagado: 8900000, pendiente: 900000 }
+    ],
+    porEstado: [
+      { name: "Pagados", value: 15, color: "#22c55e", porcentaje: 23.8 },
+      { name: "Aprobados", value: 25, color: "#3b82f6", porcentaje: 39.7 },
+      { name: "En Proceso", value: 12, color: "#f59e0b", porcentaje: 19.0 },
+      { name: "Pendientes", value: 8, color: "#ef4444", porcentaje: 12.7 },
+      { name: "Rechazados", value: 3, color: "#6b7280", porcentaje: 4.8 }
+    ],
+    tiposServicio: [
+      { tipo: "Transporte Ejecutivo", cantidad: 28, valor: 18500000 },
+      { tipo: "Carga y Logística", cantidad: 22, valor: 15200000 },
+      { tipo: "Taxi Corporativo", cantidad: 18, valor: 8800000 },
+      { tipo: "Especializado", cantidad: 15, valor: 12800000 }
+    ]
+  },
+  alertas: [
+    {
+      tipo: "warning",
+      titulo: "8 lotes pendientes de aprobación",
+      descripcion: "Requieren revisión urgente",
+      icono: AlertTriangle
+    },
+    {
+      tipo: "info",
+      titulo: "3 préstamos próximos a vencer",
+      descripcion: "Vencen en los próximos 15 días",
+      icono: CreditCard
+    },
+    {
+      tipo: "error",
+      titulo: "3 lotes rechazados",
+      descripcion: "Requieren corrección de documentos",
+      icono: FileText
+    }
+  ]
+}
+
+export default function Dashboard() {
+  const [mesSeleccionado, setMesSeleccionado] = useState("2024-04")
+  const [periodoComparacion, setPeriodoComparacion] = useState("mensual")
+
+  const { resumenFinanciero, estadoLotes, datosGraficas, alertas } = dashboardData
+
+  // Calcular máximo para las barras
+  const maxValor = Math.max(...datosGraficas.porMes.map(item => item.valor))
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="p-6 space-y-6">
+      {/* Header con filtros */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard de Transportes</h1>
+          <p className="text-muted-foreground">Vista general del sistema de pagos y gestión de servicios de transporte</p>
+        </div>
+        <div className="flex gap-4">
+          <Select value={mesSeleccionado} onValueChange={setMesSeleccionado}>
+            <SelectTrigger className="w-40">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="2024-01">Enero 2024</SelectItem>
+              <SelectItem value="2024-02">Febrero 2024</SelectItem>
+              <SelectItem value="2024-03">Marzo 2024</SelectItem>
+              <SelectItem value="2024-04">Abril 2024</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={periodoComparacion} onValueChange={setPeriodoComparacion}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="mensual">Mensual</SelectItem>
+              <SelectItem value="trimestral">Trimestral</SelectItem>
+              <SelectItem value="anual">Anual</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
-    </div>
-  );
-};
 
-export default Index;
+      {/* Métricas principales */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Valor Total Bruto</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalBruto)}
+            </div>
+            <div className="flex items-center text-xs text-muted-foreground">
+              <TrendingUp className="h-3 w-3 mr-1 text-success" />
+              +{resumenFinanciero.variacionMensual}% vs mes anterior
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Descuentos</CardTitle>
+            <TrendingDown className="h-4 w-4 text-destructive" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-destructive">
+              -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalDescuentos)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Retenciones y multas aplicadas
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Valor Neto</CardTitle>
+            <CheckCircle className="h-4 w-4 text-success" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-success">
+              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalNeto)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Valor final a pagar
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Préstamos Activos</CardTitle>
+            <CreditCard className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600">
+              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalPrestamos)}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Anticipos y préstamos vigentes
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Alertas importantes */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {alertas.map((alerta, index) => {
+          const IconComponent = alerta.icono
+          return (
+            <Card key={index} className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow ${
+              alerta.tipo === 'warning' ? 'border-l-warning bg-warning/5' :
+              alerta.tipo === 'error' ? 'border-l-destructive bg-destructive/5' :
+              'border-l-blue-500 bg-blue-50/50'
+            }`}>
+              <CardContent className="p-4">
+                <div className="flex items-center gap-3">
+                  <IconComponent className={`h-5 w-5 ${
+                    alerta.tipo === 'warning' ? 'text-warning' :
+                    alerta.tipo === 'error' ? 'text-destructive' :
+                    'text-blue-600'
+                  }`} />
+                  <div className="flex-1">
+                    <h4 className="font-medium">{alerta.titulo}</h4>
+                    <p className="text-sm text-muted-foreground">{alerta.descripcion}</p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </CardContent>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Gráficas principales simplificadas */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Gráfica de valores por mes usando barras de progreso */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
+              Evolución Mensual de Pagos
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {datosGraficas.porMes.map((item, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">{item.mes}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.valor)}
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  <Progress 
+                    value={(item.pagado / maxValor) * 100} 
+                    className="h-2 bg-muted"
+                  />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Pagado: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pagado)}</span>
+                    <span>Pendiente: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pendiente)}</span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Estado de lotes usando barras horizontales */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <PieChartIcon className="h-5 w-5" />
+              Estado de Lotes
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {datosGraficas.porEstado.map((item, index) => (
+              <div key={index} className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className="w-3 h-3 rounded-full" 
+                      style={{ backgroundColor: item.color }}
+                    ></div>
+                    <span className="text-sm font-medium">{item.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{item.value}</span>
+                    <span className="text-xs text-muted-foreground">({item.porcentaje}%)</span>
+                  </div>
+                </div>
+                <Progress 
+                  value={item.porcentaje} 
+                  className="h-2"
+                  style={{ 
+                    '--progress-foreground': item.color 
+                  } as React.CSSProperties}
+                />
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Estado detallado por módulo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Clock className="h-5 w-5 text-warning" />
+              Por Aprobar
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-warning mb-2">{estadoLotes.pendientesAprobacion}</div>
+            <p className="text-sm text-muted-foreground">Lotes pendientes</p>
+            <Button variant="outline" size="sm" className="w-full mt-3">
+              Ver Detalles
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Package className="h-5 w-5 text-blue-600" />
+              En Proceso
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-blue-600 mb-2">{estadoLotes.enProceso}</div>
+            <p className="text-sm text-muted-foreground">Lotes en gestión</p>
+            <Button variant="outline" size="sm" className="w-full mt-3">
+              Ver Detalles
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <CheckCircle className="h-5 w-5 text-success" />
+              Aprobados
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-success mb-2">{estadoLotes.aprobados}</div>
+            <p className="text-sm text-muted-foreground">Lotes aprobados</p>
+            <Button variant="outline" size="sm" className="w-full mt-3">
+              Ver Detalles
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <DollarSign className="h-5 w-5 text-green-600" />
+              Pagados
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-green-600 mb-2">{estadoLotes.pagados}</div>
+            <p className="text-sm text-muted-foreground">Lotes pagados</p>
+            <Button variant="outline" size="sm" className="w-full mt-3">
+              Ver Detalles
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Servicios de transporte por tipo */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Truck className="h-5 w-5" />
+            Servicios de Transporte por Tipo
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {datosGraficas.tiposServicio.map((servicio, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-accent/20 hover:bg-accent/30 transition-colors cursor-pointer">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-sm">{servicio.tipo}</h4>
+                  <Badge variant="outline">{servicio.cantidad}</Badge>
+                </div>
+                <p className="text-xl font-bold text-primary">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Promedio: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor / servicio.cantidad)}
+                </p>
+                <div className="mt-3">
+                  <Progress 
+                    value={(servicio.valor / Math.max(...datosGraficas.tiposServicio.map(s => s.valor))) * 100} 
+                    className="h-2"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Acciones rápidas */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Acciones Rápidas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Button className="h-16 flex flex-col gap-2" variant="outline">
+              <Package className="h-6 w-6" />
+              <span>Crear Nuevo Lote</span>
+            </Button>
+            <Button className="h-16 flex flex-col gap-2" variant="outline">
+              <FileText className="h-6 w-6" />
+              <span>Generar Reporte</span>
+            </Button>
+            <Button className="h-16 flex flex-col gap-2" variant="outline">
+              <CreditCard className="h-6 w-6" />
+              <span>Gestionar Préstamos</span>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

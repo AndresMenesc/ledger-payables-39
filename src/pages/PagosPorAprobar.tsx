@@ -1,11 +1,12 @@
 import { useState } from "react"
-import { Eye, CheckCircle, XCircle, Package, AlertTriangle, ArrowLeft, Truck, MapPin, Clock, DollarSign, AlertCircle, CreditCard, Receipt } from "lucide-react"
+import { Eye, CheckCircle, XCircle, Package, AlertTriangle, ArrowLeft, Truck, MapPin, Clock, DollarSign, AlertCircle, CreditCard, Receipt, Calendar } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 // Datos de ejemplo - servicios de transporte con descuentos y préstamos detallados
 const lotesPendientesAprobacion = [
@@ -294,6 +295,16 @@ export default function PagosPorAprobar() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
   const [selectedCuenta, setSelectedCuenta] = useState<any>(null)
   const [currentView, setCurrentView] = useState<'list' | 'lote-detail' | 'cuenta-detail'>('list')
+  const [mesSeleccionado, setMesSeleccionado] = useState(() => {
+    const now = new Date()
+    return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+  })
+
+  // Filtrar datos por mes actual
+  const filteredData = lotesPendientesAprobacion.filter(lote => {
+    const fechaMes = lote.fecha_envio.substring(0, 7)
+    return fechaMes === mesSeleccionado
+  })
 
   const handleVerCuentaDetalle = (cuenta: any) => {
     setSelectedCuenta(cuenta)
@@ -347,35 +358,83 @@ export default function PagosPorAprobar() {
     </div>
   )
 
-  const pendientesAprobacion = lotesPendientesAprobacion.filter(l => l.estado === 'pendiente_aprobacion')
-  const rechazados = lotesPendientesAprobacion.filter(l => l.estado === 'rechazado')
+  const pendientesAprobacion = filteredData.filter(l => l.estado === 'pendiente_aprobacion')
+  const rechazados = filteredData.filter(l => l.estado === 'rechazado')
   
   const valorTotalPendiente = pendientesAprobacion.reduce((sum, lote) => sum + lote.valor_total, 0)
+  
+  // Calcular total de descuentos de forma más simple
+  let totalDescuentos = 0
+  filteredData.forEach(lote => {
+    lote.cuentas.forEach((cuenta: any) => {
+      totalDescuentos += cuenta.descuentos || 0
+    })
+  })
 
   const summary = (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="space-y-4">
+      {/* Filtro por mes */}
       <Card>
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">Lotes Pendientes</p>
-          <p className="text-2xl font-semibold text-warning">{pendientesAprobacion.length}</p>
+        <CardHeader>
+          <CardTitle className="text-lg">Filtros</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Calendar className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm text-muted-foreground">Mes de envío</p>
+                <Select value={mesSeleccionado} onValueChange={setMesSeleccionado}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2024-01">Enero 2024</SelectItem>
+                    <SelectItem value="2024-02">Febrero 2024</SelectItem>
+                    <SelectItem value="2024-03">Marzo 2024</SelectItem>
+                    <SelectItem value="2024-04">Abril 2024</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
         </CardContent>
       </Card>
-      
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">Valor Pendiente</p>
-          <p className="text-xl font-semibold text-primary">
-            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(valorTotalPendiente)}
-          </p>
-        </CardContent>
-      </Card>
-      
-      <Card>
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">Lotes Rechazados</p>
-          <p className="text-2xl font-semibold text-destructive">{rechazados.length}</p>
-        </CardContent>
-      </Card>
+
+      {/* Métricas */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Lotes Encontrados</p>
+            <p className="text-2xl font-semibold">{filteredData.length}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Pendientes</p>
+            <p className="text-2xl font-semibold text-warning">{pendientesAprobacion.length}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Valor Pendiente</p>
+            <p className="text-xl font-semibold text-primary">
+              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(valorTotalPendiente)}
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm text-muted-foreground">Descuentos Aplicados</p>
+            <p className="text-xl font-semibold text-destructive">
+              -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalDescuentos)}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 
@@ -391,7 +450,7 @@ export default function PagosPorAprobar() {
         <DataTable
           title="Lotes Pendientes de Aprobación"
           columns={columns}
-          data={lotesPendientesAprobacion}
+          data={filteredData}
           actions={actions}
           summary={summary}
         />
