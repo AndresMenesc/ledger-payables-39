@@ -1,6 +1,6 @@
 
 import { useState } from "react"
-import { Eye, Download, Calendar, DollarSign, ArrowLeft, Truck, MapPin, Clock, Package } from "lucide-react"
+import { Eye, Download, Calendar, DollarSign, ArrowLeft, Truck, MapPin, Clock, Package, AlertCircle, CreditCard, Receipt } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,17 +9,17 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Datos de ejemplo - servicios de transporte
+// Datos de ejemplo - servicios de transporte con descuentos y préstamos detallados
 const lotesPagados = [
   {
     id: 1,
     numero: "LP-2024-001",
     fecha_aprobacion: "2024-01-28",
     fecha_pago: "2024-01-30",
-    total_cuentas: 3,
-    valor_bruto: 8500000,
-    descuentos_totales: 100000,
-    valor_neto: 8400000,
+    total_cuentas: 4,
+    valor_bruto: 12500000,
+    descuentos_totales: 850000,
+    valor_neto: 11650000,
     aprobado_por: "Director Financiero",
     pagado_por: "Tesorería",
     cuentas: [
@@ -27,8 +27,23 @@ const lotesPagados = [
         numero: "CC-2024-001", 
         proveedor: "TRANSPORTES BOGOTÁ EXPRESS S.A.S", 
         valor: 2500000, 
-        descuentos: 0, 
-        valor_pagado: 2500000,
+        descuentos: 125000,
+        valor_pagado: 2375000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 3.5,
+            valor: 87500,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Descuento por pronto pago",
+            porcentaje: 1.5,
+            valor: 37500,
+            tipo: "descuento"
+          }
+        ],
+        prestamos: [],
         servicios: [
           {
             id: "SRV-001",
@@ -53,14 +68,38 @@ const lotesPagados = [
       { 
         numero: "CC-2024-002", 
         proveedor: "FLOTA NACIONAL DE CARGA LTDA", 
-        valor: 1800000, 
-        descuentos: 100000, 
-        valor_pagado: 1700000,
+        valor: 3200000, 
+        descuentos: 320000, 
+        valor_pagado: 2880000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 6.0,
+            valor: 192000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Retención ICA",
+            porcentaje: 4.0,
+            valor: 128000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-001",
+            concepto: "Anticipo combustible",
+            valor: 500000,
+            fecha_otorgado: "2024-01-15",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
         servicios: [
           {
             id: "SRV-003",
             descripcion: "Transporte de carga Bogotá-Cali",
-            valor: 1800000,
+            valor: 3200000,
             ruta: "Bogotá → Cali",
             vehiculo: "Camión Volvo FH 2022 - XYZ789",
             fecha: "2024-01-22",
@@ -70,11 +109,37 @@ const lotesPagados = [
         ]
       },
       { 
-        numero: "CC-2024-004", 
+        numero: "CC-2024-003", 
         proveedor: "SERVITAXIS EMPRESARIALES SAS", 
         valor: 4200000, 
-        descuentos: 0, 
-        valor_pagado: 4200000,
+        descuentos: 210000, 
+        valor_pagado: 3990000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 5.0,
+            valor: 210000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-002",
+            concepto: "Préstamo para mantenimiento de flota",
+            valor: 800000,
+            fecha_otorgado: "2024-01-10",
+            estado: "descontado",
+            cuotas_restantes: 0
+          },
+          {
+            id: "PREST-003",
+            concepto: "Anticipo servicios enero",
+            valor: 300000,
+            fecha_otorgado: "2024-01-01",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
         servicios: [
           {
             id: "SRV-004",
@@ -84,6 +149,49 @@ const lotesPagados = [
             vehiculo: "Flota Chevrolet Spark GT 2023",
             fecha: "2024-01-23",
             estado: "pagado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-004", 
+        proveedor: "LOGISTICS PREMIUM TRANSPORT S.A.S", 
+        valor: 2600000, 
+        descuentos: 195000, 
+        valor_pagado: 2405000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 4.5,
+            valor: 117000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Multa por retraso en entrega",
+            porcentaje: 3.0,
+            valor: 78000,
+            tipo: "multa"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-004",
+            concepto: "Préstamo emergencia operativa",
+            valor: 450000,
+            fecha_otorgado: "2024-01-12",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
+        servicios: [
+          {
+            id: "SRV-005",
+            descripcion: "Transporte especializado equipos médicos",
+            valor: 2600000,
+            ruta: "Bogotá → Barranquilla",
+            vehiculo: "Camión refrigerado Mercedes-Benz - MED456",
+            fecha: "2024-01-24",
+            estado: "pagado",
+            carga: "Equipos médicos especializados - Carga refrigerada"
           }
         ]
       }
@@ -466,6 +574,85 @@ export default function Pagados() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Detalle de Descuentos Aplicados */}
+        {selectedCuenta.descuentos_detalle && selectedCuenta.descuentos_detalle.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Detalle de Descuentos Aplicados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.descuentos_detalle.map((descuento: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-destructive/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{descuento.concepto}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant={
+                            descuento.tipo === 'retencion' ? 'secondary' : 
+                            descuento.tipo === 'multa' ? 'destructive' : 'outline'
+                          }>
+                            {descuento.tipo === 'retencion' ? 'Retención' : 
+                             descuento.tipo === 'multa' ? 'Multa' : 'Descuento'}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {descuento.porcentaje}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg text-destructive">
+                          -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(descuento.valor)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Detalle de Préstamos */}
+        {selectedCuenta.prestamos && selectedCuenta.prestamos.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Préstamos Aplicados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.prestamos.map((prestamo: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-blue-50/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{prestamo.concepto}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant="outline">{prestamo.estado}</Badge>
+                          <span className="text-sm text-muted-foreground">
+                            Otorgado: {new Date(prestamo.fecha_otorgado).toLocaleDateString('es-CO')}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg text-blue-600">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamo.valor)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">ID: {prestamo.id}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Detalle de Servicios de Transporte */}
         {selectedCuenta.servicios && selectedCuenta.servicios.length > 0 && (
