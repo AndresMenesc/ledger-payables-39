@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
-// Datos de ejemplo
+// Datos de ejemplo - servicios de transporte
 const lotesPagados = [
   {
     id: 1,
@@ -22,40 +22,70 @@ const lotesPagados = [
     aprobado_por: "Director Financiero",
     pagado_por: "Tesorería",
     cuentas: [
-      { numero: "CC-2024-001", proveedor: "Tecnología Avanzada S.A.S", valor: 2500000, descuentos: 0, valor_pagado: 2500000 },
-      { numero: "CC-2024-002", proveedor: "Servicios Integrales LTDA", valor: 1800000, descuentos: 100000, valor_pagado: 1700000 },
-      { numero: "CC-2024-004", proveedor: "Consultoría Pro", valor: 4200000, descuentos: 0, valor_pagado: 4200000 }
-    ]
-  },
-  {
-    id: 2,
-    numero: "LP-2024-002",
-    fecha_aprobacion: "2024-01-29",
-    fecha_pago: "2024-01-31",
-    total_cuentas: 2,
-    valor_bruto: 3200000,
-    descuentos_totales: 50000,
-    valor_neto: 3150000,
-    aprobado_por: "Director Financiero",
-    pagado_por: "Tesorería",
-    cuentas: [
-      { numero: "CC-2024-007", proveedor: "Servicios Generales", valor: 1200000, descuentos: 50000, valor_pagado: 1150000 },
-      { numero: "CC-2024-008", proveedor: "Mantenimiento Pro", valor: 2000000, descuentos: 0, valor_pagado: 2000000 }
-    ]
-  },
-  {
-    id: 3,
-    numero: "LP-2024-005",
-    fecha_aprobacion: "2024-02-01",
-    fecha_pago: "2024-02-02",
-    total_cuentas: 1,
-    valor_bruto: 2800000,
-    descuentos_totales: 200000,
-    valor_neto: 2600000,
-    aprobado_por: "Director Financiero",
-    pagado_por: "Tesorería",
-    cuentas: [
-      { numero: "CC-2024-010", proveedor: "Construcciones XYZ", valor: 2800000, descuentos: 200000, valor_pagado: 2600000 }
+      { 
+        numero: "CC-2024-001", 
+        proveedor: "TRANSPORTES BOGOTÁ EXPRESS S.A.S", 
+        valor: 2500000, 
+        descuentos: 0, 
+        valor_pagado: 2500000,
+        servicios: [
+          {
+            id: "SRV-001",
+            descripcion: "Transporte ejecutivo Bogotá-Medellín",
+            valor: 1800000,
+            ruta: "Bogotá → Medellín",
+            vehiculo: "Toyota Prado 2023 - ABC123",
+            fecha: "2024-01-20",
+            estado: "pagado"
+          },
+          {
+            id: "SRV-002",
+            descripcion: "Servicio de regreso Medellín-Bogotá",
+            valor: 700000,
+            ruta: "Medellín → Bogotá",
+            vehiculo: "Toyota Prado 2023 - ABC123",
+            fecha: "2024-01-21",
+            estado: "pagado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-002", 
+        proveedor: "FLOTA NACIONAL DE CARGA LTDA", 
+        valor: 1800000, 
+        descuentos: 100000, 
+        valor_pagado: 1700000,
+        servicios: [
+          {
+            id: "SRV-003",
+            descripcion: "Transporte de carga Bogotá-Cali",
+            valor: 1800000,
+            ruta: "Bogotá → Cali",
+            vehiculo: "Camión Volvo FH 2022 - XYZ789",
+            fecha: "2024-01-22",
+            estado: "pagado",
+            carga: "Equipos industriales - 15 toneladas"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-004", 
+        proveedor: "SERVITAXIS EMPRESARIALES SAS", 
+        valor: 4200000, 
+        descuentos: 0, 
+        valor_pagado: 4200000,
+        servicios: [
+          {
+            id: "SRV-004",
+            descripcion: "Servicios de taxi corporativo",
+            valor: 4200000,
+            ruta: "Múltiples destinos zona empresarial",
+            vehiculo: "Flota Chevrolet Spark GT 2023",
+            fecha: "2024-01-23",
+            estado: "pagado"
+          }
+        ]
+      }
     ]
   }
 ]
@@ -72,6 +102,8 @@ const columns = [
 export default function Pagados() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
   const [showDetail, setShowDetail] = useState(false)
+  const [selectedCuentaDetail, setSelectedCuentaDetail] = useState<any>(null)
+  const [showCuentaDetail, setShowCuentaDetail] = useState(false)
   const [mesSeleccionado, setMesSeleccionado] = useState("2024-01")
 
   const filteredData = lotesPagados.filter(lote => {

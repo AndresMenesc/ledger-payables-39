@@ -10,52 +10,103 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 
-// Datos de ejemplo
+// Datos de ejemplo - servicios de transporte
 const cuentasSinLote = [
   {
     id: 1,
     numero: "CC-2024-011",
-    proveedor: "Consultoría Digital S.A.S",
+    proveedor: "TRANSPORTES RÁPIDOS BOGOTÁ S.A.S",
     fecha_aprobacion: "2024-02-01",
     valor_total: 1800000,
     estado: "aprobado",
-    servicios: "Desarrollo web, Consultoría técnica"
+    servicios: [
+      {
+        id: "SRV-011",
+        descripcion: "Transporte ejecutivo aeropuerto",
+        valor: 1800000,
+        ruta: "Aeropuerto El Dorado → Centro Empresarial",
+        vehiculo: "Toyota Prado 2023 - QWE123",
+        fecha: "2024-02-01",
+        estado: "completado"
+      }
+    ]
   },
   {
     id: 2,
     numero: "CC-2024-012",
-    proveedor: "Suministros Oficina LTDA",
+    proveedor: "LOGÍSTICA URBANA LTDA",
     fecha_aprobacion: "2024-02-02",
     valor_total: 650000,
     estado: "aprobado",
-    servicios: "Material de oficina, Papelería"
+    servicios: [
+      {
+        id: "SRV-012",
+        descripcion: "Distribución última milla",
+        valor: 650000,
+        ruta: "Centro de distribución → Zona Norte",
+        vehiculo: "Camión NPR 2022 - RTY456",
+        fecha: "2024-02-02",
+        estado: "completado"
+      }
+    ]
   },
   {
     id: 3,
     numero: "CC-2024-013",
-    proveedor: "Servicios de Limpieza Pro",
+    proveedor: "SERVICIOS DE TRANSPORTE ESPECIAL",
     fecha_aprobacion: "2024-02-03",
     valor_total: 1200000,
     estado: "aprobado",
-    servicios: "Servicios de aseo"
+    servicios: [
+      {
+        id: "SRV-013",
+        descripcion: "Transporte de personal especializado",
+        valor: 1200000,
+        ruta: "Zona Industrial → Planta Norte",
+        vehiculo: "Bus Mercedes Benz 2023 - UIO789",
+        fecha: "2024-02-03",
+        estado: "completado"
+      }
+    ]
   },
   {
     id: 4,
     numero: "CC-2024-014",
-    proveedor: "Tecnología Avanzada S.A.S",
+    proveedor: "FLOTA CORPORATIVA EXPRESS",
     fecha_aprobacion: "2024-02-04",
     valor_total: 3200000,
     estado: "aprobado",
-    servicios: "Licencias software, Soporte técnico"
+    servicios: [
+      {
+        id: "SRV-014",
+        descripcion: "Servicios de transporte ejecutivo mensual",
+        valor: 3200000,
+        ruta: "Múltiples rutas corporativas",
+        vehiculo: "Flota Toyota Prado 2023",
+        fecha: "2024-02-04",
+        estado: "completado"
+      }
+    ]
   },
   {
     id: 5,
     numero: "CC-2024-015",
-    proveedor: "Transporte Ejecutivo",
+    proveedor: "TRANSPORTE DE CARGA PESADA",
     fecha_aprobacion: "2024-02-05",
     valor_total: 450000,
     estado: "aprobado",
-    servicios: "Servicios de transporte"
+    servicios: [
+      {
+        id: "SRV-015",
+        descripcion: "Transporte de maquinaria pesada",
+        valor: 450000,
+        ruta: "Puerto → Zona Industrial",
+        vehiculo: "Cama baja Kenworth 2022 - ASD123",
+        fecha: "2024-02-05",
+        estado: "completado",
+        carga: "Maquinaria industrial - 25 toneladas"
+      }
+    ]
   }
 ]
 
