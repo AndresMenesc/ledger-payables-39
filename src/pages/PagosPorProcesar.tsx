@@ -11,6 +11,40 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import PrestamosManager from "@/components/PrestamosManager"
 
+// Datos de ejemplo de préstamos detallados
+const prestamosDetallados = [
+  {
+    id: 1,
+    proveedor: "ALBERTO JOSE TAMARA CABARCAS",
+    fechaSolicitud: "2025-02-01",
+    tipo: "Anticipo de viaje",
+    montoTotal: 98753,
+    montoUtilizado: 0,
+    montoDisponible: 98753,
+    estado: "Activo",
+    descripcion: "Anticipo para servicios de transporte ejecutivo",
+    cuotas: 1,
+    valorCuota: 98753,
+    fechaVencimiento: "2025-03-01",
+    observaciones: "Préstamo para cubrir gastos de combustible y peajes"
+  },
+  {
+    id: 2,
+    proveedor: "ALEXANDER PERDOMO VARGAS",
+    fechaSolicitud: "2025-01-15",
+    tipo: "Anticipo de viaje",
+    montoTotal: 142223,
+    montoUtilizado: 50000,
+    montoDisponible: 92223,
+    estado: "Activo",
+    descripcion: "Anticipo para servicios de carga",
+    cuotas: 2,
+    valorCuota: 71111.5,
+    fechaVencimiento: "2025-04-15",
+    observaciones: "Préstamo para mantenimiento de vehículos de carga"
+  }
+]
+
 // Datos de ejemplo
 const lotesPago = [
   {
@@ -226,6 +260,9 @@ export default function PagosPorProcesar() {
   const [nuevoLote, setNuevoLote] = useState({ nombre: "", descripcion: "" })
   const [showPrestamosManager, setShowPrestamosManager] = useState(false)
   const [showCreatePrestamo, setShowCreatePrestamo] = useState(false)
+  const [showLoanCalculator, setShowLoanCalculator] = useState(false)
+  const [selectedPrestamo, setSelectedPrestamo] = useState<any>(null)
+  const [discountToApply, setDiscountToApply] = useState(0)
 
   const handleCreateLote = () => {
     // Implementar lógica para crear nuevo lote
@@ -312,7 +349,7 @@ export default function PagosPorProcesar() {
   )
 
   // Vista principal - listado de lotes
-  if (!showDetail && !showCreateLote && !showAddCuenta && !showCuentaDetail && !showCuentaAdded && !showPrestamosManager && !showCreatePrestamo) {
+  if (!showDetail && !showCreateLote && !showAddCuenta && !showCuentaDetail && !showCuentaAdded && !showPrestamosManager && !showCreatePrestamo && !showLoanCalculator) {
     return (
       <div className="p-6 space-y-6">
         <div>
@@ -579,28 +616,28 @@ export default function PagosPorProcesar() {
                   )}
                 </div>
                 
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline"
-                    onClick={() => {
-                      // Encontrar la cuenta completa con servicios
-                      const cuentaCompleta = cuentasDisponibles.find(c => c.numero === selectedCuentaToAdd.numero) || selectedCuentaToAdd
-                      setSelectedCuentaDetail(cuentaCompleta)
-                      setShowAddCuenta(false)
-                      setShowCuentaDetail(true)
-                    }}
-                  >
-                    <Eye className="h-4 w-4 mr-2" />
-                    Ver Servicios
-                  </Button>
-                  <Button 
-                    onClick={() => {
-                      handleAddCuentaToLote()
-                    }}
-                  >
-                    Agregar al Lote
-                  </Button>
-                </div>
+                 <div className="flex gap-2">
+                   <Button 
+                     variant="outline"
+                     onClick={() => {
+                       // Encontrar la cuenta completa con servicios
+                       const cuentaCompleta = cuentasDisponibles.find(c => c.numero === selectedCuentaToAdd.numero) || selectedCuentaToAdd
+                       setSelectedCuentaDetail(cuentaCompleta)
+                       setShowAddCuenta(false)
+                       setShowCuentaDetail(true)
+                     }}
+                   >
+                     <Eye className="h-4 w-4 mr-2" />
+                     Ver Detalle
+                   </Button>
+                   <Button 
+                     onClick={() => {
+                       handleAddCuentaToLote()
+                     }}
+                   >
+                     Asociar al Lote
+                   </Button>
+                 </div>
               </div>
             </CardContent>
           </Card>
@@ -638,25 +675,129 @@ export default function PagosPorProcesar() {
         {/* Información de la cuenta */}
         <Card>
           <CardHeader>
-            <CardTitle>Resumen de la Cuenta de Cobro</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              Resumen de la Cuenta de Cobro
+              {loteToAddCuenta && (
+                <Button
+                  onClick={() => {
+                    setSelectedCuentaToAdd(selectedCuentaDetail)
+                    setShowCuentaDetail(false)
+                    handleAddCuentaToLote()
+                  }}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Asociar al Lote
+                </Button>
+              )}
+            </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <p className="text-sm text-muted-foreground">Centro de Costo</p>
-              <p className="font-medium">{selectedCuentaDetail.centroCosto || "N/A"}</p>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Centro de Costo</p>
+                <p className="font-medium">{selectedCuentaDetail.centroCosto || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Periodo</p>
+                <p className="font-medium">{selectedCuentaDetail.fechas || "N/A"}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Bruto</p>
+                <p className="font-medium">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Neto</p>
+                <p className="text-xl font-bold text-primary">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.totalNeto || selectedCuentaDetail.valor)}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Periodo</p>
-              <p className="font-medium">{selectedCuentaDetail.fechas || "N/A"}</p>
+
+            {/* Resumen financiero detallado */}
+            <div className="bg-muted/30 p-4 rounded-lg">
+              <h4 className="font-medium mb-3">Desglose Financiero</h4>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-sm">Valor bruto:</span>
+                  <span className="font-medium">
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor)}
+                  </span>
+                </div>
+                
+                {selectedCuentaDetail.prestamos > 0 && (
+                  <div className="flex justify-between text-warning">
+                    <span className="text-sm">Descuento préstamo:</span>
+                    <span className="font-medium">
+                      -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.prestamos)}
+                    </span>
+                  </div>
+                )}
+                
+                <div className="flex justify-between text-destructive">
+                  <span className="text-sm">Retención fuente:</span>
+                  <span className="font-medium">
+                    -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.descuentoReteFuente || 0)}
+                  </span>
+                </div>
+                
+                <Separator />
+                
+                <div className="flex justify-between text-lg font-bold">
+                  <span>Total neto:</span>
+                  <span className="text-success">
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.totalNeto || selectedCuentaDetail.valor)}
+                  </span>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Bruto</p>
-              <p className="font-medium">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor)}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Total Neto</p>
-              <p className="text-xl font-bold text-primary">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.totalNeto || selectedCuentaDetail.valor)}</p>
-            </div>
+
+            {/* Gestión de préstamos si los hay */}
+            {selectedCuentaDetail.prestamos > 0 && (
+              <Card className="bg-warning/5 border-warning">
+                <CardHeader>
+                  <CardTitle className="text-warning flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    Préstamo Activo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Monto del préstamo</p>
+                      <p className="text-2xl font-bold text-warning">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.prestamos)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Este monto será descontado del total de la cuenta
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPrestamo(prestamosDetallados.find(p => p.proveedor === selectedCuentaDetail.proveedor))
+                          setShowCuentaDetail(false)
+                          setShowLoanCalculator(true)
+                        }}
+                      >
+                        <Calculator className="h-4 w-4 mr-2" />
+                        Calcular Descuento
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setShowCuentaDetail(false)
+                          setShowPrestamosManager(true)
+                        }}
+                      >
+                        <History className="h-4 w-4 mr-2" />
+                        Ver Historial
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </CardContent>
         </Card>
 
@@ -1107,6 +1248,10 @@ export default function PagosPorProcesar() {
               <Button
                 variant="outline"
                 className="w-full"
+                onClick={() => {
+                  setShowCreatePrestamo(false)
+                  setShowLoanCalculator(true)
+                }}
               >
                 <Calculator className="h-4 w-4 mr-2" />
                 Calcular Descuento
@@ -1123,6 +1268,283 @@ export default function PagosPorProcesar() {
             </CardContent>
           </Card>
         </div>
+      </div>
+    )
+  }
+
+  // Vista de calculadora de préstamos
+  if (showLoanCalculator) {
+    const prestamoActual = prestamosDetallados.find(p => p.proveedor === selectedCuentaToAdd?.proveedor) || prestamosDetallados[0]
+    const [montoCustom, setMontoCustom] = useState(prestamoActual.montoDisponible)
+    const [aplicarCompleto, setAplicarCompleto] = useState(true)
+    
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setShowLoanCalculator(false)
+              setShowCreatePrestamo(true)
+            }}
+          >
+            ← Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Calculadora de Descuentos</h1>
+            <p className="text-muted-foreground">Configura el descuento del préstamo para {selectedCuentaToAdd?.proveedor}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Información del préstamo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-warning" />
+                Préstamo Actual
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-warning/10 p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground">Monto del Préstamo</p>
+                <p className="text-2xl font-bold text-warning">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamoActual.montoTotal)}
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">Estado</p>
+                  <Badge variant="warning-light">{prestamoActual.estado}</Badge>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Tipo</p>
+                  <p className="font-medium">{prestamoActual.tipo}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Fecha</p>
+                  <p className="font-medium">{prestamoActual.fechaSolicitud}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Vencimiento</p>
+                  <p className="font-medium">{prestamoActual.fechaVencimiento}</p>
+                </div>
+              </div>
+
+              <div className="space-y-2 border-t pt-4">
+                <div className="flex justify-between">
+                  <span className="text-sm">Monto Total:</span>
+                  <span className="font-medium">
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamoActual.montoTotal)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-sm">Utilizado:</span>
+                  <span className="font-medium text-destructive">
+                    -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamoActual.montoUtilizado)}
+                  </span>
+                </div>
+                <div className="flex justify-between font-bold">
+                  <span className="text-sm">Disponible:</span>
+                  <span className="text-success">
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamoActual.montoDisponible)}
+                  </span>
+                </div>
+              </div>
+
+              {prestamoActual.observaciones && (
+                <div className="bg-muted/50 p-3 rounded-lg">
+                  <p className="text-xs text-muted-foreground mb-1">Observaciones:</p>
+                  <p className="text-sm">{prestamoActual.observaciones}</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Configuración de descuento */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-primary" />
+                Configuración de Descuento
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="completo"
+                    checked={aplicarCompleto}
+                    onChange={() => setAplicarCompleto(true)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="completo" className="text-sm font-medium">
+                    Aplicar descuento completo
+                  </label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id="custom"
+                    checked={!aplicarCompleto}
+                    onChange={() => setAplicarCompleto(false)}
+                    className="w-4 h-4"
+                  />
+                  <label htmlFor="custom" className="text-sm font-medium">
+                    Monto personalizado
+                  </label>
+                </div>
+              </div>
+
+              {!aplicarCompleto && (
+                <div className="space-y-2">
+                  <Label htmlFor="montoCustom">Monto a descontar</Label>
+                  <Input
+                    id="montoCustom"
+                    type="number"
+                    value={montoCustom}
+                    onChange={(e) => setMontoCustom(Number(e.target.value))}
+                    max={prestamoActual.montoDisponible}
+                    min={0}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Máximo disponible: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamoActual.montoDisponible)}
+                  </p>
+                </div>
+              )}
+
+              <div className="bg-primary/10 p-4 rounded-lg">
+                <p className="text-sm text-muted-foreground mb-2">Descuento a aplicar:</p>
+                <p className="text-2xl font-bold text-primary">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(
+                    aplicarCompleto ? prestamoActual.montoDisponible : montoCustom
+                  )}
+                </p>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <h4 className="font-medium">Impacto en la cuenta:</h4>
+                <div className="bg-muted/50 p-3 rounded-lg space-y-1">
+                  <div className="flex justify-between">
+                    <span className="text-sm">Total cuenta:</span>
+                    <span className="text-sm">
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd?.valor || 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">Descuento préstamo:</span>
+                    <span className="text-sm text-destructive">
+                      -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(
+                        aplicarCompleto ? prestamoActual.montoDisponible : montoCustom
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm">ReteFuente:</span>
+                    <span className="text-sm text-destructive">
+                      -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd?.descuentoReteFuente || 0)}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-bold">
+                    <span className="text-sm">Total neto:</span>
+                    <span className="text-success">
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(
+                        (selectedCuentaToAdd?.valor || 0) - 
+                        (aplicarCompleto ? prestamoActual.montoDisponible : montoCustom) - 
+                        (selectedCuentaToAdd?.descuentoReteFuente || 0)
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  className="flex-1"
+                  onClick={() => {
+                    setDiscountToApply(aplicarCompleto ? prestamoActual.montoDisponible : montoCustom)
+                    setShowLoanCalculator(false)
+                    setShowCreatePrestamo(true)
+                  }}
+                >
+                  Aplicar Descuento
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowLoanCalculator(false)
+                    setShowCreatePrestamo(true)
+                  }}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Historial de cuotas */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Detalle del Préstamo</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <h4 className="font-medium mb-3">Información General</h4>
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Número de cuotas:</span>
+                    <span className="text-sm">{prestamoActual.cuotas}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Valor por cuota:</span>
+                    <span className="text-sm">
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamoActual.valorCuota)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm text-muted-foreground">Descripción:</span>
+                    <span className="text-sm">{prestamoActual.descripcion}</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="font-medium mb-3">Acciones Adicionales</h4>
+                <div className="space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => {
+                      setShowLoanCalculator(false)
+                      setShowPrestamosManager(true)
+                    }}
+                  >
+                    <History className="h-4 w-4 mr-2" />
+                    Ver Historial Completo
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Crear Nuevo Préstamo
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
