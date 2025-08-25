@@ -1,0 +1,209 @@
+import { useState } from "react"
+import { NavLink, useLocation } from "react-router-dom"
+import {
+  BarChart3, FileText, Clock, Package, CheckCircle, 
+  DollarSign, AlertTriangle, CreditCard, Truck, Building2,
+  ChevronDown, ChevronRight, Home, Receipt
+} from "lucide-react"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+  useSidebar,
+} from "@/components/ui/sidebar"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+
+// Estructura de navegación
+const navigationItems = [
+  {
+    title: "Dashboard",
+    url: "/",
+    icon: BarChart3,
+    subItems: [
+      {
+        title: "Cuentas de Cobro",
+        url: "/cuenta-cobro",
+        icon: Receipt
+      }
+    ]
+  },
+  {
+    title: "Gestión de Pagos",
+    icon: DollarSign,
+    subItems: [
+      {
+        title: "Por Preparar",
+        url: "/pagos-preparar",
+        icon: FileText
+      },
+      {
+        title: "Por Procesar", 
+        url: "/pagos-procesar",
+        icon: Package
+      },
+      {
+        title: "Por Aprobar",
+        url: "/pagos-aprobar",
+        icon: Clock
+      }
+    ]
+  },
+  {
+    title: "Estados de Lotes",
+    icon: Package,
+    subItems: [
+      {
+        title: "Lotes Aprobados",
+        url: "/lotes-aprobados",
+        icon: CheckCircle
+      },
+      {
+        title: "Pagados",
+        url: "/pagados",
+        icon: DollarSign
+      },
+      {
+        title: "Sin Lote",
+        url: "/sin-lote",
+        icon: AlertTriangle
+      }
+    ]
+  },
+  {
+    title: "Préstamos",
+    url: "/prestamos",
+    icon: CreditCard
+  }
+]
+
+export function AppSidebar() {
+  const { open, setOpen } = useSidebar()
+  const location = useLocation()
+  const currentPath = location.pathname
+  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Gestión de Pagos", "Estados de Lotes"])
+
+  const isActive = (path: string) => currentPath === path
+  const hasActiveChild = (subItems?: any[]) => 
+    subItems?.some(item => isActive(item.url)) ?? false
+
+  const toggleGroup = (groupTitle: string) => {
+    setOpenGroups(prev => 
+      prev.includes(groupTitle) 
+        ? prev.filter(title => title !== groupTitle)
+        : [...prev, groupTitle]
+    )
+  }
+
+  const getNavClasses = (isActiveItem: boolean) =>
+    isActiveItem 
+      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
+      : "hover:bg-accent hover:text-accent-foreground"
+
+  return (
+    <Sidebar className={!open ? "w-16" : "w-64"}>
+      <SidebarContent>
+        {/* Header */}
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-lg font-bold text-primary px-4 py-6">
+            {open && (
+              <div className="flex items-center gap-2">
+                <Truck className="h-6 w-6" />
+                <span>Sistema Transportes</span>
+              </div>
+            )}
+            {!open && <Truck className="h-6 w-6 mx-auto" />}
+          </SidebarGroupLabel>
+        </SidebarGroup>
+
+        {/* Navigation */}
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  {item.subItems ? (
+                    // Grupo con submódulos
+                    <Collapsible
+                      open={openGroups.includes(item.title)}
+                      onOpenChange={() => toggleGroup(item.title)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <SidebarMenuButton 
+                          className={`w-full justify-between ${hasActiveChild(item.subItems) ? 'bg-accent' : ''}`}
+                        >
+                          <div className="flex items-center">
+                            <item.icon className="h-4 w-4" />
+                            {open && <span className="ml-3">{item.title}</span>}
+                          </div>
+                          {open && (
+                            openGroups.includes(item.title) ? 
+                            <ChevronDown className="h-4 w-4" /> : 
+                            <ChevronRight className="h-4 w-4" />
+                          )}
+                        </SidebarMenuButton>
+                      </CollapsibleTrigger>
+                      
+                      {open && (
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.subItems.map((subItem) => (
+                              <SidebarMenuSubItem key={subItem.title}>
+                                <SidebarMenuSubButton asChild>
+                                  <NavLink 
+                                    to={subItem.url} 
+                                    className={getNavClasses(isActive(subItem.url))}
+                                  >
+                                    <subItem.icon className="h-4 w-4" />
+                                    <span className="ml-3">{subItem.title}</span>
+                                  </NavLink>
+                                </SidebarMenuSubButton>
+                              </SidebarMenuSubItem>
+                            ))}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      )}
+                    </Collapsible>
+                  ) : (
+                    // Elemento simple
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={item.url!} 
+                        className={getNavClasses(isActive(item.url!))}
+                      >
+                        <item.icon className="h-4 w-4" />
+                        {open && <span className="ml-3">{item.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  )}
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Footer */}
+        {open && (
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupContent>
+              <div className="px-4 py-3 text-xs text-muted-foreground border-t">
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>Sistema Activo</span>
+                </div>
+                <p className="mt-1">Gestión de Transportes v1.0</p>
+              </div>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+      </SidebarContent>
+    </Sidebar>
+  )
+}
