@@ -21,9 +21,31 @@ const lotesPago = [
     total_cuentas: 3,
     valor_total: 8500000,
     cuentas: [
-      { numero: "CC-2024-001", proveedor: "Tecnología Avanzada S.A.S", valor: 2500000 },
-      { numero: "CC-2024-002", proveedor: "Servicios Integrales LTDA", valor: 1800000 },
-      { numero: "CC-2024-004", proveedor: "Consultoría Pro", valor: 4200000 }
+      { 
+        numero: "CC-2024-001", 
+        proveedor: "Tecnología Avanzada S.A.S", 
+        valor: 2500000,
+        servicios: [
+          { descripcion: "Desarrollo de software", valor: 2000000, estado: "pendiente" },
+          { descripcion: "Soporte técnico", valor: 500000, estado: "pendiente" }
+        ]
+      },
+      { 
+        numero: "CC-2024-002", 
+        proveedor: "Servicios Integrales LTDA", 
+        valor: 1800000,
+        servicios: [
+          { descripcion: "Consultoría", valor: 1800000, estado: "aprobado" }
+        ]
+      },
+      { 
+        numero: "CC-2024-004", 
+        proveedor: "Consultoría Pro", 
+        valor: 4200000,
+        servicios: [
+          { descripcion: "Servicios especializados", valor: 4200000, estado: "pendiente" }
+        ]
+      }
     ]
   },
   {
@@ -34,8 +56,22 @@ const lotesPago = [
     total_cuentas: 2,
     valor_total: 3700000,
     cuentas: [
-      { numero: "CC-2024-005", proveedor: "Materiales XYZ", valor: 1500000 },
-      { numero: "CC-2024-006", proveedor: "Transporte ABC", valor: 2200000 }
+      { 
+        numero: "CC-2024-005", 
+        proveedor: "Materiales XYZ", 
+        valor: 1500000,
+        servicios: [
+          { descripcion: "Suministros", valor: 1500000, estado: "pendiente" }
+        ]
+      },
+      { 
+        numero: "CC-2024-006", 
+        proveedor: "Transporte ABC", 
+        valor: 2200000,
+        servicios: [
+          { descripcion: "Servicios de transporte", valor: 2200000, estado: "pendiente" }
+        ]
+      }
     ]
   }
 ]
@@ -49,7 +85,35 @@ const cuentasDisponibles = [
     descuentoReteFuente: 98753,
     totalNeto: 2722747,
     centroCosto: "IGT SERVICES AND TECHNOLOGIES COLOMBIA",
-    fechas: "2025-02-01 2025-02-28"
+    fechas: "2025-02-01 2025-02-28",
+    servicios: [
+      {
+        id: "AP43370",
+        factura: "A143369",
+        fechaExpedicion: "2025-03-28 03:27:34",
+        centroCosto: "IGT SERVICES AND TECHNOLOGIES COLOMBIA",
+        proveedor: "ALBERTO JOSE TAMARA CABARCAS",
+        fechas: "2025-02-01 2025-02-28",
+        valor: 1163500,
+        descripcion: "Transporte ejecutivo Bogotá-Medellín",
+        ruta: "Bogotá → Medellín",
+        vehiculo: "Toyota Prado 2023 - ABC123",
+        creadoPor: "Alberto jose tamara cabarcas"
+      },
+      {
+        id: "AP43371",
+        factura: "A143370", 
+        fechaExpedicion: "2025-03-28 03:27:37",
+        centroCosto: "IGT SERVICES AND TECHNOLOGIES COLOMBIA",
+        proveedor: "ALBERTO JOSE TAMARA CABARCAS",
+        fechas: "2025-02-01 2025-02-28",
+        valor: 1456000,
+        descripcion: "Servicio de regreso Medellín-Bogotá",
+        ruta: "Medellín → Bogotá",
+        vehiculo: "Toyota Prado 2023 - ABC123",
+        creadoPor: "Alberto jose tamara cabarcas"
+      }
+    ]
   },
   { 
     numero: "CC-2024-008", 
@@ -59,7 +123,23 @@ const cuentasDisponibles = [
     descuentoReteFuente: 142223,
     totalNeto: 3921277,
     centroCosto: "AMERICAS BUSINESS PROCESS SERVICES",
-    fechas: "2025-02-01 2025-02-28"
+    fechas: "2025-02-01 2025-02-28",
+    servicios: [
+      {
+        id: "AP43372",
+        factura: "A143371",
+        fechaExpedicion: "2025-03-28 03:27:45",
+        centroCosto: "AMERICAS BUSINESS PROCESS SERVICES",
+        proveedor: "ALEXANDER PERDOMO VARGAS",
+        fechas: "2025-02-01 2025-02-28", 
+        valor: 4063500,
+        descripcion: "Transporte de carga Bogotá-Cali",
+        ruta: "Bogotá → Cali",
+        vehiculo: "Camión Volvo FH 2022 - XYZ789",
+        carga: "Equipos industriales - 15 toneladas",
+        creadoPor: "Alexander perdomo vargas"
+      }
+    ]
   },
   { 
     numero: "CC-2024-009", 
@@ -69,7 +149,22 @@ const cuentasDisponibles = [
     descuentoReteFuente: 0,
     totalNeto: 1123500,
     centroCosto: "BANCO POPULAR BOGOTA",
-    fechas: "2025-02-01 2025-02-28"
+    fechas: "2025-02-01 2025-02-28",
+    servicios: [
+      {
+        id: "AP43373",
+        factura: "A143372",
+        fechaExpedicion: "2025-03-28 03:27:50",
+        centroCosto: "BANCO POPULAR BOGOTA",
+        proveedor: "DERLY TATIANA MENDEZ PEREZ",
+        fechas: "2025-02-01 2025-02-28",
+        valor: 1123500,
+        descripcion: "Servicios de taxi corporativo",
+        ruta: "Zona Rosa → Aeropuerto El Dorado",
+        vehiculo: "Chevrolet Spark GT 2023 - DEF456",
+        creadoPor: "Derly tatiana mendez perez"
+      }
+    ]
   }
 ]
 
@@ -270,7 +365,18 @@ export default function PagosPorProcesar() {
 
         {/* Cuentas de Cobro en el Lote */}
         <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Cuentas de Cobro en el Lote</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Cuentas de Cobro en el Lote</h2>
+            <Button 
+              onClick={() => {
+                setLoteToAddCuenta(selectedLote)
+                setShowAddCuenta(true)
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cuenta
+            </Button>
+          </div>
           
           {selectedLote.cuentas.map((cuenta: any, index: number) => (
             <Card key={index} className="border-l-4 border-l-primary hover:shadow-md transition-shadow">
@@ -285,6 +391,11 @@ export default function PagosPorProcesar() {
                     <p className="text-xl font-bold text-primary">
                       {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
                     </p>
+                    {cuenta.servicios && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {cuenta.servicios.length} servicio{cuenta.servicios.length !== 1 ? 's' : ''} asociado{cuenta.servicios.length !== 1 ? 's' : ''}
+                      </p>
+                    )}
                   </div>
                   
                   <div className="flex gap-2">
@@ -292,7 +403,9 @@ export default function PagosPorProcesar() {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setSelectedCuentaDetail(cuenta)
+                        // Encontrar la cuenta completa en cuentasDisponibles con servicios
+                        const cuentaCompleta = cuentasDisponibles.find(c => c.numero === cuenta.numero) || cuenta
+                        setSelectedCuentaDetail(cuentaCompleta)
                         setShowCuentaDetail(true)
                       }}
                     >
@@ -398,20 +511,38 @@ export default function PagosPorProcesar() {
                   <p className="text-xl font-bold text-primary">
                     Total Neto: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.totalNeto)}
                   </p>
+                  {selectedCuentaToAdd.prestamos > 0 && (
+                    <div className="mt-2 flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowCreatePrestamo(true)}
+                      >
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Gestionar Préstamo: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
+                      </Button>
+                    </div>
+                  )}
                 </div>
                 
                 <div className="flex gap-2">
                   <Button 
                     variant="outline"
                     onClick={() => {
-                      setSelectedCuentaDetail(selectedCuentaToAdd)
+                      // Encontrar la cuenta completa con servicios
+                      const cuentaCompleta = cuentasDisponibles.find(c => c.numero === selectedCuentaToAdd.numero) || selectedCuentaToAdd
+                      setSelectedCuentaDetail(cuentaCompleta)
                       setShowCuentaDetail(true)
                     }}
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Ver Servicios
                   </Button>
-                  <Button onClick={handleAddCuentaToLote}>
+                  <Button 
+                    onClick={() => {
+                      handleAddCuentaToLote()
+                    }}
+                  >
                     Agregar al Lote
                   </Button>
                 </div>
@@ -452,11 +583,11 @@ export default function PagosPorProcesar() {
           <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-muted-foreground">Centro de Costo</p>
-              <p className="font-medium">{selectedCuentaDetail.centroCosto}</p>
+              <p className="font-medium">{selectedCuentaDetail.centroCosto || "N/A"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Periodo</p>
-              <p className="font-medium">{selectedCuentaDetail.fechas}</p>
+              <p className="font-medium">{selectedCuentaDetail.fechas || "N/A"}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Bruto</p>
@@ -464,18 +595,77 @@ export default function PagosPorProcesar() {
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Total Neto</p>
-              <p className="text-xl font-bold text-primary">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.totalNeto)}</p>
+              <p className="text-xl font-bold text-primary">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.totalNeto || selectedCuentaDetail.valor)}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Aquí iría el listado de servicios de transporte de la cuenta */}
+        {/* Servicios de Transporte */}
         <Card>
           <CardHeader>
             <CardTitle>Servicios de Transporte Incluidos</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground">Los servicios detallados de esta cuenta de cobro se mostrarían aquí...</p>
+            {selectedCuentaDetail.servicios && selectedCuentaDetail.servicios.length > 0 ? (
+              <div className="space-y-4">
+                {selectedCuentaDetail.servicios.map((servicio: any, index: number) => (
+                  <Card key={index} className="border-l-4 border-l-primary">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-lg mb-1">{servicio.descripcion}</h4>
+                          <p className="text-xl font-bold text-primary">
+                            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                          </p>
+                        </div>
+                        <Badge variant="success-light">
+                          {servicio.id}
+                        </Badge>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-3 rounded-lg">
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Factura</p>
+                            <p className="font-medium">{servicio.factura}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Fecha Expedición</p>
+                            <p className="font-medium">{servicio.fechaExpedicion}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Ruta</p>
+                            <p className="font-medium">{servicio.ruta || "N/A"}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Vehículo</p>
+                            <p className="font-medium">{servicio.vehiculo || "N/A"}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Creado por</p>
+                            <p className="font-medium">{servicio.creadoPor}</p>
+                          </div>
+                          {servicio.carga && (
+                            <div>
+                              <p className="text-xs text-muted-foreground">Carga</p>
+                              <p className="font-medium">{servicio.carga}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No hay servicios asociados a esta cuenta de cobro.</p>
+            )}
           </CardContent>
         </Card>
       </div>
