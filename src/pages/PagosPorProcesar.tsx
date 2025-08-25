@@ -202,6 +202,10 @@ export default function PagosPorProcesar() {
     setShowAddCuenta(false)
     setSelectedCuentaToAdd(null)
     setLoteToAddCuenta(null)
+    // Volver a la vista de detalle del lote
+    if (selectedLote) {
+      setShowDetail(true)
+    }
   }
 
 
@@ -319,6 +323,7 @@ export default function PagosPorProcesar() {
             <Button 
               onClick={() => {
                 setLoteToAddCuenta(selectedLote)
+                setShowDetail(false)
                 setShowAddCuenta(true)
               }}
             >
@@ -370,6 +375,7 @@ export default function PagosPorProcesar() {
             <Button 
               onClick={() => {
                 setLoteToAddCuenta(selectedLote)
+                setShowDetail(false)
                 setShowAddCuenta(true)
               }}
             >
@@ -404,8 +410,15 @@ export default function PagosPorProcesar() {
                       size="sm"
                       onClick={() => {
                         // Encontrar la cuenta completa en cuentasDisponibles con servicios
-                        const cuentaCompleta = cuentasDisponibles.find(c => c.numero === cuenta.numero) || cuenta
+                        const cuentaCompleta = cuentasDisponibles.find(c => c.numero === cuenta.numero) || {
+                          ...cuenta,
+                          centroCosto: "Centro de costo no disponible",
+                          fechas: "Fechas no disponibles",
+                          totalNeto: cuenta.valor,
+                          servicios: cuenta.servicios || []
+                        }
                         setSelectedCuentaDetail(cuentaCompleta)
+                        setShowDetail(false)
                         setShowCuentaDetail(true)
                       }}
                     >
@@ -440,6 +453,9 @@ export default function PagosPorProcesar() {
               setShowAddCuenta(false)
               setLoteToAddCuenta(null)
               setSelectedCuentaToAdd(null)
+              if (selectedLote) {
+                setShowDetail(true)
+              }
             }}
           >
             ← Volver
@@ -565,6 +581,9 @@ export default function PagosPorProcesar() {
             onClick={() => {
               setShowCuentaDetail(false)
               setSelectedCuentaDetail(null)
+              if (selectedLote) {
+                setShowDetail(true)
+              }
             }}
           >
             ← Volver
