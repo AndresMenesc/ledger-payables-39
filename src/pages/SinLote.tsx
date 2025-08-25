@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { MoveRight, Package, Plus, Archive } from "lucide-react"
+import { MoveRight, Package, Plus, Archive, Eye } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -129,6 +129,8 @@ export default function SinLote() {
   const [selectedCuentas, setSelectedCuentas] = useState<number[]>([])
   const [showMoveDialog, setShowMoveDialog] = useState(false)
   const [showCreateLoteDialog, setShowCreateLoteDialog] = useState(false)
+  const [selectedCuentaDetail, setSelectedCuentaDetail] = useState<any>(null)
+  const [showCuentaDetail, setShowCuentaDetail] = useState(false)
   const [moveToLote, setMoveToLote] = useState("")
   const [nuevoLote, setNuevoLote] = useState({ numero: "", descripcion: "" })
 
@@ -180,13 +182,31 @@ export default function SinLote() {
       return new Date(value).toLocaleDateString('es-CO')
     }
     if (key === 'servicios') {
-      return <span className="text-sm text-muted-foreground">{value}</span>
+      // Handle servicios as array of objects
+      if (Array.isArray(value) && value.length > 0) {
+        return (
+          <span className="text-sm text-muted-foreground">
+            {value.length} servicio{value.length !== 1 ? 's' : ''} de transporte
+          </span>
+        )
+      }
+      return <span className="text-sm text-muted-foreground">Sin servicios</span>
     }
     return value
   }
 
   const actions = (row: any) => (
     <div className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => {
+          setSelectedCuentaDetail(row)
+          setShowCuentaDetail(true)
+        }}
+      >
+        Ver Servicios
+      </Button>
       <Checkbox
         checked={selectedCuentas.includes(row.id)}
         onCheckedChange={(checked) => handleSelectCuenta(row.id, checked as boolean)}
@@ -281,7 +301,7 @@ export default function SinLote() {
   )
 
   // Vista principal
-  if (!showMoveDialog && !showCreateLoteDialog) {
+  if (!showMoveDialog && !showCreateLoteDialog && !showCuentaDetail) {
     return (
       <div className="p-6 space-y-6">
         <div>
@@ -459,6 +479,139 @@ export default function SinLote() {
                 Crear Lote
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Vista de detalle de cuenta de cobro
+  if (showCuentaDetail && selectedCuentaDetail) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setShowCuentaDetail(false)
+              setSelectedCuentaDetail(null)
+            }}
+          >
+            ← Volver a Lista
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Servicios de Transporte: {selectedCuentaDetail.numero}</h1>
+            <p className="text-muted-foreground">{selectedCuentaDetail.proveedor}</p>
+          </div>
+        </div>
+
+        {/* Información de la cuenta */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Resumen de la Cuenta de Cobro</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Proveedor</p>
+              <p className="font-medium">{selectedCuentaDetail.proveedor}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Servicios</p>
+              <p className="font-medium">{selectedCuentaDetail.servicios?.length || 0}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Valor Total</p>
+              <p className="text-xl font-bold text-primary">
+                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor_total)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Servicios de Transporte */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Servicios de Transporte Detallados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {selectedCuentaDetail.servicios && selectedCuentaDetail.servicios.length > 0 ? (
+              <div className="space-y-4">
+                {selectedCuentaDetail.servicios.map((servicio: any, index: number) => (
+                  <Card key={index} className="border-l-4 border-l-primary">
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-lg mb-1">{servicio.descripcion}</h4>
+                          <p className="text-xl font-bold text-primary">
+                            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge variant="success-light">
+                            {servicio.id}
+                          </Badge>
+                          <Badge variant="success">
+                            {servicio.estado === 'completado' ? 'Completado' : 'En Proceso'}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-3 rounded-lg">
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Fecha del Servicio</p>
+                            <p className="font-medium">{new Date(servicio.fecha).toLocaleDateString('es-CO')}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground">Ruta</p>
+                            <p className="font-medium">{servicio.ruta}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Vehículo</p>
+                            <p className="font-medium">{servicio.vehiculo}</p>
+                          </div>
+                          {servicio.carga && (
+                            <div>
+                              <p className="text-xs text-muted-foreground">Carga</p>
+                              <p className="font-medium">{servicio.carga}</p>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div>
+                            <p className="text-xs text-muted-foreground">Estado</p>
+                            <Badge variant="success">
+                              Servicio Completado
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                
+                {/* Resumen financiero de servicios */}
+                <Card className="bg-accent/50">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-medium">Total de Servicios:</span>
+                      <span className="text-2xl font-bold text-primary">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(
+                          selectedCuentaDetail.servicios.reduce((sum: number, s: any) => sum + s.valor, 0)
+                        )}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <p className="text-muted-foreground">No hay servicios asociados a esta cuenta de cobro.</p>
+            )}
           </CardContent>
         </Card>
       </div>
