@@ -1,6 +1,6 @@
 
 import { useState } from "react"
-import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign } from "lucide-react"
+import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign, AlertCircle, CreditCard, Receipt } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +12,7 @@ import { DatePickerWithRange } from "@/components/ui/date-range-picker"
 import { addDays, format } from "date-fns"
 import { DateRange } from "react-day-picker"
 
-// Datos de ejemplo
+// Datos de ejemplo con servicios de transporte, descuentos y préstamos detallados
 const lotesAprobados = [
   {
     id: 1,
@@ -20,16 +20,136 @@ const lotesAprobados = [
     fecha_aprobacion: "2024-01-28",
     fecha_pago: "2024-01-30",
     total_cuentas: 3,
-    valor_bruto: 8500000,
-    descuentos_totales: 100000,
-    valor_neto: 8400000,
+    valor_bruto: 9500000,
+    descuentos_totales: 485000,
+    valor_neto: 9015000,
     estado: "pagado",
     aprobado_por: "Director Financiero",
-    proveedores: ["Tecnología Avanzada S.A.S", "Servicios Integrales LTDA", "Consultoría Pro"],
+    proveedores: ["TRANSPORTES EJECUTIVOS PLATINUM S.A.S", "FLOTA NORTE CARGA PESADA LTDA", "SERVICIOS LOGÍSTICOS INTEGRALES"],
     cuentas: [
-      { numero: "CC-2024-001", proveedor: "Tecnología Avanzada S.A.S", valor: 2500000, descuentos: 0 },
-      { numero: "CC-2024-002", proveedor: "Servicios Integrales LTDA", valor: 1800000, descuentos: 100000 },
-      { numero: "CC-2024-004", proveedor: "Consultoría Pro", valor: 4200000, descuentos: 0 }
+      { 
+        numero: "CC-2024-001", 
+        proveedor: "TRANSPORTES EJECUTIVOS PLATINUM S.A.S", 
+        valor: 3500000, 
+        descuentos: 175000,
+        valor_pagado: 3325000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 4.0,
+            valor: 140000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Retención ICA",
+            porcentaje: 1.0,
+            valor: 35000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-001",
+            concepto: "Anticipo para combustible y peajes",
+            valor: 800000,
+            fecha_otorgado: "2024-01-15",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
+        servicios: [
+          {
+            id: "SRV-001",
+            descripcion: "Transporte ejecutivo VIP Bogotá-Cartagena",
+            valor: 2200000,
+            ruta: "Bogotá → Cartagena",
+            vehiculo: "Mercedes-Benz Sprinter VIP 2023 - VIP001",
+            fecha: "2024-01-20",
+            estado: "completado"
+          },
+          {
+            id: "SRV-002",
+            descripcion: "Traslado aeropuerto - hotel ejecutivo",
+            valor: 1300000,
+            ruta: "Aeropuerto Rafael Núñez → Hotel Las Américas",
+            vehiculo: "BMW X5 2023 - EXE123",
+            fecha: "2024-01-20",
+            estado: "completado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-002", 
+        proveedor: "FLOTA NORTE CARGA PESADA LTDA", 
+        valor: 4000000, 
+        descuentos: 240000,
+        valor_pagado: 3760000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 6.0,
+            valor: 240000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-002",
+            concepto: "Préstamo para reparación de vehículo",
+            valor: 1200000,
+            fecha_otorgado: "2024-01-10",
+            estado: "descontado",
+            cuotas_restantes: 0
+          },
+          {
+            id: "PREST-003",
+            concepto: "Anticipo operativo enero",
+            valor: 600000,
+            fecha_otorgado: "2024-01-01",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
+        servicios: [
+          {
+            id: "SRV-003",
+            descripcion: "Transporte de maquinaria industrial",
+            valor: 4000000,
+            ruta: "Bogotá → Medellín → Cali",
+            vehiculo: "Tractomula Volvo FH16 2022 - CAR456",
+            fecha: "2024-01-22",
+            estado: "completado",
+            carga: "Maquinaria industrial pesada - 25 toneladas"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-003", 
+        proveedor: "SERVICIOS LOGÍSTICOS INTEGRALES", 
+        valor: 2000000, 
+        descuentos: 70000,
+        valor_pagado: 1930000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 3.5,
+            valor: 70000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [],
+        servicios: [
+          {
+            id: "SRV-004",
+            descripcion: "Distribución urbana empresarial",
+            valor: 2000000,
+            ruta: "Múltiples destinos zona empresarial Bogotá",
+            vehiculo: "Flota de vehículos menores",
+            fecha: "2024-01-23",
+            estado: "completado"
+          }
+        ]
+      }
     ]
   },
   {
@@ -38,15 +158,83 @@ const lotesAprobados = [
     fecha_aprobacion: "2024-01-29",
     fecha_pago: "2024-01-31",
     total_cuentas: 2,
-    valor_bruto: 3200000,
-    descuentos_totales: 50000,
-    valor_neto: 3150000,
+    valor_bruto: 5800000,
+    descuentos_totales: 290000,
+    valor_neto: 5510000,
     estado: "pagado",
     aprobado_por: "Director Financiero",
-    proveedores: ["Servicios Generales", "Mantenimiento Pro"],
+    proveedores: ["TRANSPORTE ESPECIALIZADO MÉDICO", "SERVICIOS AEROPORTUARIOS PREMIUM"],
     cuentas: [
-      { numero: "CC-2024-007", proveedor: "Servicios Generales", valor: 1200000, descuentos: 50000 },
-      { numero: "CC-2024-008", proveedor: "Mantenimiento Pro", valor: 2000000, descuentos: 0 }
+      { 
+        numero: "CC-2024-007", 
+        proveedor: "TRANSPORTE ESPECIALIZADO MÉDICO", 
+        valor: 3300000, 
+        descuentos: 165000,
+        valor_pagado: 3135000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 5.0,
+            valor: 165000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-004",
+            concepto: "Anticipo para equipos especializados",
+            valor: 400000,
+            fecha_otorgado: "2024-01-20",
+            estado: "descontado",
+            cuotas_restantes: 0
+          }
+        ],
+        servicios: [
+          {
+            id: "SRV-005",
+            descripcion: "Transporte de pacientes en ambulancia",
+            valor: 3300000,
+            ruta: "Bogotá → Cúcuta",
+            vehiculo: "Ambulancia Mercedes-Benz Sprinter - AMB001",
+            fecha: "2024-01-25",
+            estado: "completado",
+            carga: "Transporte médico especializado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-008", 
+        proveedor: "SERVICIOS AEROPORTUARIOS PREMIUM", 
+        valor: 2500000, 
+        descuentos: 125000,
+        valor_pagado: 2375000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 4.0,
+            valor: 100000,
+            tipo: "retencion"
+          },
+          {
+            concepto: "Descuento por volumen de servicios",
+            porcentaje: 1.0,
+            valor: 25000,
+            tipo: "descuento"
+          }
+        ],
+        prestamos: [],
+        servicios: [
+          {
+            id: "SRV-006",
+            descripcion: "Traslados aeroportuarios ejecutivos",
+            valor: 2500000,
+            ruta: "El Dorado ↔ Zona Rosa",
+            vehiculo: "Flota Premium Audi A6 - PRM123",
+            fecha: "2024-01-26",
+            estado: "completado"
+          }
+        ]
+      }
     ]
   },
   {
@@ -55,17 +243,139 @@ const lotesAprobados = [
     fecha_aprobacion: "2024-02-01",
     fecha_pago: null,
     total_cuentas: 4,
-    valor_bruto: 6800000,
-    descuentos_totales: 150000,
-    valor_neto: 6650000,
+    valor_bruto: 8200000,
+    descuentos_totales: 410000,
+    valor_neto: 7790000,
     estado: "aprobado",
     aprobado_por: "Director Financiero",
-    proveedores: ["Construcciones XYZ", "Materiales ABC", "Transporte Ejecutivo", "Consultoría Digital"],
+    proveedores: ["TRANSPORTES REGIONALES DEL SUR", "LOGÍSTICA EMPRESARIAL LTDA", "FLOTA EJECUTIVA PREMIUM", "SERVICIOS ESPECIALIZADOS 4X4"],
     cuentas: [
-      { numero: "CC-2024-010", proveedor: "Construcciones XYZ", valor: 2800000, descuentos: 100000 },
-      { numero: "CC-2024-011", proveedor: "Materiales ABC", valor: 1500000, descuentos: 50000 },
-      { numero: "CC-2024-012", proveedor: "Transporte Ejecutivo", valor: 1200000, descuentos: 0 },
-      { numero: "CC-2024-013", proveedor: "Consultoría Digital", valor: 1300000, descuentos: 0 }
+      { 
+        numero: "CC-2024-010", 
+        proveedor: "TRANSPORTES REGIONALES DEL SUR", 
+        valor: 3200000, 
+        descuentos: 192000,
+        valor_pagado: 3008000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 6.0,
+            valor: 192000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-005",
+            concepto: "Préstamo para expansión de flota",
+            valor: 1500000,
+            fecha_otorgado: "2024-01-28",
+            estado: "vigente",
+            cuotas_restantes: 3
+          }
+        ],
+        servicios: [
+          {
+            id: "SRV-007",
+            descripcion: "Transporte intermunicipal de personal",
+            valor: 3200000,
+            ruta: "Bogotá → Neiva → Pitalito",
+            vehiculo: "Bus Mercedes-Benz O500 - BUS001",
+            fecha: "2024-02-05",
+            estado: "programado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-011", 
+        proveedor: "LOGÍSTICA EMPRESARIAL LTDA", 
+        valor: 2800000, 
+        descuentos: 140000,
+        valor_pagado: 2660000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 5.0,
+            valor: 140000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [],
+        servicios: [
+          {
+            id: "SRV-008",
+            descripcion: "Distribución de documentos empresariales",
+            valor: 2800000,
+            ruta: "Múltiples oficinas Bogotá y alrededores",
+            vehiculo: "Flota de motocicletas y vehículos",
+            fecha: "2024-02-06",
+            estado: "programado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-012", 
+        proveedor: "FLOTA EJECUTIVA PREMIUM", 
+        valor: 1500000, 
+        descuentos: 45000,
+        valor_pagado: 1455000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 3.0,
+            valor: 45000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [
+          {
+            id: "PREST-006",
+            concepto: "Anticipo para servicios febrero",
+            valor: 300000,
+            fecha_otorgado: "2024-02-01",
+            estado: "vigente",
+            cuotas_restantes: 1
+          }
+        ],
+        servicios: [
+          {
+            id: "SRV-009",
+            descripcion: "Servicios ejecutivos para reuniones",
+            valor: 1500000,
+            ruta: "Bogotá - zona financiera",
+            vehiculo: "BMW Serie 5 2023 - EXE456",
+            fecha: "2024-02-07",
+            estado: "programado"
+          }
+        ]
+      },
+      { 
+        numero: "CC-2024-013", 
+        proveedor: "SERVICIOS ESPECIALIZADOS 4X4", 
+        valor: 700000, 
+        descuentos: 33000,
+        valor_pagado: 667000,
+        descuentos_detalle: [
+          {
+            concepto: "Retención en la fuente",
+            porcentaje: 4.7,
+            valor: 33000,
+            tipo: "retencion"
+          }
+        ],
+        prestamos: [],
+        servicios: [
+          {
+            id: "SRV-010",
+            descripcion: "Transporte a zonas de difícil acceso",
+            valor: 700000,
+            ruta: "Bogotá → Villavicencio → Yopal",
+            vehiculo: "Toyota Land Cruiser 4X4 - 4X4001",
+            fecha: "2024-02-08",
+            estado: "programado"
+          }
+        ]
+      }
     ]
   }
 ]
@@ -553,58 +863,160 @@ export default function LotesAprobados() {
           </CardContent>
         </Card>
 
-        {/* Detalle de Servicios de Transporte */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Truck className="h-5 w-5" />
-              Servicios de Transporte
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {serviciosEjemplo.map((servicio: any, index: number) => (
-                <div key={index} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <h4 className="font-medium text-lg">{servicio.descripcion}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <MapPin className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm text-muted-foreground">{servicio.ruta}</span>
+        {/* Detalle de Descuentos Aplicados */}
+        {selectedCuenta.descuentos_detalle && selectedCuenta.descuentos_detalle.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <AlertCircle className="h-5 w-5" />
+                Detalle de Descuentos Aplicados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.descuentos_detalle.map((descuento: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-destructive/5">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{descuento.concepto}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant={
+                            descuento.tipo === 'retencion' ? 'secondary' : 
+                            descuento.tipo === 'multa' ? 'destructive' : 'outline'
+                          }>
+                            {descuento.tipo === 'retencion' ? 'Retención' : 
+                             descuento.tipo === 'multa' ? 'Multa' : 'Descuento'}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            {descuento.porcentaje}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg text-destructive">
+                          -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(descuento.valor)}
+                        </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-lg">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
-                      </p>
-                      <Badge variant={servicio.estado === 'pagado' ? 'success' : 'success-light'}>
-                        {servicio.estado === 'pagado' ? 'Pagado' : 'Aprobado'}
-                      </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Detalle de Préstamos */}
+        {selectedCuenta.prestamos && selectedCuenta.prestamos.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5" />
+                Préstamos y Anticipos
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.prestamos.map((prestamo: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4 bg-blue-50/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{prestamo.concepto}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Badge variant={prestamo.estado === 'vigente' ? 'outline' : 'secondary'}>
+                            {prestamo.estado === 'vigente' ? 'Vigente' : 'Descontado'}
+                          </Badge>
+                          <span className="text-sm text-muted-foreground">
+                            Otorgado: {new Date(prestamo.fecha_otorgado).toLocaleDateString('es-CO')}
+                          </span>
+                          {prestamo.cuotas_restantes > 0 && (
+                            <span className="text-sm text-orange-600 font-medium">
+                              {prestamo.cuotas_restantes} cuotas restantes
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg text-blue-600">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(prestamo.valor)}
+                        </p>
+                        <p className="text-sm text-muted-foreground">ID: {prestamo.id}</p>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="flex items-center gap-2">
-                      <Truck className="h-4 w-4 text-muted-foreground" />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Detalle de Servicios de Transporte */}
+        {selectedCuenta.servicios && selectedCuenta.servicios.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Truck className="h-5 w-5" />
+                Servicios de Transporte
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {selectedCuenta.servicios.map((servicio: any, index: number) => (
+                  <div key={index} className="border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
                       <div>
-                        <p className="text-muted-foreground">Vehículo</p>
-                        <p className="font-medium">{servicio.vehiculo}</p>
+                        <h4 className="font-medium text-lg">{servicio.descripcion}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm text-muted-foreground">{servicio.ruta}</span>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-lg">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                        </p>
+                        <Badge variant={
+                          servicio.estado === 'completado' ? 'success' : 
+                          servicio.estado === 'programado' ? 'outline' : 'success-light'
+                        }>
+                          {servicio.estado === 'completado' ? 'Completado' : 
+                           servicio.estado === 'programado' ? 'Programado' : servicio.estado}
+                        </Badge>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-muted-foreground">Fecha</p>
-                        <p className="font-medium">{new Date(servicio.fecha).toLocaleDateString('es-CO')}</p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Truck className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-muted-foreground">Vehículo</p>
+                          <p className="font-medium">{servicio.vehiculo}</p>
+                        </div>
                       </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-muted-foreground">Fecha</p>
+                          <p className="font-medium">{new Date(servicio.fecha).toLocaleDateString('es-CO')}</p>
+                        </div>
+                      </div>
+                      
+                      {servicio.carga && (
+                        <div className="flex items-center gap-2">
+                          <Package className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-muted-foreground">Carga</p>
+                            <p className="font-medium">{servicio.carga}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Acciones */}
         <div className="flex justify-end gap-2">
