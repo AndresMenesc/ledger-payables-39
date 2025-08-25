@@ -13,6 +13,7 @@ import Pagados from "./pages/Pagados";
 import SinLote from "./pages/SinLote";
 import LotesAprobados from "./pages/LotesAprobados";
 import CuentaCobro from "./pages/CuentaCobro";
+import PQR from "./pages/PQR";
 import Prestamos from "./pages/Prestamos";
 import NotFound from "./pages/NotFound";
 
@@ -52,6 +53,7 @@ const App = () => (
                   <Route path="sin-lote" element={<SinLote />} />
                   <Route path="lotes-aprobados" element={<LotesAprobados />} />
                   <Route path="cuenta-cobro" element={<CuentaCobro />} />
+                  <Route path="pqr" element={<PQR />} />
                   <Route path="prestamos" element={<Prestamos />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
