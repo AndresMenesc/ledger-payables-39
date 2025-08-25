@@ -15,6 +15,7 @@ const navigationItems = [
 
 const sidebarItems = [
   { name: "Cuenta de Cobro", path: "/cuenta-cobro", icon: Calculator },
+  { name: "Préstamos", path: "/prestamos", icon: DollarSign },
 ]
 
 export function Layout() {

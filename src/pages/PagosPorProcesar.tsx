@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Eye, Package, Building2, Calendar } from "lucide-react"
+import { Plus, Eye, Package, Building2, Calendar, DollarSign } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import PrestamosManager from "@/components/PrestamosManager"
 
 // Datos de ejemplo
 const lotesPago = [
@@ -40,9 +41,36 @@ const lotesPago = [
 ]
 
 const cuentasDisponibles = [
-  { numero: "CC-2024-007", proveedor: "Servicios Generales", valor: 1200000, prestamos: 100000 },
-  { numero: "CC-2024-008", proveedor: "Mantenimiento Pro", valor: 800000, prestamos: 0 },
-  { numero: "CC-2024-009", proveedor: "Tecnología Avanzada S.A.S", valor: 3500000, prestamos: 200000 }
+  { 
+    numero: "CC-2024-007", 
+    proveedor: "ALBERTO JOSE TAMARA CABARCAS", 
+    valor: 2821500, 
+    prestamos: 98753,
+    descuentoReteFuente: 98753,
+    totalNeto: 2722747,
+    centroCosto: "IGT SERVICES AND TECHNOLOGIES COLOMBIA",
+    fechas: "2025-02-01 2025-02-28"
+  },
+  { 
+    numero: "CC-2024-008", 
+    proveedor: "ALEXANDER PERDOMO VARGAS", 
+    valor: 4063500, 
+    prestamos: 142223,
+    descuentoReteFuente: 142223,
+    totalNeto: 3921277,
+    centroCosto: "AMERICAS BUSINESS PROCESS SERVICES",
+    fechas: "2025-02-01 2025-02-28"
+  },
+  { 
+    numero: "CC-2024-009", 
+    proveedor: "DERLY TATIANA MENDEZ PEREZ", 
+    valor: 1123500, 
+    prestamos: 0,
+    descuentoReteFuente: 0,
+    totalNeto: 1123500,
+    centroCosto: "BANCO POPULAR BOGOTA",
+    fechas: "2025-02-01 2025-02-28"
+  }
 ]
 
 const columns = [
@@ -60,6 +88,8 @@ export default function PagosPorProcesar() {
   const [selectedCuentaToAdd, setSelectedCuentaToAdd] = useState<any>(null)
   const [loteToAddCuenta, setLoteToAddCuenta] = useState<any>(null)
   const [nuevoLote, setNuevoLote] = useState({ nombre: "", descripcion: "" })
+  const [showPrestamosManager, setShowPrestamosManager] = useState(false)
+  const [showCreatePrestamo, setShowCreatePrestamo] = useState(false)
 
   const handleCreateLote = () => {
     // Implementar lógica para crear nuevo lote
@@ -327,31 +357,63 @@ export default function PagosPorProcesar() {
                   <Separator />
                   
                   <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <span>Total a Pagar:</span>
-                      <span className="font-semibold">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.valor)}
-                      </span>
-                    </div>
-                    
-                    {selectedCuentaToAdd.prestamos > 0 && (
-                      <div className="flex justify-between text-destructive">
-                        <span>Descuento por Préstamos:</span>
-                        <span className="font-semibold">
-                          -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
-                        </span>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Centro de Costo</p>
+                        <p className="font-medium text-sm">{selectedCuentaToAdd.centroCosto}</p>
                       </div>
-                    )}
+                      <div>
+                        <p className="text-sm text-muted-foreground">Fechas</p>
+                        <p className="font-medium text-sm">{selectedCuentaToAdd.fechas}</p>
+                      </div>
+                    </div>
                     
                     <Separator />
                     
-                    <div className="flex justify-between text-lg font-bold">
-                      <span>Total Final:</span>
-                      <span className="text-primary">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(
-                          selectedCuentaToAdd.valor - selectedCuentaToAdd.prestamos
-                        )}
-                      </span>
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <span>Total Pagado:</span>
+                        <span className="font-semibold">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.valor)}
+                        </span>
+                      </div>
+                      
+                      <div className="flex justify-between text-destructive">
+                        <span>Descuento retafuente:</span>
+                        <span className="font-semibold">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.descuentoReteFuente)}
+                        </span>
+                      </div>
+                      
+                      {selectedCuentaToAdd.prestamos > 0 && (
+                        <>
+                          <div className="flex justify-between text-success">
+                            <span>Valor prestamo:</span>
+                            <span className="font-semibold">
+                              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
+                            </span>
+                          </div>
+                          <div className="flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setShowCreatePrestamo(true)}
+                            >
+                              <DollarSign className="h-4 w-4 mr-2" />
+                              Gestionar Préstamo
+                            </Button>
+                          </div>
+                        </>
+                      )}
+                      
+                      <Separator />
+                      
+                      <div className="flex justify-between text-lg font-bold">
+                        <span>Total neto:</span>
+                        <span className="text-primary">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.totalNeto)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -367,6 +429,54 @@ export default function PagosPorProcesar() {
                 disabled={!selectedCuentaToAdd}
               >
                 Agregar al Lote
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para gestión de préstamos */}
+      <Dialog open={showPrestamosManager} onOpenChange={setShowPrestamosManager}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Gestión de Préstamos</DialogTitle>
+          </DialogHeader>
+          <PrestamosManager />
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para crear préstamo desde cuenta */}
+      <Dialog open={showCreatePrestamo} onOpenChange={setShowCreatePrestamo}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Gestionar Préstamo - {selectedCuentaToAdd?.proveedor}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Card>
+              <CardContent className="p-4">
+                <p className="text-sm text-muted-foreground">Préstamo actual del proveedor:</p>
+                <p className="text-xl font-bold text-success">
+                  {selectedCuentaToAdd && new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <div className="flex gap-2">
+              <Button 
+                className="flex-1"
+                onClick={() => {
+                  setShowCreatePrestamo(false)
+                  setShowPrestamosManager(true)
+                }}
+              >
+                Ver Historial de Préstamos
+              </Button>
+              <Button 
+                variant="outline"
+                className="flex-1"
+                onClick={() => setShowCreatePrestamo(false)}
+              >
+                Cerrar
               </Button>
             </div>
           </div>

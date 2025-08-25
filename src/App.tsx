@@ -11,6 +11,7 @@ import Pagados from "./pages/Pagados";
 import SinLote from "./pages/SinLote";
 import LotesAprobados from "./pages/LotesAprobados";
 import CuentaCobro from "./pages/CuentaCobro";
+import Prestamos from "./pages/Prestamos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
             <Route path="sin-lote" element={<SinLote />} />
             <Route path="lotes-aprobados" element={<LotesAprobados />} />
             <Route path="cuenta-cobro" element={<CuentaCobro />} />
+            <Route path="prestamos" element={<Prestamos />} />
           </Route>
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
