@@ -81,8 +81,8 @@ const columns = [
 
 export default function LotesAprobados() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
-  const [filtroProveedor, setFiltroProveedor] = useState("")
-  const [filtroEstado, setFiltroEstado] = useState("")
+  const [filtroProveedor, setFiltroProveedor] = useState("todos")
+  const [filtroEstado, setFiltroEstado] = useState("todos")
   const [busqueda, setBusqueda] = useState("")
   const [fechaRange, setFechaRange] = useState<DateRange | undefined>({
     from: new Date(2024, 0, 1),
@@ -96,8 +96,8 @@ export default function LotesAprobados() {
 
   // Filtrar datos según los criterios seleccionados
   const filteredData = lotesAprobados.filter(lote => {
-    const matchesProveedor = !filtroProveedor || lote.proveedores.includes(filtroProveedor)
-    const matchesEstado = !filtroEstado || lote.estado === filtroEstado
+    const matchesProveedor = filtroProveedor === "todos" || lote.proveedores.includes(filtroProveedor)
+    const matchesEstado = filtroEstado === "todos" || lote.estado === filtroEstado
     const matchesBusqueda = !busqueda || 
       lote.numero.toLowerCase().includes(busqueda.toLowerCase()) ||
       lote.proveedores.some(p => p.toLowerCase().includes(busqueda.toLowerCase()))
@@ -319,7 +319,7 @@ export default function LotesAprobados() {
                   <SelectValue placeholder="Todos los proveedores" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los proveedores</SelectItem>
+                  <SelectItem value="todos">Todos los proveedores</SelectItem>
                   {proveedoresUnicos.map((proveedor) => (
                     <SelectItem key={proveedor} value={proveedor}>
                       {proveedor}
@@ -336,7 +336,7 @@ export default function LotesAprobados() {
                   <SelectValue placeholder="Todos los estados" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los estados</SelectItem>
+                  <SelectItem value="todos">Todos los estados</SelectItem>
                   <SelectItem value="aprobado">Aprobado</SelectItem>
                   <SelectItem value="pagado">Pagado</SelectItem>
                 </SelectContent>
