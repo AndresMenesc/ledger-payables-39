@@ -83,8 +83,11 @@ const columns = [
 
 export default function PagosPorProcesar() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
+  const [showDetail, setShowDetail] = useState(false)
   const [showCreateLote, setShowCreateLote] = useState(false)
   const [showAddCuenta, setShowAddCuenta] = useState(false)
+  const [showCuentaDetail, setShowCuentaDetail] = useState(false)
+  const [selectedCuentaDetail, setSelectedCuentaDetail] = useState<any>(null)
   const [selectedCuentaToAdd, setSelectedCuentaToAdd] = useState<any>(null)
   const [loteToAddCuenta, setLoteToAddCuenta] = useState<any>(null)
   const [nuevoLote, setNuevoLote] = useState({ nombre: "", descripcion: "" })
@@ -105,120 +108,6 @@ export default function PagosPorProcesar() {
     setSelectedCuentaToAdd(null)
     setLoteToAddCuenta(null)
   }
-
-  const actions = (row: any) => (
-    <div className="flex gap-2">
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setSelectedLote(row)}
-          >
-            <Eye className="h-4 w-4 mr-2" />
-            Ver Detalle
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Detalle del Lote - {selectedLote?.numero}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedLote && (
-            <div className="space-y-6">
-              {/* Información del Lote */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Información del Lote</CardTitle>
-                </CardHeader>
-                <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-sm text-muted-foreground">Fecha Creación</p>
-                    <p className="font-medium">{new Date(selectedLote.fecha_creacion).toLocaleDateString('es-CO')}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Cuentas</p>
-                    <p className="font-medium">{selectedLote.total_cuentas}</p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Estado</p>
-                    <Badge variant={selectedLote.estado === 'en_proceso' ? 'warning-light' : 'pending-light'}>
-                      {selectedLote.estado === 'en_proceso' ? 'En Proceso' : 'Pendiente'}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Cuentas en el Lote */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">Cuentas de Cobro</CardTitle>
-                    <Button 
-                      size="sm"
-                      onClick={() => {
-                        setLoteToAddCuenta(selectedLote)
-                        setShowAddCuenta(true)
-                      }}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Agregar Cuenta
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {selectedLote.cuentas.map((cuenta: any, index: number) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium">{cuenta.numero}</h4>
-                            <p className="text-sm text-muted-foreground">{cuenta.proveedor}</p>
-                          </div>
-                          <p className="text-lg font-semibold text-primary">
-                            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  
-                  <Separator className="my-4" />
-                  
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Valor Total del Lote</p>
-                      <p className="text-2xl font-bold text-primary">
-                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.valor_total)}
-                      </p>
-                    </div>
-                    
-                    <Button variant="success">
-                      Enviar para Aprobación
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-      
-      <Button 
-        size="sm"
-        onClick={() => {
-          setLoteToAddCuenta(row)
-          setShowAddCuenta(true)
-        }}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Agregar
-      </Button>
-    </div>
-  )
 
   const summary = (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -259,28 +148,361 @@ export default function PagosPorProcesar() {
     </div>
   )
 
-  return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Pagos por Procesar</h1>
-        <p className="text-muted-foreground">Crea y gestiona lotes de pagos</p>
+  const actions = (row: any) => (
+    <div className="flex gap-2">
+      <Button 
+        variant="outline" 
+        size="sm"
+        onClick={() => {
+          setSelectedLote(row)
+          setShowDetail(true)
+        }}
+      >
+        <Eye className="h-4 w-4 mr-2" />
+        Gestionar Lote
+      </Button>
+      
+      <Button 
+        size="sm"
+        onClick={() => {
+          setLoteToAddCuenta(row)
+          setShowAddCuenta(true)
+        }}
+      >
+        <Plus className="h-4 w-4 mr-2" />
+        Agregar Cuenta
+      </Button>
+    </div>
+  )
+
+  // Vista principal - listado de lotes
+  if (!showDetail && !showCreateLote && !showAddCuenta && !showCuentaDetail) {
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Gestión de Lotes de Pago</h1>
+          <p className="text-muted-foreground">Crea y gestiona lotes de pagos para servicios de transporte</p>
+        </div>
+
+        <DataTable
+          title="Lotes de Pagos de Transporte"
+          columns={columns}
+          data={lotesPago}
+          actions={actions}
+          summary={summary}
+        />
       </div>
+    )
+  }
 
-      <DataTable
-        title="Lotes de Pagos"
-        columns={columns}
-        data={lotesPago}
-        actions={actions}
-        summary={summary}
-      />
+  // Vista de detalle del lote
+  if (showDetail && selectedLote) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => {
+                setShowDetail(false)
+                setSelectedLote(null)
+              }}
+            >
+              ← Volver a Lotes
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Gestión del Lote: {selectedLote.numero}</h1>
+              <p className="text-muted-foreground">
+                {selectedLote.total_cuentas} cuentas asociadas • {new Date(selectedLote.fecha_creacion).toLocaleDateString('es-CO')}
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => {
+                setLoteToAddCuenta(selectedLote)
+                setShowAddCuenta(true)
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Agregar Cuenta
+            </Button>
+            <Button variant="success">
+              Enviar para Aprobación
+            </Button>
+          </div>
+        </div>
 
-      {/* Dialog para crear nuevo lote */}
-      <Dialog open={showCreateLote} onOpenChange={setShowCreateLote}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Crear Nuevo Lote de Pago</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+        {/* Información del Lote */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Información del Lote
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Fecha Creación</p>
+              <p className="font-medium">{new Date(selectedLote.fecha_creacion).toLocaleDateString('es-CO')}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Cuentas</p>
+              <p className="font-medium">{selectedLote.total_cuentas}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Estado</p>
+              <Badge variant={selectedLote.estado === 'en_proceso' ? 'warning-light' : 'pending-light'}>
+                {selectedLote.estado === 'en_proceso' ? 'En Proceso' : 'Pendiente'}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Valor Total</p>
+              <p className="text-2xl font-bold text-primary">
+                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedLote.valor_total)}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cuentas de Cobro en el Lote */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Cuentas de Cobro en el Lote</h2>
+          
+          {selectedLote.cuentas.map((cuenta: any, index: number) => (
+            <Card key={index} className="border-l-4 border-l-primary hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Building2 className="h-5 w-5 text-primary" />
+                      <h3 className="text-lg font-semibold">{cuenta.numero}</h3>
+                    </div>
+                    <p className="text-muted-foreground mb-2">{cuenta.proveedor}</p>
+                    <p className="text-xl font-bold text-primary">
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
+                    </p>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedCuentaDetail(cuenta)
+                        setShowCuentaDetail(true)
+                      }}
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      Ver Servicios
+                    </Button>
+                    <Button 
+                      variant="destructive"
+                      size="sm"
+                    >
+                      Remover
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  // Vista para agregar cuenta al lote
+  if (showAddCuenta && loteToAddCuenta) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setShowAddCuenta(false)
+              setLoteToAddCuenta(null)
+              setSelectedCuentaToAdd(null)
+            }}
+          >
+            ← Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Agregar Cuenta al Lote: {loteToAddCuenta.numero}</h1>
+            <p className="text-muted-foreground">Selecciona una cuenta de cobro disponible para agregar al lote</p>
+          </div>
+        </div>
+
+        {/* Cuentas Disponibles */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold">Cuentas de Cobro Disponibles</h2>
+          
+          {cuentasDisponibles.map((cuenta: any, index: number) => (
+            <Card 
+              key={index} 
+              className={`border-l-4 cursor-pointer transition-all hover:shadow-md ${
+                selectedCuentaToAdd?.numero === cuenta.numero 
+                  ? 'border-l-primary bg-primary/5' 
+                  : 'border-l-muted hover:border-l-primary/50'
+              }`}
+              onClick={() => setSelectedCuentaToAdd(cuenta)}
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Building2 className="h-5 w-5 text-primary" />
+                      <h3 className="text-lg font-semibold">{cuenta.numero}</h3>
+                    </div>
+                    <p className="text-muted-foreground mb-1">{cuenta.proveedor}</p>
+                    <p className="text-sm text-muted-foreground mb-3">{cuenta.centroCosto}</p>
+                    <p className="text-sm text-muted-foreground">Periodo: {cuenta.fechas}</p>
+                  </div>
+                  
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-primary mb-1">
+                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.totalNeto)}
+                    </p>
+                    <div className="text-sm space-y-1">
+                      <p className="text-muted-foreground">
+                        Total: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
+                      </p>
+                      {cuenta.prestamos > 0 && (
+                        <p className="text-success">
+                          Préstamo: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.prestamos)}
+                        </p>
+                      )}
+                      <p className="text-destructive">
+                        ReteFuente: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.descuentoReteFuente)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Botones de acción */}
+        {selectedCuentaToAdd && (
+          <Card className="bg-primary/5 border-primary">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold mb-2">Cuenta Seleccionada: {selectedCuentaToAdd.numero}</h3>
+                  <p className="text-muted-foreground">{selectedCuentaToAdd.proveedor}</p>
+                  <p className="text-xl font-bold text-primary">
+                    Total Neto: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.totalNeto)}
+                  </p>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => {
+                      setSelectedCuentaDetail(selectedCuentaToAdd)
+                      setShowCuentaDetail(true)
+                    }}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Servicios
+                  </Button>
+                  <Button onClick={handleAddCuentaToLote}>
+                    Agregar al Lote
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    )
+  }
+
+  // Vista de detalle de cuenta de cobro
+  if (showCuentaDetail && selectedCuentaDetail) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => {
+              setShowCuentaDetail(false)
+              setSelectedCuentaDetail(null)
+            }}
+          >
+            ← Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Servicios de la Cuenta: {selectedCuentaDetail.numero}</h1>
+            <p className="text-muted-foreground">{selectedCuentaDetail.proveedor}</p>
+          </div>
+        </div>
+
+        {/* Información de la cuenta */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Resumen de la Cuenta de Cobro</CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Centro de Costo</p>
+              <p className="font-medium">{selectedCuentaDetail.centroCosto}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Periodo</p>
+              <p className="font-medium">{selectedCuentaDetail.fechas}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Bruto</p>
+              <p className="font-medium">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.valor)}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Total Neto</p>
+              <p className="text-xl font-bold text-primary">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaDetail.totalNeto)}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Aquí iría el listado de servicios de transporte de la cuenta */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Servicios de Transporte Incluidos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-muted-foreground">Los servicios detallados de esta cuenta de cobro se mostrarían aquí...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Vista para crear nuevo lote
+  if (showCreateLote) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setShowCreateLote(false)}
+          >
+            ← Volver
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Crear Nuevo Lote de Pago</h1>
+            <p className="text-muted-foreground">Completa la información para crear un nuevo lote de pagos</p>
+          </div>
+        </div>
+
+        <Card className="max-w-2xl">
+          <CardHeader>
+            <CardTitle>Información del Lote</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
               <Label htmlFor="nombre">Nombre del Lote</Label>
               <Input
@@ -307,181 +529,11 @@ export default function PagosPorProcesar() {
                 Crear Lote
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
-      {/* Dialog para agregar cuenta al lote */}
-      <Dialog open={showAddCuenta} onOpenChange={setShowAddCuenta}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Agregar Cuenta al Lote {loteToAddCuenta?.numero}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Seleccionar Cuenta de Cobro</Label>
-              <Select onValueChange={(value) => {
-                const cuenta = cuentasDisponibles.find(c => c.numero === value)
-                setSelectedCuentaToAdd(cuenta)
-              }}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecciona una cuenta..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {cuentasDisponibles.map((cuenta) => (
-                    <SelectItem key={cuenta.numero} value={cuenta.numero}>
-                      {cuenta.numero} - {cuenta.proveedor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {selectedCuentaToAdd && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Resumen de la Cuenta</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Proveedor</p>
-                      <p className="font-medium">{selectedCuentaToAdd.proveedor}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Número</p>
-                      <p className="font-medium">{selectedCuentaToAdd.numero}</p>
-                    </div>
-                  </div>
-                  
-                  <Separator />
-                  
-                  <div className="space-y-2">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Centro de Costo</p>
-                        <p className="font-medium text-sm">{selectedCuentaToAdd.centroCosto}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Fechas</p>
-                        <p className="font-medium text-sm">{selectedCuentaToAdd.fechas}</p>
-                      </div>
-                    </div>
-                    
-                    <Separator />
-                    
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span>Total Pagado:</span>
-                        <span className="font-semibold">
-                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.valor)}
-                        </span>
-                      </div>
-                      
-                      <div className="flex justify-between text-destructive">
-                        <span>Descuento retafuente:</span>
-                        <span className="font-semibold">
-                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.descuentoReteFuente)}
-                        </span>
-                      </div>
-                      
-                      {selectedCuentaToAdd.prestamos > 0 && (
-                        <>
-                          <div className="flex justify-between text-success">
-                            <span>Valor prestamo:</span>
-                            <span className="font-semibold">
-                              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
-                            </span>
-                          </div>
-                          <div className="flex justify-end">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setShowCreatePrestamo(true)}
-                            >
-                              <DollarSign className="h-4 w-4 mr-2" />
-                              Gestionar Préstamo
-                            </Button>
-                          </div>
-                        </>
-                      )}
-                      
-                      <Separator />
-                      
-                      <div className="flex justify-between text-lg font-bold">
-                        <span>Total neto:</span>
-                        <span className="text-primary">
-                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.totalNeto)}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowAddCuenta(false)}>
-                Cancelar
-              </Button>
-              <Button 
-                onClick={handleAddCuentaToLote}
-                disabled={!selectedCuentaToAdd}
-              >
-                Agregar al Lote
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para gestión de préstamos */}
-      <Dialog open={showPrestamosManager} onOpenChange={setShowPrestamosManager}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Gestión de Préstamos</DialogTitle>
-          </DialogHeader>
-          <PrestamosManager />
-        </DialogContent>
-      </Dialog>
-
-      {/* Dialog para crear préstamo desde cuenta */}
-      <Dialog open={showCreatePrestamo} onOpenChange={setShowCreatePrestamo}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Gestionar Préstamo - {selectedCuentaToAdd?.proveedor}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <Card>
-              <CardContent className="p-4">
-                <p className="text-sm text-muted-foreground">Préstamo actual del proveedor:</p>
-                <p className="text-xl font-bold text-success">
-                  {selectedCuentaToAdd && new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
-                </p>
-              </CardContent>
-            </Card>
-            
-            <div className="flex gap-2">
-              <Button 
-                className="flex-1"
-                onClick={() => {
-                  setShowCreatePrestamo(false)
-                  setShowPrestamosManager(true)
-                }}
-              >
-                Ver Historial de Préstamos
-              </Button>
-              <Button 
-                variant="outline"
-                className="flex-1"
-                onClick={() => setShowCreatePrestamo(false)}
-              >
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
-  )
+  return null
 }
