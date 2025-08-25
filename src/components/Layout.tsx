@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { NavLink, Outlet } from "react-router-dom"
-import { Menu, X, Calculator, FileText, DollarSign, CheckCircle2, Package, Archive } from "lucide-react"
+import { Menu, X, Calculator, FileText, DollarSign, CheckCircle2, Package, Archive, Truck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
@@ -36,8 +36,8 @@ export function Layout() {
               {sidebarOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
             <div className="flex items-center gap-2">
-              <Calculator className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold text-foreground">Sistema de Gestión Contable</h1>
+              <Truck className="h-6 w-6 text-primary" />
+              <h1 className="text-xl font-bold text-foreground">Sistema de Gestión - Transporte</h1>
             </div>
           </div>
           
