@@ -23,27 +23,52 @@ const lotesPago = [
     cuentas: [
       { 
         numero: "CC-2024-001", 
-        proveedor: "Tecnología Avanzada S.A.S", 
+        proveedor: "TRANSPORTES BOGOTÁ EXPRESS S.A.S", 
         valor: 2500000,
         servicios: [
-          { descripcion: "Desarrollo de software", valor: 2000000, estado: "pendiente" },
-          { descripcion: "Soporte técnico", valor: 500000, estado: "pendiente" }
+          { 
+            descripcion: "Transporte ejecutivo Bogotá-Medellín", 
+            valor: 1800000, 
+            estado: "pendiente",
+            ruta: "Bogotá → Medellín",
+            vehiculo: "Toyota Prado 2023 - ABC123"
+          },
+          { 
+            descripcion: "Servicio de regreso Medellín-Bogotá", 
+            valor: 700000, 
+            estado: "pendiente",
+            ruta: "Medellín → Bogotá",
+            vehiculo: "Toyota Prado 2023 - ABC123"
+          }
         ]
       },
       { 
         numero: "CC-2024-002", 
-        proveedor: "Servicios Integrales LTDA", 
+        proveedor: "FLOTA NACIONAL DE CARGA LTDA", 
         valor: 1800000,
         servicios: [
-          { descripcion: "Consultoría", valor: 1800000, estado: "aprobado" }
+          { 
+            descripcion: "Transporte de carga Bogotá-Cali", 
+            valor: 1800000, 
+            estado: "aprobado",
+            ruta: "Bogotá → Cali",
+            vehiculo: "Camión Volvo FH 2022 - XYZ789",
+            carga: "Equipos industriales - 15 toneladas"
+          }
         ]
       },
       { 
         numero: "CC-2024-004", 
-        proveedor: "Consultoría Pro", 
+        proveedor: "SERVITAXIS EMPRESARIALES SAS", 
         valor: 4200000,
         servicios: [
-          { descripcion: "Servicios especializados", valor: 4200000, estado: "pendiente" }
+          { 
+            descripcion: "Servicios de taxi corporativo", 
+            valor: 4200000, 
+            estado: "pendiente",
+            ruta: "Zona Rosa → Aeropuerto El Dorado",
+            vehiculo: "Chevrolet Spark GT 2023 - DEF456"
+          }
         ]
       }
     ]
@@ -58,18 +83,30 @@ const lotesPago = [
     cuentas: [
       { 
         numero: "CC-2024-005", 
-        proveedor: "Materiales XYZ", 
+        proveedor: "TRANSPORTES INTERURBANOS LTDA", 
         valor: 1500000,
         servicios: [
-          { descripcion: "Suministros", valor: 1500000, estado: "pendiente" }
+          { 
+            descripcion: "Transporte intermunicipal", 
+            valor: 1500000, 
+            estado: "pendiente",
+            ruta: "Bogotá → Bucaramanga",
+            vehiculo: "Bus Mercedes Benz 2023 - GHI789"
+          }
         ]
       },
       { 
         numero: "CC-2024-006", 
-        proveedor: "Transporte ABC", 
+        proveedor: "LOGÍSTICA Y TRANSPORTE ABC", 
         valor: 2200000,
         servicios: [
-          { descripcion: "Servicios de transporte", valor: 2200000, estado: "pendiente" }
+          { 
+            descripcion: "Distribución urbana", 
+            valor: 2200000, 
+            estado: "pendiente",
+            ruta: "Centro → Zona Industrial",
+            vehiculo: "Camión NPR 2022 - JKL456"
+          }
         ]
       }
     ]
@@ -532,7 +569,10 @@ export default function PagosPorProcesar() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowCreatePrestamo(true)}
+                        onClick={() => {
+                          setShowAddCuenta(false)
+                          setShowCreatePrestamo(true)
+                        }}
                       >
                         <DollarSign className="h-4 w-4 mr-2" />
                         Gestionar Préstamo: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
@@ -548,6 +588,7 @@ export default function PagosPorProcesar() {
                       // Encontrar la cuenta completa con servicios
                       const cuentaCompleta = cuentasDisponibles.find(c => c.numero === selectedCuentaToAdd.numero) || selectedCuentaToAdd
                       setSelectedCuentaDetail(cuentaCompleta)
+                      setShowAddCuenta(false)
                       setShowCuentaDetail(true)
                     }}
                   >
@@ -581,7 +622,9 @@ export default function PagosPorProcesar() {
             onClick={() => {
               setShowCuentaDetail(false)
               setSelectedCuentaDetail(null)
-              if (selectedLote) {
+              if (loteToAddCuenta) {
+                setShowAddCuenta(true)
+              } else if (selectedLote) {
                 setShowDetail(true)
               }
             }}
@@ -638,7 +681,7 @@ export default function PagosPorProcesar() {
                           </p>
                         </div>
                         <Badge variant="success-light">
-                          {servicio.id}
+                          {servicio.id || `SRV-${index + 1}`}
                         </Badge>
                       </div>
                       
@@ -646,11 +689,11 @@ export default function PagosPorProcesar() {
                         <div className="space-y-2">
                           <div>
                             <p className="text-xs text-muted-foreground">Factura</p>
-                            <p className="font-medium">{servicio.factura}</p>
+                            <p className="font-medium">{servicio.factura || "N/A"}</p>
                           </div>
                           <div>
                             <p className="text-xs text-muted-foreground">Fecha Expedición</p>
-                            <p className="font-medium">{servicio.fechaExpedicion}</p>
+                            <p className="font-medium">{servicio.fechaExpedicion || "N/A"}</p>
                           </div>
                         </div>
                         
@@ -668,7 +711,7 @@ export default function PagosPorProcesar() {
                         <div className="space-y-2">
                           <div>
                             <p className="text-xs text-muted-foreground">Creado por</p>
-                            <p className="font-medium">{servicio.creadoPor}</p>
+                            <p className="font-medium">{servicio.creadoPor || selectedCuentaDetail.proveedor}</p>
                           </div>
                           {servicio.carga && (
                             <div>
@@ -676,6 +719,16 @@ export default function PagosPorProcesar() {
                               <p className="font-medium">{servicio.carga}</p>
                             </div>
                           )}
+                          <div>
+                            <p className="text-xs text-muted-foreground">Estado</p>
+                            <Badge variant={
+                              servicio.estado === 'pendiente' ? 'pending-light' :
+                              servicio.estado === 'aprobado' ? 'success-light' : 'destructive'
+                            }>
+                              {servicio.estado === 'pendiente' ? 'Pendiente' :
+                               servicio.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}
+                            </Badge>
+                          </div>
                         </div>
                       </div>
                     </CardContent>
@@ -746,5 +799,100 @@ export default function PagosPorProcesar() {
     )
   }
 
-  return null
+  // Dialogs for loan management (missing from the component)
+  return (
+    <>
+      {/* Dialog para gestión de préstamos */}
+      {showPrestamosManager && (
+        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setShowPrestamosManager(false)
+                  if (loteToAddCuenta) {
+                    setShowAddCuenta(true)
+                  }
+                }}
+              >
+                ← Volver
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Gestión de Préstamos</h1>
+                <p className="text-muted-foreground">Administra préstamos y anticipos para servicios de transporte</p>
+              </div>
+            </div>
+            
+            <PrestamosManager />
+          </div>
+        </div>
+      )}
+
+      {/* Dialog para crear préstamo desde cuenta */}
+      {showCreatePrestamo && (
+        <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+          <div className="p-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setShowCreatePrestamo(false)
+                  if (loteToAddCuenta) {
+                    setShowAddCuenta(true)
+                  }
+                }}
+              >
+                ← Volver
+              </Button>
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Gestionar Préstamo - {selectedCuentaToAdd?.proveedor}</h1>
+                <p className="text-muted-foreground">Información del préstamo asociado</p>
+              </div>
+            </div>
+
+            <Card className="max-w-2xl">
+              <CardHeader>
+                <CardTitle>Información del Préstamo</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-success/10 p-4 rounded-lg">
+                  <p className="text-sm text-muted-foreground">Préstamo actual del proveedor:</p>
+                  <p className="text-2xl font-bold text-success">
+                    {selectedCuentaToAdd && new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuentaToAdd.prestamos)}
+                  </p>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    className="flex-1"
+                    onClick={() => {
+                      setShowCreatePrestamo(false)
+                      setShowPrestamosManager(true)
+                    }}
+                  >
+                    Ver Historial de Préstamos
+                  </Button>
+                  <Button 
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => {
+                      setShowCreatePrestamo(false)
+                      if (loteToAddCuenta) {
+                        setShowAddCuenta(true)
+                      }
+                    }}
+                  >
+                    Cerrar
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+    </>
+  )
 }
