@@ -27,21 +27,22 @@ const App = () => (
         <SidebarProvider>
           <div className="min-h-screen flex w-full">
             <AppSidebar />
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 flex flex-col min-w-0">
               {/* Header Global */}
-              <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 flex items-center px-4">
-                <SidebarTrigger className="mr-4" />
-                <div className="flex items-center gap-2">
-                  <h1 className="font-semibold text-lg">Sistema de Gestión de Transportes</h1>
+              <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 flex items-center px-3 sm:px-4 lg:px-6">
+                <SidebarTrigger className="mr-2 sm:mr-4" />
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <h1 className="font-semibold text-sm sm:text-base lg:text-lg truncate">Sistema de Gestión de Transportes</h1>
                 </div>
                 <div className="ml-auto flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-muted-foreground">Sistema Activo</span>
+                  <span className="text-xs sm:text-sm text-muted-foreground hidden sm:block">Sistema Activo</span>
                 </div>
               </header>
               
               {/* Main Content */}
-              <main className="flex-1 overflow-y-auto">
+              <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+                <div className="max-w-full mx-auto">
                 <Routes>
                   <Route path="/" element={<Dashboard />} />
                   <Route path="pagos-preparar" element={<PagosPorPreparar />} />
@@ -54,6 +55,7 @@ const App = () => (
                   <Route path="prestamos" element={<Prestamos />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
+                </div>
               </main>
             </div>
           </div>

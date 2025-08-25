@@ -106,18 +106,18 @@ export function AppSidebar() {
       : "hover:bg-accent hover:text-accent-foreground"
 
   return (
-    <Sidebar className={!open ? "w-16" : "w-64"}>
+    <Sidebar className={!open ? "w-14" : "w-48 sm:w-56 lg:w-64"}>
       <SidebarContent>
         {/* Header */}
         <SidebarGroup>
-          <SidebarGroupLabel className="text-lg font-bold text-primary px-4 py-6">
+          <SidebarGroupLabel className="text-sm sm:text-base lg:text-lg font-bold text-primary px-2 sm:px-4 py-4 sm:py-6">
             {open && (
               <div className="flex items-center gap-2">
-                <Truck className="h-6 w-6" />
-                <span>Sistema Transportes</span>
+                <Truck className="h-5 w-5 sm:h-6 sm:w-6" />
+                <span className="hidden sm:block">Sistema Transportes</span>
               </div>
             )}
-            {!open && <Truck className="h-6 w-6 mx-auto" />}
+            {!open && <Truck className="h-5 w-5 sm:h-6 sm:w-6 mx-auto" />}
           </SidebarGroupLabel>
         </SidebarGroup>
 
@@ -191,12 +191,12 @@ export function AppSidebar() {
         {open && (
           <SidebarGroup className="mt-auto">
             <SidebarGroupContent>
-              <div className="px-4 py-3 text-xs text-muted-foreground border-t">
+              <div className="px-2 sm:px-4 py-3 text-xs border-t">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Sistema Activo</span>
+                  <span className="hidden sm:block">Sistema Activo</span>
                 </div>
-                <p className="mt-1">Gestión de Transportes v1.0</p>
+                <p className="mt-1 hidden sm:block">Gestión de Transportes v1.0</p>
               </div>
             </SidebarGroupContent>
           </SidebarGroup>

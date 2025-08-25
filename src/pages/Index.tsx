@@ -140,16 +140,15 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Header con filtros */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard de Transportes</h1>
-          <p className="text-muted-foreground">Vista general del sistema de pagos y gestión de servicios de transporte</p>
+    <div className="space-y-4 sm:space-y-6">{/* Header con filtros */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">Dashboard de Transportes</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">Vista general del sistema de pagos y gestión de servicios de transporte</p>
         </div>
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
           <Select value={mesSeleccionado} onValueChange={setMesSeleccionado}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -160,7 +159,7 @@ export default function Dashboard() {
             </SelectContent>
           </Select>
           <Select value={periodoComparacion} onValueChange={setPeriodoComparacion}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-32">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -174,24 +173,24 @@ export default function Dashboard() {
 
       {/* Control de mes habilitado para cuenta de cobro */}
       <Card className="bg-blue-50/50 border-blue-200">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Calendar className="h-5 w-5 text-blue-600" />
-              <div>
-                <h3 className="font-medium text-blue-900">Mes Habilitado para Cuenta de Cobro</h3>
-                <p className="text-sm text-blue-700">Los proveedores podrán generar cuentas de cobro para este período</p>
+        <CardContent className="p-3 sm:p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 min-w-0 flex-1">
+              <Calendar className="h-5 w-5 text-blue-600 flex-shrink-0" />
+              <div className="min-w-0">
+                <h3 className="font-medium text-blue-900 text-sm sm:text-base">Mes Habilitado para Cuenta de Cobro</h3>
+                <p className="text-xs sm:text-sm text-blue-700">Los proveedores podrán generar cuentas de cobro para este período</p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-blue-800">Mes Actual:</span>
-                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 w-full lg:w-auto">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                <span className="text-xs sm:text-sm font-medium text-blue-800">Mes Actual:</span>
+                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300 text-xs">
                   {obtenerNombreMes(mesHabilitadoCuentaCobro)}
                 </Badge>
               </div>
               <Select value={mesHabilitadoCuentaCobro} onValueChange={handleCambioMes}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-full sm:w-40">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -212,12 +211,12 @@ export default function Dashboard() {
               
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto">
                     <Settings className="h-4 w-4 mr-2" />
                     Gestionar Cuentas
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="max-w-md">
+                <AlertDialogContent className="max-w-md mx-4 sm:mx-auto">
                   <AlertDialogHeader>
                     <AlertDialogTitle className="flex items-center gap-2 text-blue-800">
                       <FileText className="h-5 w-5" />
@@ -258,7 +257,7 @@ export default function Dashboard() {
 
       {/* Modal de confirmación para cambio de mes */}
       <AlertDialog open={modalAbierto} onOpenChange={setModalAbierto}>
-        <AlertDialogContent className="max-w-lg">
+        <AlertDialogContent className="max-w-lg mx-4 sm:mx-auto">
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
               <AlertTriangle className="h-5 w-5" />
@@ -302,17 +301,17 @@ export default function Dashboard() {
       </AlertDialog>
 
       {/* Métricas principales */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/pagos-preparar')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Total Bruto</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Valor Total Bruto</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold">
               {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalBruto)}
             </div>
-            <div className="flex items-center text-xs text-muted-foreground">
+            <div className="flex items-center text-xs text-muted-foreground mt-1">
               <TrendingUp className="h-3 w-3 mr-1 text-success" />
               +{resumenFinanciero.variacionMensual}% vs mes anterior
             </div>
@@ -321,14 +320,14 @@ export default function Dashboard() {
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/pagos-procesar')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Descuentos</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Total Descuentos</CardTitle>
             <TrendingDown className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-destructive">
               -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalDescuentos)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               Retenciones y multas aplicadas
             </p>
           </CardContent>
@@ -336,14 +335,14 @@ export default function Dashboard() {
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/pagados')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Valor Neto</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Valor Neto</CardTitle>
             <CheckCircle className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-success">
               {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalNeto)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               Valor final a pagar
             </p>
           </CardContent>
@@ -351,14 +350,14 @@ export default function Dashboard() {
 
         <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => handleCardClick('/prestamos')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Préstamos Activos</CardTitle>
+            <CardTitle className="text-xs sm:text-sm font-medium">Préstamos Activos</CardTitle>
             <CreditCard className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-blue-600">
               {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalPrestamos)}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               Anticipos y préstamos vigentes
             </p>
           </CardContent>
@@ -366,7 +365,7 @@ export default function Dashboard() {
       </div>
 
       {/* Alertas importantes */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {alertas.map((alerta, index) => {
           const IconComponent = alerta.icono
           return (
@@ -379,16 +378,16 @@ export default function Dashboard() {
               }`}
               onClick={() => handleAlertClick(alerta.tipo)}
             >
-              <CardContent className="p-4">
+              <CardContent className="p-3 sm:p-4">
                 <div className="flex items-center gap-3">
                   <IconComponent className={`h-5 w-5 ${
                     alerta.tipo === 'warning' ? 'text-warning' :
                     alerta.tipo === 'error' ? 'text-destructive' :
                     'text-blue-600'
                   }`} />
-                  <div className="flex-1">
-                    <h4 className="font-medium">{alerta.titulo}</h4>
-                    <p className="text-sm text-muted-foreground">{alerta.descripcion}</p>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm sm:text-base">{alerta.titulo}</h4>
+                    <p className="text-xs sm:text-sm text-muted-foreground">{alerta.descripcion}</p>
                   </div>
                   <ArrowRight className="h-4 w-4 text-muted-foreground" />
                 </div>
@@ -399,7 +398,7 @@ export default function Dashboard() {
       </div>
 
       {/* Gráficas principales simplificadas */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
         {/* Gráfica de valores por mes usando barras de progreso */}
         <Card>
           <CardHeader>
@@ -413,7 +412,7 @@ export default function Dashboard() {
               <div key={index} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">{item.mes}</span>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-xs sm:text-sm text-muted-foreground">
                     {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.valor)}
                   </span>
                 </div>
@@ -422,7 +421,7 @@ export default function Dashboard() {
                     value={(item.pagado / maxValor) * 100} 
                     className="h-2 bg-muted"
                   />
-                  <div className="flex justify-between text-xs text-muted-foreground">
+                  <div className="flex flex-col sm:flex-row justify-between text-xs text-muted-foreground gap-1">
                     <span>Pagado: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pagado)}</span>
                     <span>Pendiente: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pendiente)}</span>
                   </div>
@@ -451,8 +450,8 @@ export default function Dashboard() {
                     ></div>
                     <span className="text-sm font-medium">{item.name}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground">{item.value}</span>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs sm:text-sm text-muted-foreground">{item.value}</span>
                     <span className="text-xs text-muted-foreground">({item.porcentaje}%)</span>
                   </div>
                 </div>
@@ -470,17 +469,17 @@ export default function Dashboard() {
       </div>
 
       {/* Estado detallado por módulo */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-aprobar')}>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <Clock className="h-5 w-5 text-warning" />
               Por Aprobar
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-warning mb-2">{estadoLotes.pendientesAprobacion}</div>
-            <p className="text-sm text-muted-foreground">Lotes pendientes</p>
+            <div className="text-xl sm:text-2xl font-bold text-warning mb-2">{estadoLotes.pendientesAprobacion}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Lotes pendientes</p>
             <Button variant="outline" size="sm" className="w-full mt-3">
               Ver Detalles
             </Button>
@@ -489,14 +488,14 @@ export default function Dashboard() {
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-procesar')}>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <Package className="h-5 w-5 text-blue-600" />
               En Proceso
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-600 mb-2">{estadoLotes.enProceso}</div>
-            <p className="text-sm text-muted-foreground">Lotes en gestión</p>
+            <div className="text-xl sm:text-2xl font-bold text-blue-600 mb-2">{estadoLotes.enProceso}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Lotes en gestión</p>
             <Button variant="outline" size="sm" className="w-full mt-3">
               Ver Detalles
             </Button>
@@ -505,14 +504,14 @@ export default function Dashboard() {
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/lotes-aprobados')}>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <CheckCircle className="h-5 w-5 text-success" />
               Aprobados
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success mb-2">{estadoLotes.aprobados}</div>
-            <p className="text-sm text-muted-foreground">Lotes aprobados</p>
+            <div className="text-xl sm:text-2xl font-bold text-success mb-2">{estadoLotes.aprobados}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Lotes aprobados</p>
             <Button variant="outline" size="sm" className="w-full mt-3">
               Ver Detalles
             </Button>
@@ -521,14 +520,14 @@ export default function Dashboard() {
 
         <Card className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagados')}>
           <CardHeader className="pb-3">
-            <CardTitle className="flex items-center gap-2 text-base">
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
               <DollarSign className="h-5 w-5 text-green-600" />
               Pagados
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600 mb-2">{estadoLotes.pagados}</div>
-            <p className="text-sm text-muted-foreground">Lotes pagados</p>
+            <div className="text-xl sm:text-2xl font-bold text-green-600 mb-2">{estadoLotes.pagados}</div>
+            <p className="text-xs sm:text-sm text-muted-foreground">Lotes pagados</p>
             <Button variant="outline" size="sm" className="w-full mt-3">
               Ver Detalles
             </Button>
@@ -545,14 +544,14 @@ export default function Dashboard() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
             {datosGraficas.tiposServicio.map((servicio, index) => (
-              <div key={index} className="p-4 border rounded-lg bg-accent/20 hover:bg-accent/30 transition-colors cursor-pointer">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-medium text-sm">{servicio.tipo}</h4>
+              <div key={index} className="p-3 sm:p-4 border rounded-lg bg-accent/20 hover:bg-accent/30 transition-colors cursor-pointer">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-2 gap-2">
+                  <h4 className="font-medium text-xs sm:text-sm">{servicio.tipo}</h4>
                   <Badge variant="outline">{servicio.cantidad}</Badge>
                 </div>
-                <p className="text-xl font-bold text-primary">
+                <p className="text-lg sm:text-xl font-bold text-primary">
                   {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
                 </p>
                 <p className="text-xs text-muted-foreground">
@@ -576,29 +575,29 @@ export default function Dashboard() {
           <CardTitle>Acciones Rápidas</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Button 
-              className="h-16 flex flex-col gap-2" 
+              className="h-12 sm:h-16 flex flex-col gap-1 sm:gap-2 text-xs sm:text-sm" 
               variant="outline"
               onClick={() => handleCardClick('/pagos-preparar')}
             >
-              <Package className="h-6 w-6" />
+              <Package className="h-4 w-4 sm:h-6 sm:w-6" />
               <span>Crear Nuevo Lote</span>
             </Button>
             <Button 
-              className="h-16 flex flex-col gap-2" 
+              className="h-12 sm:h-16 flex flex-col gap-1 sm:gap-2 text-xs sm:text-sm" 
               variant="outline"
               onClick={() => handleCardClick('/cuenta-cobro')}
             >
-              <FileText className="h-6 w-6" />
+              <FileText className="h-4 w-4 sm:h-6 sm:w-6" />
               <span>Generar Reporte</span>
             </Button>
             <Button 
-              className="h-16 flex flex-col gap-2" 
+              className="h-12 sm:h-16 flex flex-col gap-1 sm:gap-2 text-xs sm:text-sm" 
               variant="outline"
               onClick={() => handleCardClick('/prestamos')}
             >
-              <CreditCard className="h-6 w-6" />
+              <CreditCard className="h-4 w-4 sm:h-6 sm:w-6" />
               <span>Gestionar Préstamos</span>
             </Button>
           </div>
