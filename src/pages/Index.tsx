@@ -5,10 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { 
   TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle, 
   AlertTriangle, Package, FileText, Calendar, ArrowRight,
-  Truck, Building2, CreditCard, BarChart3, PieChart as PieChartIcon
+  Truck, Building2, CreditCard, BarChart3, PieChart as PieChartIcon, Settings
 } from "lucide-react"
 
 // Datos de ejemplo para el dashboard
@@ -75,6 +76,8 @@ export default function Dashboard() {
   const [mesSeleccionado, setMesSeleccionado] = useState("2024-04")
   const [periodoComparacion, setPeriodoComparacion] = useState("mensual")
   const [mesHabilitadoCuentaCobro, setMesHabilitadoCuentaCobro] = useState("2024-04")
+  const [nuevoMesSeleccionado, setNuevoMesSeleccionado] = useState("")
+  const [modalAbierto, setModalAbierto] = useState(false)
 
   const { resumenFinanciero, estadoLotes, datosGraficas, alertas } = dashboardData
 
@@ -100,6 +103,40 @@ export default function Dashboard() {
       default:
         break
     }
+  }
+
+  // Función para manejar el cambio de mes con confirmación
+  const handleCambioMes = (nuevoMes: string) => {
+    if (nuevoMes !== mesHabilitadoCuentaCobro) {
+      setNuevoMesSeleccionado(nuevoMes)
+      setModalAbierto(true)
+    }
+  }
+
+  // Confirmar cambio de mes
+  const confirmarCambioMes = () => {
+    setMesHabilitadoCuentaCobro(nuevoMesSeleccionado)
+    setModalAbierto(false)
+    // Aquí iría la lógica para notificar a los proveedores
+  }
+
+  // Obtener nombre del mes en español
+  const obtenerNombreMes = (valor: string) => {
+    const meses = {
+      "2024-01": "Enero 2024",
+      "2024-02": "Febrero 2024", 
+      "2024-03": "Marzo 2024",
+      "2024-04": "Abril 2024",
+      "2024-05": "Mayo 2024",
+      "2024-06": "Junio 2024",
+      "2024-07": "Julio 2024",
+      "2024-08": "Agosto 2024",
+      "2024-09": "Septiembre 2024",
+      "2024-10": "Octubre 2024",
+      "2024-11": "Noviembre 2024",
+      "2024-12": "Diciembre 2024"
+    }
+    return meses[valor as keyof typeof meses] || valor
   }
 
   return (
@@ -147,7 +184,13 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <Select value={mesHabilitadoCuentaCobro} onValueChange={setMesHabilitadoCuentaCobro}>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-medium text-blue-800">Mes Actual:</span>
+                <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-300">
+                  {obtenerNombreMes(mesHabilitadoCuentaCobro)}
+                </Badge>
+              </div>
+              <Select value={mesHabilitadoCuentaCobro} onValueChange={handleCambioMes}>
                 <SelectTrigger className="w-40">
                   <SelectValue />
                 </SelectTrigger>
@@ -166,16 +209,97 @@ export default function Dashboard() {
                   <SelectItem value="2024-12">Diciembre 2024</SelectItem>
                 </SelectContent>
               </Select>
-              <Button 
-                onClick={() => handleCardClick('/cuenta-cobro')}
-                size="sm"
-              >
-                Gestionar Cuentas
-              </Button>
+              
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Gestionar Cuentas
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="max-w-md">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2 text-blue-800">
+                      <FileText className="h-5 w-5" />
+                      Gestión de Cuentas de Cobro
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-left space-y-3">
+                      <p className="text-gray-600">
+                        Mes habilitado actualmente: <span className="font-semibold text-blue-700">{obtenerNombreMes(mesHabilitadoCuentaCobro)}</span>
+                      </p>
+                      <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+                        <p className="text-sm text-blue-800">
+                          <strong>¿Qué puedes hacer?</strong>
+                        </p>
+                        <ul className="text-sm text-blue-700 mt-2 space-y-1">
+                          <li>• Revisar cuentas de cobro del mes actual</li>
+                          <li>• Aprobar o rechazar documentos</li>
+                          <li>• Generar reportes de facturación</li>
+                          <li>• Gestionar proveedores</li>
+                        </ul>
+                      </div>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter className="flex gap-2">
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction 
+                      onClick={() => handleCardClick('/cuenta-cobro')}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      Ir al Módulo
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de confirmación para cambio de mes */}
+      <AlertDialog open={modalAbierto} onOpenChange={setModalAbierto}>
+        <AlertDialogContent className="max-w-lg">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-orange-600">
+              <AlertTriangle className="h-5 w-5" />
+              Confirmar Cambio de Mes
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left space-y-4">
+              <p>Estás a punto de cambiar el mes habilitado para cuentas de cobro:</p>
+              <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-orange-800">Mes actual:</span>
+                  <Badge variant="outline" className="bg-orange-100 text-orange-700 border-orange-300">
+                    {obtenerNombreMes(mesHabilitadoCuentaCobro)}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-orange-800">Nuevo mes:</span>
+                  <Badge className="bg-orange-600 text-white">
+                    {obtenerNombreMes(nuevoMesSeleccionado)}
+                  </Badge>
+                </div>
+              </div>
+              <div className="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400">
+                <p className="text-sm text-blue-800">
+                  <strong>Importante:</strong> Al cambiar el mes, los proveedores serán notificados automáticamente y podrán comenzar a generar cuentas de cobro para el nuevo período.
+                </p>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setModalAbierto(false)}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmarCambioMes}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Confirmar Cambio
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Métricas principales */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
