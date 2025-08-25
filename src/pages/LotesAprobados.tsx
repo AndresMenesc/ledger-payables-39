@@ -1,9 +1,9 @@
+
 import { useState } from "react"
-import { Eye, Download, Calendar, Search, Building2 } from "lucide-react"
+import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -81,7 +81,8 @@ const columns = [
 
 export default function LotesAprobados() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
-  const [showDetail, setShowDetail] = useState(false)
+  const [selectedCuenta, setSelectedCuenta] = useState<any>(null)
+  const [currentView, setCurrentView] = useState<'list' | 'lote-detail' | 'cuenta-detail'>('list')
   const [filtroProveedor, setFiltroProveedor] = useState("todos")
   const [filtroEstado, setFiltroEstado] = useState("todos")
   const [busqueda, setBusqueda] = useState("")
@@ -113,8 +114,12 @@ export default function LotesAprobados() {
   })
 
   const handleDownloadReport = (loteId: number) => {
-    // Implementar lógica para descargar reporte
     console.log(`Descargar reporte del lote ${loteId}`)
+  }
+
+  const handleVerCuentaDetalle = (cuenta: any) => {
+    setSelectedCuenta(cuenta)
+    setCurrentView('cuenta-detail')
   }
 
   const renderCell = (key: string, value: any, row: any) => {
@@ -144,7 +149,7 @@ export default function LotesAprobados() {
         size="sm"
         onClick={() => {
           setSelectedLote(row)
-          setShowDetail(true)
+          setCurrentView('lote-detail')
         }}
       >
         <Eye className="h-4 w-4 mr-2" />
@@ -269,7 +274,7 @@ export default function LotesAprobados() {
   )
 
   // Lista principal
-  if (!showDetail) {
+  if (currentView === 'list') {
     return (
       <div className="p-6 space-y-6">
         <div>
@@ -292,8 +297,8 @@ export default function LotesAprobados() {
     )
   }
 
-  // Vista de detalle
-  if (showDetail && selectedLote) {
+  // Vista de detalle del lote
+  if (currentView === 'lote-detail' && selectedLote) {
     return (
       <div className="p-6 space-y-6">
         <div className="flex items-center gap-3">
@@ -301,11 +306,12 @@ export default function LotesAprobados() {
             variant="outline" 
             size="sm"
             onClick={() => {
-              setShowDetail(false)
+              setCurrentView('list')
               setSelectedLote(null)
             }}
           >
-            ← Volver a Lista
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver a Lista
           </Button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Lote Aprobado: {selectedLote.numero}</h1>
@@ -382,38 +388,53 @@ export default function LotesAprobados() {
             <CardTitle className="text-lg">Cuentas de Cobro ({selectedLote.total_cuentas})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2 px-3 font-medium text-muted-foreground">No. Cuenta</th>
-                    <th className="text-left py-2 px-3 font-medium text-muted-foreground">Proveedor</th>
-                    <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Original</th>
-                    <th className="text-right py-2 px-3 font-medium text-muted-foreground">Descuentos</th>
-                    <th className="text-right py-2 px-3 font-medium text-muted-foreground">Valor Final</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {selectedLote.cuentas.map((cuenta: any, index: number) => (
-                    <tr key={index} className="border-b hover:bg-accent/50">
-                      <td className="py-3 px-3 font-medium">{cuenta.numero}</td>
-                      <td className="py-3 px-3">{cuenta.proveedor}</td>
-                      <td className="py-3 px-3 text-right">
+            <div className="space-y-4">
+              {selectedLote.cuentas.map((cuenta: any, index: number) => (
+                <div key={index} className="border rounded-lg p-4 hover:bg-accent/20 transition-colors">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h4 className="font-medium">{cuenta.numero}</h4>
+                      <p className="text-sm text-muted-foreground">{cuenta.proveedor}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleVerCuentaDetalle(cuenta)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Ver Detalle
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Valor Original</p>
+                      <p className="font-medium">
                         {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor)}
-                      </td>
-                      <td className="py-3 px-3 text-right text-destructive">
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-muted-foreground">Descuentos</p>
+                      <p className="font-medium text-destructive">
                         {cuenta.descuentos > 0 
                           ? `-${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.descuentos)}`
                           : '-'
                         }
-                      </td>
-                      <td className="py-3 px-3 text-right font-semibold">
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <p className="text-muted-foreground">Valor Final</p>
+                      <p className="font-medium text-success">
                         {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(cuenta.valor - cuenta.descuentos)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
             
             <div className="flex justify-end mt-6">
@@ -426,6 +447,172 @@ export default function LotesAprobados() {
             </div>
           </CardContent>
         </Card>
+      </div>
+    )
+  }
+
+  // Vista de detalle de la cuenta individual
+  if (currentView === 'cuenta-detail' && selectedCuenta) {
+    // Agregar datos de ejemplo para servicios si no existen
+    const serviciosEjemplo = selectedCuenta.servicios || [
+      {
+        id: "SRV-" + Math.random().toString(36).substr(2, 9),
+        descripcion: "Transporte ejecutivo para reuniones corporativas",
+        valor: selectedCuenta.valor * 0.6,
+        ruta: "Bogotá → Medellín → Bogotá",
+        vehiculo: "Toyota Prado 2023 - ABC123",
+        fecha: "2024-01-20",
+        estado: selectedLote?.estado || "aprobado"
+      },
+      {
+        id: "SRV-" + Math.random().toString(36).substr(2, 9),
+        descripcion: "Servicio de transporte de documentos",
+        valor: selectedCuenta.valor * 0.4,
+        ruta: "Zona empresarial",
+        vehiculo: "Motocicleta Honda 2022 - XYZ789",
+        fecha: "2024-01-21",
+        estado: selectedLote?.estado || "aprobado"
+      }
+    ]
+
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setCurrentView('lote-detail')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver al Lote
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Cuenta: {selectedCuenta.numero}</h1>
+            <p className="text-muted-foreground">{selectedCuenta.proveedor}</p>
+          </div>
+        </div>
+
+        {/* Información de la Cuenta */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <DollarSign className="h-5 w-5" />
+              Información de la Cuenta
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Número de Cuenta</p>
+              <p className="font-medium">{selectedCuenta.numero}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Proveedor</p>
+              <p className="font-medium">{selectedCuenta.proveedor}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Estado</p>
+              <Badge variant={selectedLote?.estado === 'pagado' ? 'success' : 'success-light'}>
+                {selectedLote?.estado === 'pagado' ? 'Pagado' : 'Aprobado'}
+              </Badge>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Servicios</p>
+              <p className="font-medium">{serviciosEjemplo.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Resumen Financiero de la Cuenta */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Resumen Financiero</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center p-4 bg-accent/50 rounded-lg">
+                <p className="text-sm text-muted-foreground">Valor Original</p>
+                <p className="text-2xl font-bold">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor)}
+                </p>
+              </div>
+              
+              <div className="text-center p-4 bg-destructive/10 rounded-lg">
+                <p className="text-sm text-muted-foreground">Descuentos</p>
+                <p className="text-2xl font-bold text-destructive">
+                  -{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.descuentos || 0)}
+                </p>
+              </div>
+              
+              <div className="text-center p-4 bg-success/10 rounded-lg">
+                <p className="text-sm text-muted-foreground">Valor Final</p>
+                <p className="text-2xl font-bold text-success">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor - (selectedCuenta.descuentos || 0))}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Detalle de Servicios de Transporte */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Truck className="h-5 w-5" />
+              Servicios de Transporte
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {serviciosEjemplo.map((servicio: any, index: number) => (
+                <div key={index} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <h4 className="font-medium text-lg">{servicio.descripcion}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">{servicio.ruta}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-lg">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                      </p>
+                      <Badge variant={servicio.estado === 'pagado' ? 'success' : 'success-light'}>
+                        {servicio.estado === 'pagado' ? 'Pagado' : 'Aprobado'}
+                      </Badge>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div className="flex items-center gap-2">
+                      <Truck className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-muted-foreground">Vehículo</p>
+                        <p className="font-medium">{servicio.vehiculo}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-muted-foreground" />
+                      <div>
+                        <p className="text-muted-foreground">Fecha</p>
+                        <p className="font-medium">{new Date(servicio.fecha).toLocaleDateString('es-CO')}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Acciones */}
+        <div className="flex justify-end gap-2">
+          <Button variant="outline">
+            <Download className="h-4 w-4 mr-2" />
+            Descargar Cuenta
+          </Button>
+        </div>
       </div>
     )
   }
