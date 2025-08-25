@@ -9,11 +9,13 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Progress } from "@/components/ui/progress"
+import { Checkbox } from "@/components/ui/checkbox"
 import { 
   MessageSquare, Plus, Search, Filter, Eye, Calendar, User, 
   Clock, CheckCircle, AlertTriangle, XCircle, BarChart3, 
   TrendingUp, Phone, Mail, MessageCircle, FileText, Settings,
-  Download, Upload, RefreshCw, Archive, Send, History
+  Download, Upload, RefreshCw, Archive, Send, History,
+  Camera, Paperclip, Save, UserCheck, MapPin, Building
 } from "lucide-react"
 
 // Datos de ejemplo
@@ -129,6 +131,32 @@ export default function PQR() {
   const [modalDetalle, setModalDetalle] = useState(false)
   const [modalNueva, setModalNueva] = useState(false)
   const [modalRespuesta, setModalRespuesta] = useState(false)
+  const [tabRespuestaActiva, setTabRespuestaActiva] = useState("observaciones")
+  const [tabNuevaActiva, setTabNuevaActiva] = useState("informacion")
+
+  // Estados para nueva PQR
+  const [nuevaPQR, setNuevaPQR] = useState({
+    fechaIncidente: "",
+    identificacion: "",
+    primerNombre: "",
+    primerApellido: "",
+    correo: "",
+    telefono: "",
+    medioNotificacion: "correo_electronico",
+    cliente: "",
+    causa: "",
+    tipoServicio: "",
+    observacion: "",
+    autorizacion: false
+  })
+
+  // Estados para respuesta PQR
+  const [respuestaPQR, setRespuestaPQR] = useState({
+    somos_responsables: false,
+    que_paso: "",
+    evidencias: [],
+    plan_accion: ""
+  })
 
   const getEstadoColor = (estado: string) => {
     switch (estado) {
@@ -599,172 +627,410 @@ export default function PQR() {
         </DialogContent>
       </Dialog>
 
-      {/* Modal Nueva PQR */}
+      {/* Modal Nueva PQR Mejorado */}
       <Dialog open={modalNueva} onOpenChange={setModalNueva}>
-        <DialogContent className="max-w-2xl mx-4 sm:mx-auto">
+        <DialogContent className="max-w-4xl mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-primary">
               <Plus className="h-5 w-5" />
-              Registrar Nueva PQR
+              Nueva PQR
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="tipo">Tipo de PQR</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Seleccione el tipo" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PETICION">Petición</SelectItem>
-                    <SelectItem value="QUEJA">Queja</SelectItem>
-                    <SelectItem value="RECLAMO">Reclamo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div>
-                <Label htmlFor="categoria">Categoría</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="Seleccione categoría" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SERVICIO">Servicio</SelectItem>
-                    <SelectItem value="FACTURACION">Facturación</SelectItem>
-                    <SelectItem value="ATENCION">Atención al Cliente</SelectItem>
-                    <SelectItem value="OTROS">Otros</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+          <Tabs value={tabNuevaActiva} onValueChange={setTabNuevaActiva} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="informacion" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Información básica
+              </TabsTrigger>
+              <TabsTrigger value="evidencia" className="flex items-center gap-2">
+                <Camera className="h-4 w-4" />
+                Evidencia PQR
+              </TabsTrigger>
+            </TabsList>
             
-            <div>
-              <Label htmlFor="titulo">Título</Label>
-              <Input 
-                id="titulo"
-                placeholder="Resumen breve del caso"
-                className="mt-1"
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="solicitante">Nombre del Solicitante</Label>
-                <Input 
-                  id="solicitante"
-                  placeholder="Nombre completo"
-                  className="mt-1"
-                />
+            <TabsContent value="informacion" className="space-y-6 mt-6">
+              {/* Información del solicitante */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-primary">Información del solicitante</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <Label htmlFor="fechaIncidente">Fecha de incidente</Label>
+                    <Input 
+                      id="fechaIncidente"
+                      type="date"
+                      value={nuevaPQR.fechaIncidente}
+                      onChange={(e) => setNuevaPQR({...nuevaPQR, fechaIncidente: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="identificacion">Identificación</Label>
+                    <Input 
+                      id="identificacion"
+                      placeholder="Número de documento"
+                      value={nuevaPQR.identificacion}
+                      onChange={(e) => setNuevaPQR({...nuevaPQR, identificacion: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="primerNombre">Primer nombre</Label>
+                    <Input 
+                      id="primerNombre"
+                      placeholder="Nombre"
+                      value={nuevaPQR.primerNombre}
+                      onChange={(e) => setNuevaPQR({...nuevaPQR, primerNombre: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="primerApellido">Primer apellido</Label>
+                    <Input 
+                      id="primerApellido"
+                      placeholder="Apellido"
+                      value={nuevaPQR.primerApellido}
+                      onChange={(e) => setNuevaPQR({...nuevaPQR, primerApellido: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="correo">Correo</Label>
+                    <Input 
+                      id="correo"
+                      type="email"
+                      placeholder="correo@ejemplo.com"
+                      value={nuevaPQR.correo}
+                      onChange={(e) => setNuevaPQR({...nuevaPQR, correo: e.target.value})}
+                      className="mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="medioNotificacion">Medio de notificación</Label>
+                    <Select 
+                      value={nuevaPQR.medioNotificacion} 
+                      onValueChange={(value) => setNuevaPQR({...nuevaPQR, medioNotificacion: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="correo_electronico">Correo electrónico</SelectItem>
+                        <SelectItem value="telefono">Teléfono</SelectItem>
+                        <SelectItem value="sms">SMS</SelectItem>
+                        <SelectItem value="correo_fisico">Correo físico</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
-              
-              <div>
-                <Label htmlFor="email">Email</Label>
-                <Input 
-                  id="email"
-                  type="email"
-                  placeholder="correo@ejemplo.com"
-                  className="mt-1"
-                />
+
+              {/* Tipo de QPR */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-primary">Tipo de QPR</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="cliente">Cliente</Label>
+                    <Select 
+                      value={nuevaPQR.cliente} 
+                      onValueChange={(value) => setNuevaPQR({...nuevaPQR, cliente: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Seleccione un cliente" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="centro_source">Centro Source Colombia</SelectItem>
+                        <SelectItem value="igt_services">IGT Services and Technologies Colombia</SelectItem>
+                        <SelectItem value="otro">Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="causa">Causa</Label>
+                    <Select 
+                      value={nuevaPQR.causa} 
+                      onValueChange={(value) => setNuevaPQR({...nuevaPQR, causa: value})}
+                    >
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Seleccione la causa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="servicio">Servicio</SelectItem>
+                        <SelectItem value="facturacion">Facturación</SelectItem>
+                        <SelectItem value="atencion_cliente">Atención al cliente</SelectItem>
+                        <SelectItem value="seguridad">Seguridad</SelectItem>
+                        <SelectItem value="otro">Otro</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="tipoServicio">Tipo de servicio</Label>
+                  <Select 
+                    value={nuevaPQR.tipoServicio} 
+                    onValueChange={(value) => setNuevaPQR({...nuevaPQR, tipoServicio: value})}
+                  >
+                    <SelectTrigger className="mt-1">
+                      <SelectValue placeholder="Seleccione el tipo de servicio" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="transporte_ejecutivo">Transporte Ejecutivo</SelectItem>
+                      <SelectItem value="carga_logistica">Carga y Logística</SelectItem>
+                      <SelectItem value="taxi_corporativo">Taxi Corporativo</SelectItem>
+                      <SelectItem value="especializado">Especializado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div>
+                  <Label htmlFor="observacion">Observación</Label>
+                  <Textarea 
+                    id="observacion"
+                    placeholder="Describa detalladamente la situación..."
+                    rows={4}
+                    value={nuevaPQR.observacion}
+                    onChange={(e) => setNuevaPQR({...nuevaPQR, observacion: e.target.value})}
+                    className="mt-1"
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="telefono">Teléfono</Label>
-                <Input 
-                  id="telefono"
-                  placeholder="+57 300 123 4567"
-                  className="mt-1"
-                />
+
+              {/* Autorización */}
+              <div className="space-y-4">
+                <div className="flex items-start space-x-2">
+                  <Checkbox 
+                    id="autorizacion"
+                    checked={nuevaPQR.autorizacion}
+                    onCheckedChange={(checked) => setNuevaPQR({...nuevaPQR, autorizacion: checked as boolean})}
+                  />
+                  <Label htmlFor="autorizacion" className="text-sm leading-relaxed">
+                    Autorizo de manera voluntaria, previa, explícita, informada e inequívoca a para tratar mis datos personales de 
+                    acuerdo con su Política de Tratamiento de Datos Personales para los fines relacionados con su objeto social y 
+                    en especial para fines legales, contractuales, misionales descritos en la Política de Tratamiento de Datos 
+                    Personales de . La información obtenida para el Tratamiento de mis datos personales la he suministrado de 
+                    forma voluntaria y es verídica.
+                  </Label>
+                </div>
               </div>
-              
-              <div>
-                <Label htmlFor="canal">Canal de Recepción</Label>
-                <Select>
-                  <SelectTrigger className="mt-1">
-                    <SelectValue placeholder="¿Cómo llegó?" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="WEB">Sitio Web</SelectItem>
-                    <SelectItem value="TELEFONO">Teléfono</SelectItem>
-                    <SelectItem value="EMAIL">Email</SelectItem>
-                    <SelectItem value="PRESENCIAL">Presencial</SelectItem>
-                  </SelectContent>
-                </Select>
+            </TabsContent>
+            
+            <TabsContent value="evidencia" className="space-y-6 mt-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-primary">Evidencia</h3>
+                
+                <div className="border-2 border-dashed border-primary/20 rounded-lg p-8 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="p-4 bg-primary/10 rounded-full">
+                      <Upload className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium text-primary">Presiona aquí</p>
+                      <p className="text-sm text-muted-foreground">para subir o arrastra y suelta un JPG, PNG, JPEG y PDF</p>
+                    </div>
+                    <Button variant="outline">
+                      <Paperclip className="h-4 w-4 mr-2" />
+                      Seleccionar archivos
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button variant="outline" className="h-12">
+                    <Camera className="h-4 w-4 mr-2" />
+                    Tomar foto
+                  </Button>
+                  <Button variant="outline" className="h-12">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Adjuntar documento
+                  </Button>
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="descripcion">Descripción Detallada</Label>
-              <Textarea 
-                id="descripcion"
-                placeholder="Describa detalladamente la situación..."
-                rows={4}
-                className="mt-1"
-              />
-            </div>
-            
-            <div className="flex gap-2 pt-4">
-              <Button className="flex-1">
-                <Upload className="h-4 w-4 mr-2" />
-                Registrar PQR
-              </Button>
-              <Button variant="outline" onClick={() => setModalNueva(false)}>
-                Cancelar
-              </Button>
-            </div>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex gap-2 pt-4 border-t">
+            <Button 
+              className="flex-1 bg-primary hover:bg-primary/90"
+              disabled={!nuevaPQR.autorizacion}
+            >
+              <Send className="h-4 w-4 mr-2" />
+              Registrar PQR
+            </Button>
+            <Button variant="outline" onClick={() => setModalNueva(false)}>
+              Cancelar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Modal Respuesta Rápida */}
+      {/* Modal Respuesta Mejorado */}
       <Dialog open={modalRespuesta} onOpenChange={setModalRespuesta}>
-        <DialogContent className="max-w-lg mx-4 sm:mx-auto">
+        <DialogContent className="max-w-4xl mx-4 sm:mx-auto max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-primary">
               <Send className="h-5 w-5" />
-              Responder PQR {pqrSeleccionada?.id}
+              Responder PQR N° {pqrSeleccionada?.id}
             </DialogTitle>
           </DialogHeader>
           
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="accion">Acción a Realizar</Label>
-              <Select>
-                <SelectTrigger className="mt-1">
-                  <SelectValue placeholder="Seleccione una acción" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="RESPONDER">Responder</SelectItem>
-                  <SelectItem value="REASIGNAR">Reasignar</SelectItem>
-                  <SelectItem value="CERRAR">Cerrar</SelectItem>
-                  <SelectItem value="ESCALATE">Escalar</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <Tabs value={tabRespuestaActiva} onValueChange={setTabRespuestaActiva} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="pqr" className="flex items-center gap-1">
+                <MessageSquare className="h-3 w-3" />
+                <span className="hidden sm:inline">PQR</span>
+              </TabsTrigger>
+              <TabsTrigger value="observaciones" className="flex items-center gap-1">
+                <Eye className="h-3 w-3" />
+                <span className="hidden sm:inline">Observaciones</span>
+              </TabsTrigger>
+              <TabsTrigger value="evidencia" className="flex items-center gap-1">
+                <Camera className="h-3 w-3" />
+                <span className="hidden sm:inline">Evidencia</span>
+              </TabsTrigger>
+              <TabsTrigger value="plan" className="flex items-center gap-1">
+                <Settings className="h-3 w-3" />
+                <span className="hidden sm:inline">Plan de acción</span>
+              </TabsTrigger>
+            </TabsList>
             
-            <div>
-              <Label htmlFor="respuesta-rapida">Respuesta</Label>
-              <Textarea 
-                id="respuesta-rapida"
-                placeholder="Escriba su respuesta..."
-                rows={4}
-                className="mt-1"
-              />
-            </div>
+            <TabsContent value="pqr" className="space-y-4 mt-6">
+              <div className="bg-gray-50 rounded-lg p-4">
+                <h4 className="font-medium mb-2">Detalle PQR</h4>
+                <div className="space-y-2 text-sm">
+                  <p><strong>Tipo:</strong> {pqrSeleccionada?.tipo}</p>
+                  <p><strong>Solicitante:</strong> {pqrSeleccionada?.solicitante}</p>
+                  <p><strong>Descripción:</strong></p>
+                  <p className="bg-white p-3 rounded border">{pqrSeleccionada?.descripcion}</p>
+                </div>
+              </div>
+            </TabsContent>
             
-            <div className="flex gap-2">
-              <Button className="flex-1">
-                <Send className="h-4 w-4 mr-2" />
-                Enviar
-              </Button>
-              <Button variant="outline" onClick={() => setModalRespuesta(false)}>
-                Cancelar
-              </Button>
-            </div>
+            <TabsContent value="observaciones" className="space-y-4 mt-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="responsables"
+                    checked={respuestaPQR.somos_responsables}
+                    onCheckedChange={(checked) => setRespuestaPQR({...respuestaPQR, somos_responsables: checked as boolean})}
+                  />
+                  <Label htmlFor="responsables" className="font-medium">
+                    ¿Somos responsable?
+                  </Label>
+                </div>
+                
+                <div>
+                  <Label htmlFor="que_paso" className="font-medium">¿Qué pasó?</Label>
+                  <Textarea 
+                    id="que_paso"
+                    placeholder="Describa qué sucedió en detalle..."
+                    rows={6}
+                    value={respuestaPQR.que_paso}
+                    onChange={(e) => setRespuestaPQR({...respuestaPQR, que_paso: e.target.value})}
+                    className="mt-2"
+                  />
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="evidencia" className="space-y-4 mt-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Evidencia</h4>
+                
+                <div className="border-2 border-dashed border-primary/20 rounded-lg p-8 text-center">
+                  <div className="flex flex-col items-center gap-4">
+                    <div className="p-4 bg-primary/10 rounded-full">
+                      <Upload className="h-8 w-8 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-lg font-medium text-primary">Presiona aquí</p>
+                      <p className="text-sm text-muted-foreground">para subir o arrastra y suelta un JPG, PNG, JPEG y PDF</p>
+                    </div>
+                    <Button variant="outline">
+                      <Paperclip className="h-4 w-4 mr-2" />
+                      Seleccionar archivos
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Button variant="outline" className="h-12">
+                    <Camera className="h-4 w-4 mr-2" />
+                    Tomar foto
+                  </Button>
+                  <Button variant="outline" className="h-12">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Documento
+                  </Button>
+                  <Button variant="outline" className="h-12">
+                    <Download className="h-4 w-4 mr-2" />
+                    Descargar evidencia
+                  </Button>
+                </div>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="plan" className="space-y-4 mt-6">
+              <div className="space-y-4">
+                <h4 className="font-medium">Plan de acción</h4>
+                
+                <Textarea 
+                  placeholder="Describa el plan de acción para resolver esta PQR..."
+                  rows={8}
+                  value={respuestaPQR.plan_accion}
+                  onChange={(e) => setRespuestaPQR({...respuestaPQR, plan_accion: e.target.value})}
+                />
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="responsable_plan">Responsable</Label>
+                    <Select>
+                      <SelectTrigger className="mt-1">
+                        <SelectValue placeholder="Asignar responsable" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="juan_perez">Juan Pérez</SelectItem>
+                        <SelectItem value="ana_lopez">Ana López</SelectItem>
+                        <SelectItem value="pedro_sanchez">Pedro Sánchez</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="fecha_compromiso">Fecha de compromiso</Label>
+                    <Input 
+                      id="fecha_compromiso"
+                      type="date"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+            </TabsContent>
+          </Tabs>
+          
+          <div className="flex gap-2 pt-4 border-t">
+            <Button className="flex-1 bg-primary hover:bg-primary/90">
+              <Save className="h-4 w-4 mr-2" />
+              Guardar
+            </Button>
+            <Button variant="outline">
+              <Send className="h-4 w-4 mr-2" />
+              Enviar respuesta
+            </Button>
+            <Button variant="outline" onClick={() => setModalRespuesta(false)}>
+              Cancelar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>
