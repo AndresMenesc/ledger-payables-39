@@ -199,6 +199,9 @@ export default function FUEC() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Gestión de FUEC</h1>
           <p className="text-muted-foreground">Formato Único de Extracto del Contrato</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            Seleccione los checks del inicio de la tabla para enviar por correo los FUECs seleccionados
+          </p>
         </div>
         <Button onClick={() => setShowCreateModal(true)} className="flex items-center gap-2">
           <Plus className="h-4 w-4" />

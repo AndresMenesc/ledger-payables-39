@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, FileText, Eye, Send, Download } from "lucide-react"
+import { Plus, Search, FileText, Eye, Send, Download, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -33,6 +33,13 @@ interface Traslado {
   valorTotal: number
 }
 
+interface Gestion {
+  id: string
+  fecha: string
+  descripcion: string
+  usuario: string
+}
+
 const mockCotizaciones: Cotizacion[] = [
   {
     numero: "COT-2024-001",
@@ -63,11 +70,28 @@ const mockCotizaciones: Cotizacion[] = [
   }
 ]
 
+const mockGestiones: Gestion[] = [
+  {
+    id: "1",
+    fecha: "2025-09-01 10:30:00",
+    descripcion: "Se realizó seguimiento telefónico al cliente. Cliente interesado en el servicio.",
+    usuario: "Juan Pérez"
+  },
+  {
+    id: "2",
+    fecha: "2025-08-30 14:15:00",
+    descripcion: "Envío de cotización por correo electrónico al cliente.",
+    usuario: "María González"
+  }
+]
+
 export default function Cotizaciones() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [traslados, setTraslados] = useState<Traslado[]>([])
   const [activeTab, setActiveTab] = useState("agregar-cotizacion")
+  const [selectedCotizacion, setSelectedCotizacion] = useState<Cotizacion | null>(null)
+  const [isGestionModalOpen, setIsGestionModalOpen] = useState(false)
 
   const getEstadoBadge = (estado: string) => {
     const variants = {
@@ -101,6 +125,15 @@ export default function Cotizaciones() {
   }
 
   const totalCotizacion = traslados.reduce((sum, traslado) => sum + traslado.valorTotal, 0)
+
+  const handleDownload = (cotizacion: Cotizacion) => {
+    toast.success("Cotización descargada en PDF")
+  }
+
+  const handleGestionCotizacion = (cotizacion: Cotizacion) => {
+    setSelectedCotizacion(cotizacion)
+    setIsGestionModalOpen(true)
+  }
 
   return (
     <div className="space-y-6">
@@ -377,13 +410,21 @@ export default function Cotizaciones() {
                     <td className="p-2">${cotizacion.valorTotal.toLocaleString()}</td>
                     <td className="p-2">
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleGestionCotizacion(cotizacion)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm">
                           <Send className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDownload(cotizacion)}
+                        >
                           <Download className="h-4 w-4" />
                         </Button>
                       </div>
@@ -395,6 +436,82 @@ export default function Cotizaciones() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Gestiones Modal */}
+      <Dialog open={isGestionModalOpen} onOpenChange={setIsGestionModalOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Gestión de cotización
+            </DialogTitle>
+          </DialogHeader>
+          
+          <Tabs defaultValue="historial" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="historial">Historial de gestiones</TabsTrigger>
+              <TabsTrigger value="nueva-gestion">Agregar nueva gestión</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="historial" className="space-y-4">
+              <div className="space-y-3">
+                {mockGestiones.map((gestion) => (
+                  <Card key={gestion.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <Calendar className="h-5 w-5 text-primary mt-0.5" />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-primary">{gestion.usuario} {gestion.fecha}</h4>
+                          <p className="text-sm text-muted-foreground mt-1">{gestion.descripcion}</p>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              
+              <div className="flex justify-center">
+                <Button>Aceptar</Button>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="nueva-gestion" className="space-y-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tipoGestion">Tipo de gestión</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleccionar tipo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="llamada">Llamada telefónica</SelectItem>
+                      <SelectItem value="email">Envío de email</SelectItem>
+                      <SelectItem value="reunion">Reunión</SelectItem>
+                      <SelectItem value="seguimiento">Seguimiento</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="observaciones">Observaciones</Label>
+                  <Textarea 
+                    id="observaciones" 
+                    placeholder="Descripción de la gestión realizada..."
+                    className="min-h-[100px]"
+                  />
+                </div>
+                <Button 
+                  className="w-full" 
+                  onClick={() => {
+                    toast.success("Gestión agregada correctamente")
+                  }}
+                >
+                  Guardar gestión
+                </Button>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
