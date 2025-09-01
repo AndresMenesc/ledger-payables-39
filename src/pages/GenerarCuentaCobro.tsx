@@ -17,33 +17,48 @@ export default function GenerarCuentaCobro() {
 
   // Datos mock de servicios
   const servicios = [
-    {
-      id: 1,
-      fecha: "2024-01-15",
-      servicio: "Transporte de carga - Bogotá a Medellín",
-      proveedor: "Transportes Colombia SAS",
-      vehiculo: "ABC-123",
-      valor: 850000,
-      estado: "Pendiente"
-    },
-    {
-      id: 2,
-      fecha: "2024-01-16",
-      servicio: "Transporte de pasajeros - Ruta urbana",
-      proveedor: "Movilidad Express LTDA",
-      vehiculo: "XYZ-789",
-      valor: 450000,
-      estado: "Pendiente"
-    },
-    {
-      id: 3,
-      fecha: "2024-01-17",
-      servicio: "Transporte intermunicipal - Cali a Pasto",
-      proveedor: "Rutas del Sur S.A.",
-      vehiculo: "DEF-456",
-      valor: 1200000,
-      estado: "Seleccionado"
-    }
+    { id: 1, fecha: "2024-01-15", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "ABC-123", valor: 85000, estado: "Liquidado" },
+    { id: 2, fecha: "2024-01-16", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "XYZ-789", valor: 45000, estado: "Liquidado" },
+    { id: 3, fecha: "2024-01-17", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "DEF-456", valor: 120000, estado: "Liquidado" },
+    { id: 4, fecha: "2024-01-18", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "GHI-789", valor: 65000, estado: "Liquidado" },
+    { id: 5, fecha: "2024-01-19", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "JKL-012", valor: 95000, estado: "Liquidado" },
+    { id: 6, fecha: "2024-01-20", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "MNO-345", valor: 55000, estado: "Liquidado" },
+    { id: 7, fecha: "2024-01-21", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "PQR-678", valor: 110000, estado: "Liquidado" },
+    { id: 8, fecha: "2024-01-22", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "STU-901", valor: 70000, estado: "Liquidado" },
+    { id: 9, fecha: "2024-01-23", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "VWX-234", valor: 105000, estado: "Liquidado" },
+    { id: 10, fecha: "2024-01-24", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "YZA-567", valor: 48000, estado: "Liquidado" },
+    { id: 11, fecha: "2024-01-25", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "BCD-890", valor: 92000, estado: "Liquidado" },
+    { id: 12, fecha: "2024-01-26", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "EFG-123", valor: 58000, estado: "Liquidado" },
+    { id: 13, fecha: "2024-01-27", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "HIJ-456", valor: 88000, estado: "Liquidado" },
+    { id: 14, fecha: "2024-01-28", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "KLM-789", valor: 63000, estado: "Liquidado" },
+    { id: 15, fecha: "2024-01-29", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "NOP-012", valor: 97000, estado: "Liquidado" },
+    { id: 16, fecha: "2024-01-30", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "QRS-345", valor: 52000, estado: "Liquidado" },
+    { id: 17, fecha: "2024-02-01", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "TUV-678", valor: 103000, estado: "Liquidado" },
+    { id: 18, fecha: "2024-02-02", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "WXY-901", valor: 59000, estado: "Liquidado" },
+    { id: 19, fecha: "2024-02-03", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "ZAB-234", valor: 89000, estado: "Liquidado" },
+    { id: 20, fecha: "2024-02-04", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "CDE-567", valor: 67000, estado: "Liquidado" },
+    { id: 21, fecha: "2024-02-05", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "FGH-890", valor: 94000, estado: "Liquidado" },
+    { id: 22, fecha: "2024-02-06", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "IJK-123", valor: 61000, estado: "Liquidado" },
+    { id: 23, fecha: "2024-02-07", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "LMN-456", valor: 98000, estado: "Liquidado" },
+    { id: 24, fecha: "2024-02-08", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "OPQ-789", valor: 54000, estado: "Liquidado" },
+    { id: 25, fecha: "2024-02-09", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "RST-012", valor: 91000, estado: "Liquidado" },
+    { id: 26, fecha: "2024-02-10", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "UVW-345", valor: 66000, estado: "Liquidado" },
+    { id: 27, fecha: "2024-02-11", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "XYZ-678", valor: 99000, estado: "Liquidado" },
+    { id: 28, fecha: "2024-02-12", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "ABC-901", valor: 57000, estado: "Liquidado" },
+    { id: 29, fecha: "2024-02-13", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "DEF-234", valor: 96000, estado: "Liquidado" },
+    { id: 30, fecha: "2024-02-14", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "GHI-567", valor: 62000, estado: "Liquidado" },
+    { id: 31, fecha: "2024-02-15", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "JKL-890", valor: 87000, estado: "Liquidado" },
+    { id: 32, fecha: "2024-02-16", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "MNO-123", valor: 69000, estado: "Liquidado" },
+    { id: 33, fecha: "2024-02-17", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "PQR-456", valor: 102000, estado: "Liquidado" },
+    { id: 34, fecha: "2024-02-18", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "STU-789", valor: 56000, estado: "Liquidado" },
+    { id: 35, fecha: "2024-02-19", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "VWX-012", valor: 93000, estado: "Liquidado" },
+    { id: 36, fecha: "2024-02-20", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "YZA-345", valor: 64000, estado: "Liquidado" },
+    { id: 37, fecha: "2024-02-21", servicio: "Ejecutivo", proveedor: "Transportes Colombia SAS", vehiculo: "BCD-678", valor: 86000, estado: "Liquidado" },
+    { id: 38, fecha: "2024-02-22", servicio: "Ruta", proveedor: "Movilidad Express LTDA", vehiculo: "EFG-901", valor: 71000, estado: "Liquidado" },
+    { id: 39, fecha: "2024-02-23", servicio: "Ejecutivo", proveedor: "Rutas del Sur S.A.", vehiculo: "HIJ-234", valor: 100000, estado: "Liquidado" },
+    { id: 40, fecha: "2024-02-24", servicio: "Ruta", proveedor: "Transportes Colombia SAS", vehiculo: "KLM-567", valor: 53000, estado: "Liquidado" },
+    { id: 41, fecha: "2024-02-25", servicio: "Ejecutivo", proveedor: "Movilidad Express LTDA", vehiculo: "NOP-890", valor: 95000, estado: "Liquidado" },
+    { id: 42, fecha: "2024-02-26", servicio: "Ruta", proveedor: "Rutas del Sur S.A.", vehiculo: "QRS-123", valor: 68000, estado: "Liquidado" }
   ];
 
   const serviciosFiltrados = servicios.filter(servicio =>
@@ -178,10 +193,6 @@ export default function GenerarCuentaCobro() {
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
               >
                 <div className="flex items-center space-x-4">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                  />
                   <div>
                     <h4 className="font-medium">{servicio.servicio}</h4>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
@@ -201,7 +212,7 @@ export default function GenerarCuentaCobro() {
                     <div className="font-semibold">
                       ${servicio.valor.toLocaleString()}
                     </div>
-                    <Badge variant={servicio.estado === "Seleccionado" ? "default" : "secondary"}>
+                    <Badge className="bg-green-100 text-green-800 border-green-200">
                       {servicio.estado}
                     </Badge>
                   </div>
@@ -217,12 +228,9 @@ export default function GenerarCuentaCobro() {
           )}
           
           <div className="flex justify-end pt-4 border-t mt-4">
-            <div className="space-x-2">
-              <Button variant="outline">Cancelar</Button>
-              <Button onClick={() => setShowConfirmDialog(true)}>
-                Generar Cuenta de Cobro
-              </Button>
-            </div>
+            <Button onClick={() => setShowConfirmDialog(true)}>
+              Generar Cuenta de Cobro
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -241,9 +249,8 @@ export default function GenerarCuentaCobro() {
             <div className="bg-muted p-4 rounded-lg">
               <h4 className="font-medium mb-2">Resumen:</h4>
               <div className="space-y-1 text-sm">
-                <p>• Servicios seleccionados: {serviciosFiltrados.filter(s => s.estado === "Seleccionado").length}</p>
+                <p>• Servicios liquidados: {serviciosFiltrados.length}</p>
                 <p>• Total a facturar: ${serviciosFiltrados
-                  .filter(s => s.estado === "Seleccionado")
                   .reduce((sum, s) => sum + s.valor, 0)
                   .toLocaleString()}</p>
               </div>
