@@ -29,6 +29,38 @@ const navigationItems = [
     icon: BarChart3
   },
   {
+    title: "Facturación",
+    icon: Receipt,
+    subItems: [
+      {
+        title: "Liquidaciones",
+        url: "/liquidaciones",
+        icon: Calculator
+      },
+      {
+        title: "Facturas",
+        url: "/facturas",
+        icon: FileText
+      }
+    ]
+  },
+  {
+    title: "Usuarios proveedores",
+    icon: Users,
+    subItems: [
+      {
+        title: "Generar cuenta de cobro",
+        url: "/generar-cuenta-cobro",
+        icon: Receipt
+      },
+      {
+        title: "Documentación",
+        url: "/documentacion",
+        icon: FileText
+      }
+    ]
+  },
+  {
     title: "Cuentas de Cobro",
     url: "/cuenta-cobro",
     icon: Receipt
@@ -79,22 +111,6 @@ const navigationItems = [
     title: "Préstamos",
     url: "/prestamos",
     icon: CreditCard
-  },
-  {
-    title: "Facturación",
-    icon: Receipt,
-    subItems: [
-      {
-        title: "Liquidaciones",
-        url: "/liquidaciones",
-        icon: Calculator
-      },
-      {
-        title: "Facturas",
-        url: "/facturas",
-        icon: FileText
-      }
-    ]
   },
   {
     title: "Proveedores",
@@ -148,7 +164,7 @@ export function AppSidebar() {
   const { open, setOpen } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
-  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Gestión de Pagos", "Estados de Lotes", "Comercial", "Facturación"])
+  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Facturación", "Usuarios proveedores", "Gestión de Pagos", "Estados de Lotes", "Comercial"])
 
   const isActive = (path: string) => currentPath === path
   const hasActiveChild = (subItems?: any[]) => 

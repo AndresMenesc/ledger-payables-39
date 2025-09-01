@@ -24,6 +24,8 @@ import Cotizaciones from "./pages/Cotizaciones";
 import Portafolios from "./pages/Portafolios";
 import Liquidaciones from "./pages/Liquidaciones";
 import Facturas from "./pages/Facturas";
+import GenerarCuentaCobro from "./pages/GenerarCuentaCobro";
+import Documentacion from "./pages/Documentacion";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -71,6 +73,8 @@ const App = () => (
                   <Route path="prestamos" element={<Prestamos />} />
                   <Route path="liquidaciones" element={<Liquidaciones />} />
                   <Route path="facturas" element={<Facturas />} />
+                  <Route path="generar-cuenta-cobro" element={<GenerarCuentaCobro />} />
+                  <Route path="documentacion" element={<Documentacion />} />
                   <Route path="cotizaciones" element={<Cotizaciones />} />
                   <Route path="portafolios" element={<Portafolios />} />
                   <Route path="*" element={<NotFound />} />
