@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   BarChart3, FileText, Clock, Package, CheckCircle, 
   DollarSign, AlertTriangle, CreditCard, Truck, Building2,
-  ChevronDown, ChevronRight, Home, Receipt, MessageSquare
+  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users
 } from "lucide-react"
 import {
   Sidebar,
@@ -79,6 +79,11 @@ const navigationItems = [
     title: "Gestión PQR",
     url: "/pqr",
     icon: MessageSquare
+  },
+  {
+    title: "Proveedores",
+    url: "/proveedores",
+    icon: Users
   },
   {
     title: "Préstamos",

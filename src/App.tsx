@@ -14,6 +14,7 @@ import SinLote from "./pages/SinLote";
 import LotesAprobados from "./pages/LotesAprobados";
 import CuentaCobro from "./pages/CuentaCobro";
 import PQR from "./pages/PQR";
+import Proveedores from "./pages/Proveedores";
 import Prestamos from "./pages/Prestamos";
 import NotFound from "./pages/NotFound";
 
@@ -54,6 +55,7 @@ const App = () => (
                   <Route path="lotes-aprobados" element={<LotesAprobados />} />
                   <Route path="cuenta-cobro" element={<CuentaCobro />} />
                   <Route path="pqr" element={<PQR />} />
+                  <Route path="proveedores" element={<Proveedores />} />
                   <Route path="prestamos" element={<Prestamos />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
