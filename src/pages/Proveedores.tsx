@@ -50,6 +50,20 @@ interface Proveedor {
   fechaUltimaActividad: string
   servicios: string[]
   observaciones?: string
+  usuarioBloqueado?: boolean
+  ultimoLogin?: string
+}
+
+interface HistorialCambio {
+  id: string
+  tipo: 'proveedor' | 'conductor' | 'vehiculo'
+  entidadId: string
+  campo: string
+  valorAnterior: string
+  valorNuevo: string
+  usuario: string
+  fecha: string
+  accion: 'crear' | 'editar' | 'eliminar'
 }
 
 // Datos de ejemplo
@@ -132,15 +146,23 @@ export default function Proveedores() {
     conductor: any
     action: 'activate' | 'deactivate'
   }>({ open: false, conductor: null, action: 'activate' })
+  const [isVehiculosDialogOpen, setIsVehiculosDialogOpen] = useState(false)
+  const [vehiculosProveedor, setVehiculosProveedor] = useState<any[]>([])
+  const [isHistorialDialogOpen, setIsHistorialDialogOpen] = useState(false)
+  const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([])
+  const [bloquearUsuarioDialog, setBloquearUsuarioDialog] = useState<{
+    open: boolean
+    proveedor: Proveedor | null
+  }>({ open: false, proveedor: null })
 
   // Columnas para la tabla
   const columns = [
     { key: 'codigo', label: 'Código', sortable: true },
-    { key: 'razonSocial', label: 'Razón Social', sortable: true },
-    { key: 'nit', label: 'NIT', sortable: true },
-    { key: 'contactoPrincipal', label: 'Contacto', sortable: true },
+    { key: 'razonSocial', label: 'Nombre Completo', sortable: true },
+    { key: 'nit', label: 'Identificación', sortable: true },
     { key: 'telefono', label: 'Teléfono' },
     { key: 'email', label: 'Correo', sortable: true },
+    { key: 'usuarioBloqueo', label: 'Usuario', sortable: false },
     { key: 'estado', label: 'Estado', sortable: true },
     { key: 'acciones', label: 'Acciones' }
   ]
@@ -212,6 +234,76 @@ export default function Proveedores() {
     setIsConductoresDialogOpen(true)
   }
 
+  const handleVerVehiculos = (proveedor: Proveedor) => {
+    // Datos de ejemplo de vehículos
+    const vehiculosEjemplo = [
+      {
+        id: 1,
+        placa: "ABC123",
+        marca: "Volvo",
+        modelo: "FH16",
+        año: "2020",
+        tipo: "Tractocamión",
+        estado: "activo"
+      },
+      {
+        id: 2,
+        placa: "XYZ789",
+        marca: "Mercedes Benz",
+        modelo: "Actros",
+        año: "2019",
+        tipo: "Camión",
+        estado: "inactivo"
+      }
+    ]
+    setVehiculosProveedor(vehiculosEjemplo)
+    setSelectedProveedor(proveedor)
+    setIsVehiculosDialogOpen(true)
+  }
+
+  const handleVerHistorial = (proveedor: Proveedor) => {
+    // Datos de ejemplo del historial
+    const historialEjemplo: HistorialCambio[] = [
+      {
+        id: "1",
+        tipo: "proveedor",
+        entidadId: proveedor.id,
+        campo: "Creación",
+        valorAnterior: "",
+        valorNuevo: "Proveedor creado",
+        usuario: "admin@sistema.com",
+        fecha: "2024-01-15 10:30:00",
+        accion: "crear"
+      },
+      {
+        id: "2", 
+        tipo: "proveedor",
+        entidadId: proveedor.id,
+        campo: "estado",
+        valorAnterior: "activo",
+        valorNuevo: "inactivo",
+        usuario: "gerente@sistema.com",
+        fecha: "2024-03-20 14:45:00",
+        accion: "editar"
+      }
+    ]
+    setHistorialCambios(historialEjemplo)
+    setSelectedProveedor(proveedor)
+    setIsHistorialDialogOpen(true)
+  }
+
+  const handleBloquearUsuario = (proveedor: Proveedor) => {
+    setBloquearUsuarioDialog({ open: true, proveedor })
+  }
+
+  const confirmBloquearUsuario = () => {
+    toast({
+      title: "Usuario bloqueado",
+      description: "El usuario del proveedor ha sido bloqueado exitosamente.",
+    })
+    setBloquearUsuarioDialog({ open: false, proveedor: null })
+  }
+
   const handleCreateProveedor = () => {
     toast({
       title: "Proveedor creado",
@@ -239,6 +331,22 @@ export default function Proveedores() {
     switch (columnKey) {
       case 'estado':
         return getEstadoBadge(item.estado, item.id)
+      case 'usuarioBloqueo':
+        return (
+          <div className="space-y-1">
+            <Button
+              variant={item.usuarioBloqueado ? "destructive" : "outline"}
+              size="sm"
+              onClick={() => handleBloquearUsuario(item)}
+              className="h-6 text-xs w-full"
+            >
+              {item.usuarioBloqueado ? 'Desbloq. Usuario' : 'Bloq. Usuario'}
+            </Button>
+            <p className="text-xs text-muted-foreground">
+              Último login: {item.ultimoLogin || '2024-08-30 15:30'}
+            </p>
+          </div>
+        )
       case 'acciones':
         return (
           <DropdownMenu>
@@ -255,6 +363,14 @@ export default function Proveedores() {
               <DropdownMenuItem onClick={() => handleVerConductores(item)}>
                 <User className="mr-2 h-4 w-4" />
                 Ver conductores
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleVerVehiculos(item)}>
+                <Building2 className="mr-2 h-4 w-4" />
+                Ver vehículos
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleVerHistorial(item)}>
+                <FileText className="mr-2 h-4 w-4" />
+                Ver historial
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEditProveedor(item)}>
                 <Edit className="mr-2 h-4 w-4" />
@@ -764,6 +880,151 @@ export default function Proveedores() {
               Cancelar
             </AlertDialogCancel>
             <AlertDialogAction onClick={() => handleConductorEstadoChange(conductorConfirmDialog.conductor, conductorConfirmDialog.action)}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal de Vehículos */}
+      <Dialog open={isVehiculosDialogOpen} onOpenChange={setIsVehiculosDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5" />
+              Vehículos - {selectedProveedor?.razonSocial}
+            </DialogTitle>
+            <DialogDescription>
+              Lista de vehículos asociados al proveedor
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {vehiculosProveedor.length > 0 ? (
+              <div className="grid gap-4">
+                {vehiculosProveedor.map((vehiculo) => (
+                  <Card key={vehiculo.id}>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{vehiculo.placa}</h4>
+                            <Badge variant={vehiculo.estado === 'activo' ? 'default' : 'secondary'}>
+                              {vehiculo.estado}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <div><span className="font-medium">Marca:</span> {vehiculo.marca}</div>
+                            <div><span className="font-medium">Modelo:</span> {vehiculo.modelo}</div>
+                            <div><span className="font-medium">Año:</span> {vehiculo.año}</div>
+                            <div><span className="font-medium">Tipo:</span> {vehiculo.tipo}</div>
+                          </div>
+                        </div>
+                        <Button 
+                          variant={vehiculo.estado === 'activo' ? 'destructive' : 'default'}
+                          size="sm"
+                          onClick={() => {
+                            const updatedVehiculos = vehiculosProveedor.map(v => 
+                              v.id === vehiculo.id 
+                                ? { ...v, estado: vehiculo.estado === 'activo' ? 'inactivo' : 'activo' }
+                                : v
+                            )
+                            setVehiculosProveedor(updatedVehiculos)
+                            toast({
+                              title: "Estado actualizado",
+                              description: `El vehículo ha sido ${vehiculo.estado === 'activo' ? 'inactivado' : 'activado'}.`,
+                            })
+                          }}
+                          className={vehiculo.estado === 'activo' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+                        >
+                          {vehiculo.estado === 'activo' ? 'Inactivar' : 'Activar'}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay vehículos registrados</h3>
+                <p className="text-muted-foreground">Este proveedor no tiene vehículos asociados.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Historial */}
+      <Dialog open={isHistorialDialogOpen} onOpenChange={setIsHistorialDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Historial de Cambios - {selectedProveedor?.razonSocial}
+            </DialogTitle>
+            <DialogDescription>
+              Registro de todos los cambios realizados en este proveedor
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {historialCambios.length > 0 ? (
+              <div className="space-y-3">
+                {historialCambios.map((cambio) => (
+                  <Card key={cambio.id}>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Badge variant={cambio.accion === 'crear' ? 'default' : cambio.accion === 'editar' ? 'secondary' : 'destructive'}>
+                              {cambio.accion.toUpperCase()}
+                            </Badge>
+                            <h4 className="font-semibold">{cambio.campo}</h4>
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {cambio.valorAnterior && (
+                              <div><span className="font-medium">Valor anterior:</span> {cambio.valorAnterior}</div>
+                            )}
+                            <div><span className="font-medium">Valor nuevo:</span> {cambio.valorNuevo}</div>
+                            <div className="flex items-center gap-4 mt-2">
+                              <span><span className="font-medium">Usuario:</span> {cambio.usuario}</span>
+                              <span><span className="font-medium">Fecha:</span> {cambio.fecha}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay historial disponible</h3>
+                <p className="text-muted-foreground">No se han registrado cambios para este proveedor.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Dialog for Block User */}
+      <AlertDialog open={bloquearUsuarioDialog.open} onOpenChange={(open) => setBloquearUsuarioDialog({...bloquearUsuarioDialog, open})}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {bloquearUsuarioDialog.proveedor?.usuarioBloqueado ? 'Desbloquear' : 'Bloquear'} Usuario
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas {bloquearUsuarioDialog.proveedor?.usuarioBloqueado ? 'desbloquear' : 'bloquear'} el usuario del proveedor {bloquearUsuarioDialog.proveedor?.razonSocial}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setBloquearUsuarioDialog({ open: false, proveedor: null })}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmBloquearUsuario}>
               Confirmar
             </AlertDialogAction>
           </AlertDialogFooter>
