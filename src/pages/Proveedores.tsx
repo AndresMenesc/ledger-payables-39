@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { DataTable } from "@/components/DataTable"
 import { 
@@ -24,7 +25,8 @@ import {
   User,
   FileText,
   Calendar,
-  Star
+  Star,
+  Upload
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
@@ -119,6 +121,17 @@ export default function Proveedores() {
   const [isConductoresDialogOpen, setIsConductoresDialogOpen] = useState(false)
   const [conductoresProveedor, setConductoresProveedor] = useState<any[]>([])
   const [formData, setFormData] = useState<Partial<Proveedor>>({})
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+    onConfirm: () => void
+  }>({ open: false, title: '', description: '', onConfirm: () => {} })
+  const [conductorConfirmDialog, setConductorConfirmDialog] = useState<{
+    open: boolean
+    conductor: any
+    action: 'activate' | 'deactivate'
+  }>({ open: false, conductor: null, action: 'activate' })
 
   // Columnas para la tabla
   const columns = [
@@ -133,17 +146,19 @@ export default function Proveedores() {
   ]
 
   const getEstadoBadge = (estado: string, proveedorId: string) => {
-    const variants = {
-      'activo': 'default',
-      'inactivo': 'secondary'
-    } as const
-    
     return (
       <Button
-        variant={estado === 'activo' ? 'default' : 'secondary'}
+        variant={estado === 'activo' ? 'default' : 'destructive'}
         size="sm"
-        onClick={() => handleEstadoChange(proveedorId, estado === 'activo' ? 'inactivo' : 'activo')}
-        className="h-6 text-xs"
+        onClick={() => {
+          setConfirmDialog({
+            open: true,
+            title: `${estado === 'activo' ? 'Inactivar' : 'Activar'} Proveedor`,
+            description: `¿Estás seguro de que deseas ${estado === 'activo' ? 'inactivar' : 'activar'} este proveedor?`,
+            onConfirm: () => handleEstadoChange(proveedorId, estado === 'activo' ? 'inactivo' : 'activo')
+          })
+        }}
+        className={`h-6 text-xs ${estado === 'activo' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
       >
         {estado === 'activo' ? 'Activo' : 'Inactivo'}
       </Button>
@@ -155,6 +170,21 @@ export default function Proveedores() {
       title: "Estado actualizado",
       description: `El proveedor ha sido marcado como ${nuevoEstado}.`,
     })
+    setConfirmDialog({ ...confirmDialog, open: false })
+  }
+
+  const handleConductorEstadoChange = (conductor: any, action: 'activate' | 'deactivate') => {
+    const updatedConductores = conductoresProveedor.map(c => 
+      c.id === conductor.id 
+        ? { ...c, estado: action === 'activate' ? 'activo' : 'inactivo' }
+        : c
+    )
+    setConductoresProveedor(updatedConductores)
+    toast({
+      title: "Estado actualizado",
+      description: `El conductor ha sido ${action === 'activate' ? 'activado' : 'inactivado'}.`,
+    })
+    setConductorConfirmDialog({ ...conductorConfirmDialog, open: false })
   }
 
   const handleVerConductores = (proveedor: Proveedor) => {
@@ -264,174 +294,207 @@ export default function Proveedores() {
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{selectedProveedor ? 'Editar Proveedor' : 'Crear Nuevo Proveedor'}</DialogTitle>
+              <DialogTitle>{selectedProveedor ? 'Editar Proveedor' : 'Creación de Nuevo Proveedor'}</DialogTitle>
               <DialogDescription>
                 {selectedProveedor ? 'Modifica los datos del proveedor' : 'Completa la información para registrar un nuevo proveedor'}
               </DialogDescription>
             </DialogHeader>
             
-            <Tabs defaultValue="basicos" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="basicos">Datos Básicos</TabsTrigger>
-                <TabsTrigger value="contacto">Contacto</TabsTrigger>
-                <TabsTrigger value="servicios">Servicios</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="basicos" className="space-y-4">
+            <div className="space-y-6">
+              {/* Información básica */}
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="tipoAfiliado">Tipo de afiliado</Label>
+                  <Select value={formData.tipoDocumento} onValueChange={(value) => setFormData({...formData, tipoDocumento: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="INTERNO" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="INTERNO">INTERNO</SelectItem>
+                      <SelectItem value="EXTERNO">EXTERNO</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="nitOCC">Nit o CC</Label>
+                  <Input 
+                    id="nitOCC" 
+                    placeholder=""
+                    value={formData.nit || ''}
+                    onChange={(e) => setFormData({...formData, nit: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="digitoVerificacion">Dígito de verificación</Label>
+                  <Input 
+                    id="digitoVerificacion" 
+                    placeholder=""
+                    className="w-20"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="razonSocial">Razón social</Label>
+                  <Input 
+                    id="razonSocial" 
+                    placeholder=""
+                    value={formData.razonSocial || ''}
+                    onChange={(e) => setFormData({...formData, razonSocial: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tipoEmpresa">Tipo de empresa</Label>
+                  <Select value="P.N">
+                    <SelectTrigger>
+                      <SelectValue placeholder="P.N" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="P.N">P.N</SelectItem>
+                      <SelectItem value="P.J">P.J</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="correo">Correo</Label>
+                  <Input 
+                    id="correo" 
+                    type="email"
+                    placeholder=""
+                    value={formData.email || ''}
+                    onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="departamento">Departamento</Label>
+                  <Select value={formData.departamento} onValueChange={(value) => setFormData({...formData, departamento: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Cundinamarca">Cundinamarca</SelectItem>
+                      <SelectItem value="Antioquia">Antioquia</SelectItem>
+                      <SelectItem value="Atlántico">Atlántico</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="ciudad">Ciudad</Label>
+                  <Select value={formData.ciudad} onValueChange={(value) => setFormData({...formData, ciudad: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Bogotá">Bogotá</SelectItem>
+                      <SelectItem value="Medellín">Medellín</SelectItem>
+                      <SelectItem value="Barranquilla">Barranquilla</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="sede">Sede</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="principal">Principal</SelectItem>
+                      <SelectItem value="sucursal">Sucursal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="direccion">Dirección</Label>
+                  <Input 
+                    id="direccion" 
+                    placeholder=""
+                    value={formData.direccion || ''}
+                    onChange={(e) => setFormData({...formData, direccion: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="celular">Celular</Label>
+                  <Input 
+                    id="celular" 
+                    placeholder=""
+                    value={formData.telefono || ''}
+                    onChange={(e) => setFormData({...formData, telefono: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="fotoProveedor">Foto proveedor</Label>
+                  <div className="flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 cursor-pointer hover:border-muted-foreground/50">
+                    <div className="text-center">
+                      <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Seleccione un archivo</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Datos financieros */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Datos financieros</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="codigo">Código</Label>
-                    <Input 
-                      id="codigo" 
-                      placeholder="PROV-001"
-                      value={formData.codigo || ''}
-                      onChange={(e) => setFormData({...formData, codigo: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="razonSocial">Razón Social</Label>
-                    <Input 
-                      id="razonSocial" 
-                      placeholder="Nombre de la empresa"
-                      value={formData.razonSocial || ''}
-                      onChange={(e) => setFormData({...formData, razonSocial: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tipoDocumento">Tipo de Documento</Label>
-                    <Select value={formData.tipoDocumento} onValueChange={(value) => setFormData({...formData, tipoDocumento: value})}>
+                    <Label htmlFor="entidadBancaria">Entidad bancaria</Label>
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar tipo" />
+                        <SelectValue placeholder="" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="NIT">NIT</SelectItem>
-                        <SelectItem value="CC">Cédula de Ciudadanía</SelectItem>
-                        <SelectItem value="CE">Cédula de Extranjería</SelectItem>
+                        <SelectItem value="bancolombia">Bancolombia</SelectItem>
+                        <SelectItem value="davivienda">Davivienda</SelectItem>
+                        <SelectItem value="bogota">Banco de Bogotá</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="nit">Número de Documento</Label>
-                    <Input 
-                      id="nit" 
-                      placeholder="900123456-1"
-                      value={formData.nit || ''}
-                      onChange={(e) => setFormData({...formData, nit: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="categoria">Categoría</Label>
-                    <Select value={formData.categoria} onValueChange={(value) => setFormData({...formData, categoria: value})}>
+                    <Label htmlFor="tipoCuenta">Tipo de cuenta</Label>
+                    <Select>
                       <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar categoría" />
+                        <SelectValue placeholder="" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Transporte Terrestre">Transporte Terrestre</SelectItem>
-                        <SelectItem value="Logística">Logística</SelectItem>
-                        <SelectItem value="Almacenamiento">Almacenamiento</SelectItem>
-                        <SelectItem value="Distribución">Distribución</SelectItem>
-                        <SelectItem value="Mantenimiento">Mantenimiento</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="estado">Estado</Label>
-                    <Select value={formData.estado} onValueChange={(value) => setFormData({...formData, estado: value as any})}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Seleccionar estado" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="activo">Activo</SelectItem>
-                        <SelectItem value="inactivo">Inactivo</SelectItem>
+                        <SelectItem value="ahorros">Ahorros</SelectItem>
+                        <SelectItem value="corriente">Corriente</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="contacto" className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="contactoPrincipal">Contacto Principal</Label>
+                    <Label htmlFor="numeroCuenta">Número de cuenta</Label>
                     <Input 
-                      id="contactoPrincipal" 
-                      placeholder="Nombre del contacto"
-                      value={formData.contactoPrincipal || ''}
-                      onChange={(e) => setFormData({...formData, contactoPrincipal: e.target.value})}
+                      id="numeroCuenta" 
+                      placeholder=""
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="telefono">Teléfono</Label>
-                    <Input 
-                      id="telefono" 
-                      placeholder="+57 310 1234567"
-                      value={formData.telefono || ''}
-                      onChange={(e) => setFormData({...formData, telefono: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email"
-                      placeholder="contacto@empresa.com"
-                      value={formData.email || ''}
-                      onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="direccion">Dirección</Label>
-                    <Input 
-                      id="direccion" 
-                      placeholder="Calle 72 #10-34"
-                      value={formData.direccion || ''}
-                      onChange={(e) => setFormData({...formData, direccion: e.target.value})}
-                    />
+                    <Label htmlFor="certificadoBancario">Certificado bancario</Label>
+                    <div className="flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 cursor-pointer hover:border-muted-foreground/50">
+                      <div className="text-center">
+                        <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Seleccione un archivo</span>
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="ciudad">Ciudad</Label>
-                    <Input 
-                      id="ciudad" 
-                      placeholder="Bogotá"
-                      value={formData.ciudad || ''}
-                      onChange={(e) => setFormData({...formData, ciudad: e.target.value})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="departamento">Departamento</Label>
-                    <Input 
-                      id="departamento" 
-                      placeholder="Cundinamarca"
-                      value={formData.departamento || ''}
-                      onChange={(e) => setFormData({...formData, departamento: e.target.value})}
-                    />
+                    <Label htmlFor="poder">Poder</Label>
+                    <div className="flex items-center justify-center border-2 border-dashed border-muted-foreground/25 rounded-lg p-4 cursor-pointer hover:border-muted-foreground/50">
+                      <div className="text-center">
+                        <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                        <span className="text-sm text-muted-foreground">Seleccione un archivo</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="servicios" className="space-y-4">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="servicios">Servicios Ofrecidos</Label>
-                    <Textarea 
-                      id="servicios" 
-                      placeholder="Describe los servicios que ofrece el proveedor (separados por comas)"
-                      value={formData.servicios?.join(', ') || ''}
-                      onChange={(e) => setFormData({...formData, servicios: e.target.value.split(', ').filter(s => s.trim())})}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="observaciones">Observaciones</Label>
-                    <Textarea 
-                      id="observaciones" 
-                      placeholder="Observaciones adicionales sobre el proveedor"
-                      value={formData.observaciones || ''}
-                      onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                    />
-                  </div>
-                </div>
-              </TabsContent>
-            </Tabs>
+              </div>
+            </div>
             
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
@@ -635,9 +698,19 @@ export default function Proveedores() {
                             </div>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">
-                          <Eye className="h-4 w-4 mr-2" />
-                          Ver perfil
+                        <Button 
+                          variant={conductor.estado === 'activo' ? 'destructive' : 'default'}
+                          size="sm"
+                          onClick={() => {
+                            setConductorConfirmDialog({
+                              open: true,
+                              conductor,
+                              action: conductor.estado === 'activo' ? 'deactivate' : 'activate'
+                            })
+                          }}
+                          className={conductor.estado === 'activo' ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}
+                        >
+                          {conductor.estado === 'activo' ? 'Inactivar' : 'Activar'}
                         </Button>
                       </div>
                     </CardContent>
@@ -654,6 +727,48 @@ export default function Proveedores() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation Dialog for Provider Status */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({...confirmDialog, open})}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDialog.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConfirmDialog({...confirmDialog, open: false})}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDialog.onConfirm}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirmation Dialog for Driver Status */}
+      <AlertDialog open={conductorConfirmDialog.open} onOpenChange={(open) => setConductorConfirmDialog({...conductorConfirmDialog, open})}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {conductorConfirmDialog.action === 'activate' ? 'Activar' : 'Inactivar'} Conductor
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas {conductorConfirmDialog.action === 'activate' ? 'activar' : 'inactivar'} al conductor {conductorConfirmDialog.conductor?.nombre}?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setConductorConfirmDialog({...conductorConfirmDialog, open: false})}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={() => handleConductorEstadoChange(conductorConfirmDialog.conductor, conductorConfirmDialog.action)}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </div>
   )
