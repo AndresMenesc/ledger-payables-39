@@ -127,7 +127,7 @@ export function DataTable({
                   className="px-3 py-1.5 text-sm border border-input bg-background rounded-md"
                   onChange={(e) => onStatusFilterChange?.(e.target.value)}
                 >
-                  <option value="">Todos los estados</option>
+                  <option value="todos">Todos los estados</option>
                   <option value="activo">Activo</option>
                   <option value="inactivo">Inactivo</option>
                 </select>
