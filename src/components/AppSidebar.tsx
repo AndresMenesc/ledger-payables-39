@@ -45,22 +45,6 @@ const navigationItems = [
     ]
   },
   {
-    title: "Usuarios proveedores",
-    icon: Users,
-    subItems: [
-      {
-        title: "Generar cuenta de cobro",
-        url: "/generar-cuenta-cobro",
-        icon: Receipt
-      },
-      {
-        title: "Documentación",
-        url: "/documentacion",
-        icon: FileText
-      }
-    ]
-  },
-  {
     title: "Cuentas de Cobro",
     url: "/cuenta-cobro",
     icon: Receipt
@@ -157,6 +141,22 @@ const navigationItems = [
     title: "Gestión PQR",
     url: "/pqr",
     icon: MessageSquare
+  },
+  {
+    title: "Usuarios proveedores",
+    icon: Users,
+    subItems: [
+      {
+        title: "Generar cuenta de cobro",
+        url: "/generar-cuenta-cobro",
+        icon: Receipt
+      },
+      {
+        title: "Documentación",
+        url: "/documentacion",
+        icon: FileText
+      }
+    ]
   }
 ]
 

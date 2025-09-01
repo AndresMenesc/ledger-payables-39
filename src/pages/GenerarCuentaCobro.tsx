@@ -6,10 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { FileText, Plus, Search, Calendar, DollarSign, User, Building2 } from "lucide-react";
 
 export default function GenerarCuentaCobro() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const { toast } = useToast();
 
   // Datos mock de servicios
   const servicios = [
@@ -232,11 +236,52 @@ export default function GenerarCuentaCobro() {
           <div className="flex justify-end pt-4 border-t mt-4">
             <div className="space-x-2">
               <Button variant="outline">Cancelar</Button>
-              <Button>Generar Cuenta de Cobro</Button>
+              <Button onClick={() => setShowConfirmDialog(true)}>
+                Generar Cuenta de Cobro
+              </Button>
             </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de confirmación */}
+      <Dialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Generación de Cuenta de Cobro</DialogTitle>
+            <DialogDescription>
+              ¿Está seguro que desea generar la cuenta de cobro con los servicios seleccionados? 
+              Esta acción no se puede deshacer.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="bg-muted p-4 rounded-lg">
+              <h4 className="font-medium mb-2">Resumen:</h4>
+              <div className="space-y-1 text-sm">
+                <p>• Servicios seleccionados: {serviciosFiltrados.filter(s => s.estado === "Seleccionado").length}</p>
+                <p>• Total a facturar: ${serviciosFiltrados
+                  .filter(s => s.estado === "Seleccionado")
+                  .reduce((sum, s) => sum + s.valor, 0)
+                  .toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfirmDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => {
+              setShowConfirmDialog(false);
+              toast({
+                title: "Cuenta de Cobro Generada",
+                description: "La cuenta de cobro ha sido generada exitosamente.",
+              });
+            }}>
+              Confirmar Generación
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
