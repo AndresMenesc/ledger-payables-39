@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, FolderOpen, Eye, Send, FileText, Calendar } from "lucide-react"
+import { Plus, Search, FolderOpen, Eye, Send, FileText, Calendar, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,6 +22,7 @@ interface Portafolio {
   ciudad: string
   creadoPor: string
   enviado: number
+  estado: "Activo" | "Inactivo" | "Pendiente"
 }
 
 interface Gestion {
@@ -41,7 +42,8 @@ const mockPortafolios: Portafolio[] = [
     solicitante: "adsfsdghgbe",
     ciudad: "BARRANQUILLA",
     creadoPor: "Mateo Gomez osio",
-    enviado: 1
+    enviado: 1,
+    estado: "Activo"
   },
   {
     id: "2",
@@ -52,7 +54,8 @@ const mockPortafolios: Portafolio[] = [
     solicitante: "mateo",
     ciudad: "BARRANQUILLA",
     creadoPor: "Mateo Gomez osio",
-    enviado: 2
+    enviado: 2,
+    estado: "Pendiente"
   }
 ]
 
@@ -67,14 +70,18 @@ const mockGestiones: Gestion[] = [
 
 export default function Portafolios() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [selectedPortafolio, setSelectedPortafolio] = useState<Portafolio | null>(null)
   const [isGestionModalOpen, setIsGestionModalOpen] = useState(false)
   const [tipoCliente, setTipoCliente] = useState("ejecutivos")
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
+  const [pdfType, setPdfType] = useState<"ejecutivos" | "rutas">("ejecutivos")
 
   const filteredPortafolios = mockPortafolios.filter(portafolio =>
-    portafolio.nombreCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    portafolio.solicitante.toLowerCase().includes(searchTerm.toLowerCase())
+    (portafolio.nombreCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    portafolio.solicitante.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (statusFilter === "" || portafolio.estado === statusFilter)
   )
 
   const handleCreatePortafolio = () => {
@@ -85,6 +92,11 @@ export default function Portafolios() {
   const handleGestionPortafolio = (portafolio: Portafolio) => {
     setSelectedPortafolio(portafolio)
     setIsGestionModalOpen(true)
+  }
+
+  const handleViewPdf = (type: "ejecutivos" | "rutas") => {
+    setPdfType(type)
+    setIsPdfModalOpen(true)
   }
 
   return (
@@ -172,17 +184,33 @@ export default function Portafolios() {
         </Dialog>
       </div>
 
-      {/* Search */}
+      {/* Search and Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por cliente o solicitante..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por cliente o solicitante..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-48">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="Filtrar por estado" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="Activo">Activo</SelectItem>
+                <SelectItem value="Inactivo">Inactivo</SelectItem>
+                <SelectItem value="Pendiente">Pendiente</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -210,8 +238,22 @@ export default function Portafolios() {
                     <td className="p-2">{portafolio.nombreCliente}</td>
                     <td className="p-2">
                       <div className="flex items-center gap-1">
-                        <FileText className="h-4 w-4" />
-                        <FileText className="h-4 w-4" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewPdf("ejecutivos")}
+                          className="h-auto p-0 hover:bg-transparent"
+                        >
+                          <FileText className="h-4 w-4 cursor-pointer hover:text-primary" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleViewPdf("rutas")}
+                          className="h-auto p-0 hover:bg-transparent"
+                        >
+                          <FileText className="h-4 w-4 cursor-pointer hover:text-primary" />
+                        </Button>
                         <span className="ml-1">{portafolio.archivos}</span>
                       </div>
                     </td>
@@ -366,6 +408,32 @@ export default function Portafolios() {
               </div>
             </TabsContent>
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* PDF Preview Modal */}
+      <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              {pdfType === "ejecutivos" ? "Portafolio de Ejecutivos" : "Portafolio de Rutas"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 bg-gray-100 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <FileText className="h-16 w-16 text-gray-400 mx-auto" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700">Vista previa de PDF</h3>
+                <p className="text-gray-500">
+                  {pdfType === "ejecutivos" ? "Portafolio de Ejecutivos" : "Portafolio de Rutas"}
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Contenido del documento {pdfType === "ejecutivos" ? "ejecutivos" : "de rutas"}
+                </p>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

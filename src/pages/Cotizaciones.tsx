@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Plus, Search, FileText, Eye, Send, Download, Calendar } from "lucide-react"
+import { Plus, Search, FileText, Eye, Download, Calendar, Filter } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -87,11 +87,14 @@ const mockGestiones: Gestion[] = [
 
 export default function Cotizaciones() {
   const [searchTerm, setSearchTerm] = useState("")
+  const [statusFilter, setStatusFilter] = useState("")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [traslados, setTraslados] = useState<Traslado[]>([])
   const [activeTab, setActiveTab] = useState("agregar-cotizacion")
   const [selectedCotizacion, setSelectedCotizacion] = useState<Cotizacion | null>(null)
   const [isGestionModalOpen, setIsGestionModalOpen] = useState(false)
+  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false)
+  const [selectedCotizacionPdf, setSelectedCotizacionPdf] = useState<Cotizacion | null>(null)
 
   const getEstadoBadge = (estado: string) => {
     const variants = {
@@ -104,8 +107,9 @@ export default function Cotizaciones() {
   }
 
   const filteredCotizaciones = mockCotizaciones.filter(cotizacion =>
-    cotizacion.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cotizacion.numero.toLowerCase().includes(searchTerm.toLowerCase())
+    (cotizacion.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    cotizacion.numero.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (statusFilter === "" || cotizacion.estado === statusFilter)
   )
 
   const handleAddTraslado = () => {
@@ -133,6 +137,11 @@ export default function Cotizaciones() {
   const handleGestionCotizacion = (cotizacion: Cotizacion) => {
     setSelectedCotizacion(cotizacion)
     setIsGestionModalOpen(true)
+  }
+
+  const handleViewPdf = (cotizacion: Cotizacion) => {
+    setSelectedCotizacionPdf(cotizacion)
+    setIsPdfModalOpen(true)
   }
 
   return (
@@ -363,17 +372,33 @@ export default function Cotizaciones() {
         </Dialog>
       </div>
 
-      {/* Search */}
+      {/* Search and Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por cliente o número..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por cliente o número..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-48">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  <SelectValue placeholder="Filtrar por estado" />
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="Enviada">Enviada</SelectItem>
+                <SelectItem value="Pendiente">Pendiente</SelectItem>
+                <SelectItem value="Aprobada">Aprobada</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
@@ -417,8 +442,13 @@ export default function Cotizaciones() {
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="sm">
-                          <Send className="h-4 w-4" />
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleViewPdf(cotizacion)}
+                          title="Ver cotización en PDF"
+                        >
+                          <FileText className="h-4 w-4" />
                         </Button>
                         <Button 
                           variant="ghost" 
@@ -510,6 +540,29 @@ export default function Cotizaciones() {
               </div>
             </TabsContent>
           </Tabs>
+        </DialogContent>
+      </Dialog>
+
+      {/* PDF Preview Modal */}
+      <Dialog open={isPdfModalOpen} onOpenChange={setIsPdfModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              Vista previa - {selectedCotizacionPdf?.numero}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 bg-gray-100 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <FileText className="h-16 w-16 text-gray-400 mx-auto" />
+              <div>
+                <h3 className="text-lg font-semibold text-gray-700">Vista previa de PDF</h3>
+                <p className="text-gray-500">Cotización: {selectedCotizacionPdf?.numero}</p>
+                <p className="text-gray-500">Cliente: {selectedCotizacionPdf?.cliente}</p>
+                <p className="text-gray-500">Valor: ${selectedCotizacionPdf?.valorTotal.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
