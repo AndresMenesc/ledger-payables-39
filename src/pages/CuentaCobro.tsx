@@ -6,9 +6,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Filter, Eye, UserX, CheckCircle, XCircle, Clock, ArrowLeft } from "lucide-react"
+import { Search, Filter, Eye, UserX, CheckCircle, XCircle, Clock, ArrowLeft, FileCheck, Plus } from "lucide-react"
 
 // Datos de muestra
+const lotesDisponibles = [
+  {
+    id: 1,
+    numero: "LOTE-2025-001",
+    estado: "EN PREPARACION",
+    valorActual: 15450000,
+    cantidadCuentas: 12,
+    fechaCreacion: "2025-01-15",
+    responsable: "Ana García"
+  },
+  {
+    id: 2,
+    numero: "LOTE-2025-002",
+    estado: "EN REVISION",
+    valorActual: 8920000,
+    cantidadCuentas: 8,
+    fechaCreacion: "2025-01-18",
+    responsable: "Carlos Mendez"
+  },
+  {
+    id: 3,
+    numero: "LOTE-2025-003",
+    estado: "PENDIENTE",
+    valorActual: 12300000,
+    cantidadCuentas: 15,
+    fechaCreacion: "2025-01-22",
+    responsable: "María López"
+  }
+]
+
 const cuentasCobro = [
   {
     id: 1,
@@ -125,6 +155,8 @@ export default function CuentaCobro() {
   const [busqueda, setBusqueda] = useState("")
   const [mostrarDetalle, setMostrarDetalle] = useState(false)
   const [cuentaSeleccionada, setCuentaSeleccionada] = useState<any>(null)
+  const [mostrarLotes, setMostrarLotes] = useState(false)
+  const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null)
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -142,6 +174,28 @@ export default function CuentaCobro() {
   const verDetalleCuenta = (cuenta: any) => {
     setCuentaSeleccionada(cuenta)
     setMostrarDetalle(true)
+  }
+
+  const radicarCuenta = () => {
+    if (loteSeleccionado) {
+      // Aquí iría la lógica para radicar la cuenta al lote seleccionado
+      console.log(`Radicando cuenta ${cuentaSeleccionada?.numero} al lote ${loteSeleccionado}`)
+      setMostrarLotes(false)
+      setLoteSeleccionado(null)
+    }
+  }
+
+  const getEstadoLoteBadge = (estado: string) => {
+    switch (estado) {
+      case "EN PREPARACION":
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">EN PREPARACIÓN</Badge>
+      case "EN REVISION":
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">EN REVISIÓN</Badge>
+      case "PENDIENTE":
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100">PENDIENTE</Badge>
+      default:
+        return <Badge variant="outline">{estado}</Badge>
+    }
   }
 
   if (mostrarDetalle && cuentaSeleccionada) {
@@ -252,6 +306,117 @@ export default function CuentaCobro() {
             </Table>
           </CardContent>
         </Card>
+
+        {/* Botón Radicar Cuenta */}
+        <div className="flex justify-center pt-4">
+          <Button 
+            onClick={() => setMostrarLotes(true)}
+            className="bg-primary hover:bg-primary/90 text-white px-8 py-2"
+          >
+            <FileCheck className="h-4 w-4 mr-2" />
+            Radicar Cuenta
+          </Button>
+        </div>
+
+        {/* Modal de Lotes Disponibles */}
+        <Dialog open={mostrarLotes} onOpenChange={setMostrarLotes}>
+          <DialogContent className="max-w-4xl">
+            <DialogHeader>
+              <DialogTitle className="text-primary">
+                Seleccionar Lote para Radicar Cuenta de Cobro
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Cuenta: <span className="font-semibold">{cuentaSeleccionada?.numero} - {cuentaSeleccionada?.contratista}</span>
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Valor: <span className="font-semibold text-green-600">{cuentaSeleccionada?.valor}</span>
+              </p>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold">Lotes Disponibles</h3>
+                <Input 
+                  placeholder="Buscar lote..."
+                  className="w-64"
+                />
+              </div>
+              
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {lotesDisponibles.map((lote) => (
+                  <div 
+                    key={lote.id} 
+                    className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
+                      loteSeleccionado === lote.numero 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setLoteSeleccionado(lote.numero)}
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="font-semibold text-lg">{lote.numero}</h4>
+                          {getEstadoLoteBadge(lote.estado)}
+                          {loteSeleccionado === lote.numero && (
+                            <CheckCircle className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Valor Actual:</span>
+                            <p className="font-semibold text-green-600">
+                              ${lote.valorActual.toLocaleString()}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Cuentas:</span>
+                            <p className="font-semibold">{lote.cantidadCuentas} cuentas</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Fecha Creación:</span>
+                            <p>{lote.fechaCreacion}</p>
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Responsable:</span>
+                            <p>{lote.responsable}</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                          <p className="text-sm text-blue-700">
+                            <strong>Valor Final si se radica:</strong> 
+                            <span className="ml-2 font-bold">
+                              ${(lote.valorActual + parseFloat(cuentaSeleccionada?.valor?.replace(/[$,]/g, '') || '0')).toLocaleString()}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setMostrarLotes(false)
+                    setLoteSeleccionado(null)
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  onClick={radicarCuenta}
+                  disabled={!loteSeleccionado}
+                  className="bg-primary hover:bg-primary/90"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Radicar a Lote Seleccionado
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
