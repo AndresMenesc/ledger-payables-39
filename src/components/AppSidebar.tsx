@@ -72,6 +72,11 @@ const navigationItems = [
         title: "Sin Lote",
         url: "/sin-lote",
         icon: AlertTriangle
+      },
+      {
+        title: "Préstamos",
+        url: "/prestamos",
+        icon: CreditCard
       }
     ]
   },
@@ -86,11 +91,6 @@ const navigationItems = [
     icon: Users
   },
   {
-    title: "Validación de Proveedores",
-    url: "/validacion-proveedores",
-    icon: CheckCircle
-  },
-  {
     title: "Conductores",
     url: "/conductores",
     icon: User
@@ -101,14 +101,14 @@ const navigationItems = [
     icon: Truck
   },
   {
+    title: "Validación de documentos",
+    url: "/validacion-proveedores",
+    icon: CheckCircle
+  },
+  {
     title: "FUEC",
     url: "/fuec",
     icon: FileCheck
-  },
-  {
-    title: "Préstamos",
-    url: "/prestamos",
-    icon: CreditCard
   },
   {
     title: "Comercial",

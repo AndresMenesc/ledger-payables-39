@@ -215,6 +215,13 @@ export default function Portafolios() {
         </CardContent>
       </Card>
 
+      {/* Info Text */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <p className="text-sm text-blue-700">
+          <strong>Tip:</strong> Haz clic en los iconos de archivos para ver la vista previa del respectivo portafolio (Ejecutivos o Rutas).
+        </p>
+      </div>
+
       {/* Table */}
       <Card>
         <CardContent>
