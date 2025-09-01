@@ -43,8 +43,7 @@ interface Proveedor {
   ciudad: string
   departamento: string
   categoria: string
-  estado: 'activo' | 'inactivo' | 'suspendido'
-  calificacion: number
+  estado: 'activo' | 'inactivo'
   fechaRegistro: string
   fechaUltimaActividad: string
   servicios: string[]
@@ -67,7 +66,6 @@ const proveedoresData: Proveedor[] = [
     departamento: "Cundinamarca",
     categoria: "Transporte Terrestre",
     estado: "activo",
-    calificacion: 4.8,
     fechaRegistro: "2024-01-15",
     fechaUltimaActividad: "2024-08-30",
     servicios: ["Carga pesada", "Logística", "Distribución"],
@@ -87,7 +85,6 @@ const proveedoresData: Proveedor[] = [
     departamento: "Antioquia",
     categoria: "Logística",
     estado: "activo",
-    calificacion: 4.5,
     fechaRegistro: "2024-02-20",
     fechaUltimaActividad: "2024-08-28",
     servicios: ["Almacenamiento", "Distribución", "Embalaje"],
@@ -106,12 +103,11 @@ const proveedoresData: Proveedor[] = [
     ciudad: "Barranquilla",
     departamento: "Atlántico",
     categoria: "Transporte Terrestre",
-    estado: "suspendido",
-    calificacion: 3.2,
+    estado: "inactivo",
     fechaRegistro: "2024-03-10",
     fechaUltimaActividad: "2024-07-15",
     servicios: ["Transporte", "Mudanzas"],
-    observaciones: "Suspendido por incumplimiento en entregas"
+    observaciones: "Inactivo por incumplimiento en entregas"
   }
 ]
 
@@ -120,6 +116,8 @@ export default function Proveedores() {
   const [selectedProveedor, setSelectedProveedor] = useState<Proveedor | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false)
+  const [isConductoresDialogOpen, setIsConductoresDialogOpen] = useState(false)
+  const [conductoresProveedor, setConductoresProveedor] = useState<any[]>([])
   const [formData, setFormData] = useState<Partial<Proveedor>>({})
 
   // Columnas para la tabla
@@ -129,34 +127,59 @@ export default function Proveedores() {
     { key: 'nit', label: 'NIT', sortable: true },
     { key: 'contactoPrincipal', label: 'Contacto', sortable: true },
     { key: 'telefono', label: 'Teléfono' },
-    { key: 'categoria', label: 'Categoría', sortable: true },
+    { key: 'email', label: 'Correo', sortable: true },
     { key: 'estado', label: 'Estado', sortable: true },
-    { key: 'calificacion', label: 'Calificación', sortable: true },
     { key: 'acciones', label: 'Acciones' }
   ]
 
-  const getEstadoBadge = (estado: string) => {
+  const getEstadoBadge = (estado: string, proveedorId: string) => {
     const variants = {
       'activo': 'default',
-      'inactivo': 'secondary', 
-      'suspendido': 'destructive'
+      'inactivo': 'secondary'
     } as const
     
-    return <Badge variant={variants[estado as keyof typeof variants]}>{estado}</Badge>
+    return (
+      <Button
+        variant={estado === 'activo' ? 'default' : 'secondary'}
+        size="sm"
+        onClick={() => handleEstadoChange(proveedorId, estado === 'activo' ? 'inactivo' : 'activo')}
+        className="h-6 text-xs"
+      >
+        {estado === 'activo' ? 'Activo' : 'Inactivo'}
+      </Button>
+    )
   }
 
-  const getCalificacionStars = (calificacion: number) => {
-    return (
-      <div className="flex items-center gap-1">
-        {[...Array(5)].map((_, i) => (
-          <Star 
-            key={i}
-            className={`h-4 w-4 ${i < Math.floor(calificacion) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`}
-          />
-        ))}
-        <span className="ml-1 text-sm text-muted-foreground">({calificacion})</span>
-      </div>
-    )
+  const handleEstadoChange = (proveedorId: string, nuevoEstado: string) => {
+    toast({
+      title: "Estado actualizado",
+      description: `El proveedor ha sido marcado como ${nuevoEstado}.`,
+    })
+  }
+
+  const handleVerConductores = (proveedor: Proveedor) => {
+    // Datos de ejemplo de conductores
+    const conductoresEjemplo = [
+      {
+        id: 1,
+        nombre: "Juan Pérez",
+        cedula: "12345678",
+        licencia: "C2-123456",
+        telefono: "+57 300 1234567",
+        estado: "activo"
+      },
+      {
+        id: 2,
+        nombre: "María González",
+        cedula: "87654321", 
+        licencia: "C3-654321",
+        telefono: "+57 310 7654321",
+        estado: "activo"
+      }
+    ]
+    setConductoresProveedor(conductoresEjemplo)
+    setSelectedProveedor(proveedor)
+    setIsConductoresDialogOpen(true)
   }
 
   const handleCreateProveedor = () => {
@@ -185,9 +208,7 @@ export default function Proveedores() {
   const renderCell = (columnKey: string, value: any, item: Proveedor) => {
     switch (columnKey) {
       case 'estado':
-        return getEstadoBadge(item.estado)
-      case 'calificacion':
-        return getCalificacionStars(item.calificacion)
+        return getEstadoBadge(item.estado, item.id)
       case 'acciones':
         return (
           <DropdownMenu>
@@ -200,6 +221,10 @@ export default function Proveedores() {
               <DropdownMenuItem onClick={() => { setSelectedProveedor(item); setIsDetailDialogOpen(true) }}>
                 <Eye className="mr-2 h-4 w-4" />
                 Ver detalles
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleVerConductores(item)}>
+                <User className="mr-2 h-4 w-4" />
+                Ver conductores
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleEditProveedor(item)}>
                 <Edit className="mr-2 h-4 w-4" />
@@ -318,7 +343,6 @@ export default function Proveedores() {
                       <SelectContent>
                         <SelectItem value="activo">Activo</SelectItem>
                         <SelectItem value="inactivo">Inactivo</SelectItem>
-                        <SelectItem value="suspendido">Suspendido</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -511,10 +535,9 @@ export default function Proveedores() {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  {getEstadoBadge(selectedProveedor.estado)}
+                  {getEstadoBadge(selectedProveedor.estado, selectedProveedor.id)}
                   <Badge variant="outline">{selectedProveedor.codigo}</Badge>
                 </div>
-                {getCalificacionStars(selectedProveedor.calificacion)}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -576,6 +599,62 @@ export default function Proveedores() {
           )}
         </DialogContent>
       </Dialog>
+      {/* Modal de Conductores */}
+      <Dialog open={isConductoresDialogOpen} onOpenChange={setIsConductoresDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" />
+              Conductores - {selectedProveedor?.razonSocial}
+            </DialogTitle>
+            <DialogDescription>
+              Lista de conductores asociados al proveedor
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {conductoresProveedor.length > 0 ? (
+              <div className="grid gap-4">
+                {conductoresProveedor.map((conductor) => (
+                  <Card key={conductor.id}>
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-semibold">{conductor.nombre}</h4>
+                            <Badge variant={conductor.estado === 'activo' ? 'default' : 'secondary'}>
+                              {conductor.estado}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <div><span className="font-medium">Cédula:</span> {conductor.cedula}</div>
+                            <div><span className="font-medium">Licencia:</span> {conductor.licencia}</div>
+                            <div className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {conductor.telefono}
+                            </div>
+                          </div>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4 mr-2" />
+                          Ver perfil
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold mb-2">No hay conductores registrados</h3>
+                <p className="text-muted-foreground">Este proveedor no tiene conductores asociados.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }
