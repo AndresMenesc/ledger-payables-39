@@ -15,6 +15,8 @@ import LotesAprobados from "./pages/LotesAprobados";
 import CuentaCobro from "./pages/CuentaCobro";
 import PQR from "./pages/PQR";
 import Proveedores from "./pages/Proveedores";
+import Conductores from "./pages/Conductores";
+import Vehiculos from "./pages/Vehiculos";
 import Prestamos from "./pages/Prestamos";
 import NotFound from "./pages/NotFound";
 
@@ -56,6 +58,8 @@ const App = () => (
                   <Route path="cuenta-cobro" element={<CuentaCobro />} />
                   <Route path="pqr" element={<PQR />} />
                   <Route path="proveedores" element={<Proveedores />} />
+                  <Route path="conductores" element={<Conductores />} />
+                  <Route path="vehiculos" element={<Vehiculos />} />
                   <Route path="prestamos" element={<Prestamos />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
