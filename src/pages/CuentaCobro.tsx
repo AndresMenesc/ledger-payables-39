@@ -85,9 +85,9 @@ const cuentasCobro = [
 const contratistasFaltantes = [
   {
     id: 1,
-    nombre: "COUNTRY EXPRESS",
+    nombre: "COUNTRY LICORES",
     tipo: "PROPIO",
-    correo: "GERENCIA@COUNTRYEXP.COM",
+    correo: "GERENCIA@EMPRESAMAIL.COM",
     celular: "3163304262",
     ultimoLogin: "Mayo 07, 2025 11:27 PM"
   },
