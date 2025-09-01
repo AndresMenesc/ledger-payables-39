@@ -87,7 +87,7 @@ const mockGestiones: Gestion[] = [
 
 export default function Cotizaciones() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [traslados, setTraslados] = useState<Traslado[]>([])
   const [activeTab, setActiveTab] = useState("agregar-cotizacion")
@@ -109,7 +109,7 @@ export default function Cotizaciones() {
   const filteredCotizaciones = mockCotizaciones.filter(cotizacion =>
     (cotizacion.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
     cotizacion.numero.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (statusFilter === "" || cotizacion.estado === statusFilter)
+    (statusFilter === "all" || cotizacion.estado === statusFilter)
   )
 
   const handleAddTraslado = () => {
@@ -393,7 +393,7 @@ export default function Cotizaciones() {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="Enviada">Enviada</SelectItem>
                 <SelectItem value="Pendiente">Pendiente</SelectItem>
                 <SelectItem value="Aprobada">Aprobada</SelectItem>

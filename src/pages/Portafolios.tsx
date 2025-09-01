@@ -70,7 +70,7 @@ const mockGestiones: Gestion[] = [
 
 export default function Portafolios() {
   const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [selectedPortafolio, setSelectedPortafolio] = useState<Portafolio | null>(null)
   const [isGestionModalOpen, setIsGestionModalOpen] = useState(false)
@@ -81,7 +81,7 @@ export default function Portafolios() {
   const filteredPortafolios = mockPortafolios.filter(portafolio =>
     (portafolio.nombreCliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
     portafolio.solicitante.toLowerCase().includes(searchTerm.toLowerCase())) &&
-    (statusFilter === "" || portafolio.estado === statusFilter)
+    (statusFilter === "all" || portafolio.estado === statusFilter)
   )
 
   const handleCreatePortafolio = () => {
@@ -205,7 +205,7 @@ export default function Portafolios() {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="Activo">Activo</SelectItem>
                 <SelectItem value="Inactivo">Inactivo</SelectItem>
                 <SelectItem value="Pendiente">Pendiente</SelectItem>
