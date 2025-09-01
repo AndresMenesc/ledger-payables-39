@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   BarChart3, FileText, Clock, Package, CheckCircle, 
   DollarSign, AlertTriangle, CreditCard, Truck, Building2,
-  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target
+  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator
 } from "lucide-react"
 import {
   Sidebar,
@@ -81,6 +81,22 @@ const navigationItems = [
     icon: CreditCard
   },
   {
+    title: "Facturación",
+    icon: Receipt,
+    subItems: [
+      {
+        title: "Liquidaciones",
+        url: "/liquidaciones",
+        icon: Calculator
+      },
+      {
+        title: "Facturas",
+        url: "/facturas",
+        icon: FileText
+      }
+    ]
+  },
+  {
     title: "Proveedores",
     url: "/proveedores",
     icon: Users
@@ -132,7 +148,7 @@ export function AppSidebar() {
   const { open, setOpen } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
-  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Gestión de Pagos", "Estados de Lotes", "Comercial"])
+  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Gestión de Pagos", "Estados de Lotes", "Comercial", "Facturación"])
 
   const isActive = (path: string) => currentPath === path
   const hasActiveChild = (subItems?: any[]) => 
