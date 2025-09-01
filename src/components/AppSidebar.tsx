@@ -72,18 +72,13 @@ const navigationItems = [
         title: "Sin Lote",
         url: "/sin-lote",
         icon: AlertTriangle
-      },
-      {
-        title: "Préstamos",
-        url: "/prestamos",
-        icon: CreditCard
       }
     ]
   },
   {
-    title: "Gestión PQR",
-    url: "/pqr",
-    icon: MessageSquare
+    title: "Préstamos",
+    url: "/prestamos",
+    icon: CreditCard
   },
   {
     title: "Proveedores",
@@ -125,6 +120,11 @@ const navigationItems = [
         icon: FolderOpen
       }
     ]
+  },
+  {
+    title: "Gestión PQR",
+    url: "/pqr",
+    icon: MessageSquare
   }
 ]
 
