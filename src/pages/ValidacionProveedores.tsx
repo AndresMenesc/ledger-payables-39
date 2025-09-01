@@ -48,8 +48,10 @@ interface Documento {
   categoria: string
   estado: 'pendiente' | 'aprobado' | 'rechazado'
   fechaSubida: string
+  fechaVencimiento?: string
   revisor?: string
   comentarios?: string
+  urlDocumento?: string
 }
 
 interface ConductorValidacion {
@@ -59,7 +61,11 @@ interface ConductorValidacion {
   telefono: string
   email: string
   estado: 'pendiente' | 'aprobado' | 'rechazado'
-  documentos: Documento[]
+  documentos: {
+    seguridadSocial: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    licenciaConduccion: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    examenesPsicosensometricos: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+  }
 }
 
 interface VehiculoValidacion {
@@ -69,7 +75,14 @@ interface VehiculoValidacion {
   modelo: string
   ano: string
   estado: 'pendiente' | 'aprobado' | 'rechazado'
-  documentos: Documento[]
+  documentos: {
+    revisionPreventiva: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    tecnomecanica: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    tarjetaOperacion: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    soat: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    polizaContractual: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+    polizaExtraContractual: { fecha: string; documento?: string; estado: 'pendiente' | 'aprobado' | 'rechazado' }
+  }
 }
 
 // Datos de ejemplo
@@ -112,36 +125,21 @@ const proveedoresValidacion: ProveedorValidacion[] = [
 const documentosEjemplo: Documento[] = [
   {
     id: "1",
-    nombre: "RUT Empresa",
-    categoria: "Proveedor",
-    estado: "aprobado",
-    fechaSubida: "2024-08-20",
-    revisor: "Admin Usuario",
-    comentarios: "Documento válido y actualizado"
-  },
-  {
-    id: "2", 
     nombre: "Cédula Representante Legal",
     categoria: "Proveedor",
     estado: "aprobado",
     fechaSubida: "2024-08-20",
-    revisor: "Admin Usuario"
-  },
-  {
-    id: "3",
-    nombre: "SOAT Vehículo ABC123",
-    categoria: "Vehículo",
-    estado: "pendiente",
-    fechaSubida: "2024-08-20"
-  },
-  {
-    id: "4",
-    nombre: "Tarjeta de Propiedad ABC123",
-    categoria: "Vehículo", 
-    estado: "rechazado",
-    fechaSubida: "2024-08-20",
     revisor: "Admin Usuario",
-    comentarios: "Documento vencido, requiere actualización"
+    comentarios: "Documento válido y actualizado",
+    urlDocumento: "/api/documentos/cedula-ejemplo.pdf"
+  },
+  {
+    id: "2", 
+    nombre: "Certificado Bancario",
+    categoria: "Proveedor",
+    estado: "pendiente",
+    fechaSubida: "2024-08-20",
+    urlDocumento: "/api/documentos/certificado-bancario.pdf"
   }
 ]
 
@@ -153,7 +151,11 @@ const conductoresEjemplo: ConductorValidacion[] = [
     telefono: "3001111111",
     email: "pedro@email.com",
     estado: "pendiente",
-    documentos: []
+    documentos: {
+      seguridadSocial: { fecha: "2024-12-15", documento: "/api/documentos/seguridad-social.pdf", estado: "pendiente" },
+      licenciaConduccion: { fecha: "2025-03-20", documento: "/api/documentos/licencia.pdf", estado: "aprobado" },
+      examenesPsicosensometricos: { fecha: "2024-11-30", documento: "/api/documentos/examenes.pdf", estado: "rechazado" }
+    }
   }
 ]
 
@@ -165,13 +167,22 @@ const vehiculosEjemplo: VehiculoValidacion[] = [
     modelo: "Ford F-150",
     ano: "2020",
     estado: "pendiente",
-    documentos: []
+    documentos: {
+      revisionPreventiva: { fecha: "2024-12-15", documento: "/api/documentos/revision.pdf", estado: "pendiente" },
+      tecnomecanica: { fecha: "2025-06-30", documento: "/api/documentos/tecnomecanica.pdf", estado: "aprobado" },
+      tarjetaOperacion: { fecha: "2025-01-20", documento: "/api/documentos/tarjeta.pdf", estado: "pendiente" },
+      soat: { fecha: "2024-11-15", documento: "/api/documentos/soat.pdf", estado: "rechazado" },
+      polizaContractual: { fecha: "2025-03-10", documento: "/api/documentos/poliza1.pdf", estado: "aprobado" },
+      polizaExtraContractual: { fecha: "2025-03-10", documento: "/api/documentos/poliza2.pdf", estado: "pendiente" }
+    }
   }
 ]
 
 export default function ValidacionProveedores() {
   const [selectedProveedor, setSelectedProveedor] = useState<ProveedorValidacion | null>(null)
   const [validacionOpen, setValidacionOpen] = useState(false)
+  const [pdfViewerOpen, setPdfViewerOpen] = useState(false)
+  const [selectedPdf, setSelectedPdf] = useState<string>("")
   const [activeTab, setActiveTab] = useState("documentos")
   const { toast } = useToast()
 
@@ -224,6 +235,11 @@ export default function ValidacionProveedores() {
         {labels[estado as keyof typeof labels]}
       </Badge>
     )
+  }
+
+  const handleVerPdf = (url: string) => {
+    setSelectedPdf(url)
+    setPdfViewerOpen(true)
   }
 
   const handleVerValidacion = (proveedor: ProveedorValidacion) => {
@@ -436,10 +452,30 @@ export default function ValidacionProveedores() {
                 <TabsContent value="documentos" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Documentos Subidos</CardTitle>
+                      <CardTitle>Documentos del Proveedor</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
+                        {/* Datos Bancarios */}
+                        <div className="p-4 border border-border rounded-lg">
+                          <h4 className="font-semibold mb-3">Datos Bancarios</h4>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                              <Label className="text-sm font-medium text-muted-foreground">Banco</Label>
+                              <p className="font-medium">Banco de Bogotá</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium text-muted-foreground">Tipo de Cuenta</Label>
+                              <p className="font-medium">Cuenta Corriente</p>
+                            </div>
+                            <div>
+                              <Label className="text-sm font-medium text-muted-foreground">Número de Cuenta</Label>
+                              <p className="font-medium">001234567890</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Documentos */}
                         {documentosEjemplo.map((doc) => (
                           <div key={doc.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
                             <div className="flex items-center gap-4">
@@ -469,9 +505,15 @@ export default function ValidacionProveedores() {
                               <Button variant="ghost" size="sm">
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              <Button variant="ghost" size="sm">
-                                <Download className="h-4 w-4" />
-                              </Button>
+                              {doc.urlDocumento && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleVerPdf(doc.urlDocumento!)}
+                                >
+                                  <Download className="h-4 w-4" />
+                                </Button>
+                              )}
                               {doc.estado === 'pendiente' && (
                                 <>
                                   <Button 
@@ -503,13 +545,13 @@ export default function ValidacionProveedores() {
                 <TabsContent value="vehiculos" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Vehículos Registrados</CardTitle>
+                      <CardTitle>Vehículos y Documentos</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {vehiculosEjemplo.map((vehiculo) => (
-                          <div key={vehiculo.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                            <div className="flex items-center gap-4">
+                          <div key={vehiculo.id} className="border border-border rounded-lg p-4">
+                            <div className="flex items-center gap-4 mb-4">
                               <Car className="h-8 w-8 text-primary" />
                               <div>
                                 <p className="font-medium">{vehiculo.placa}</p>
@@ -519,10 +561,54 @@ export default function ValidacionProveedores() {
                                 {getDocumentoBadge(vehiculo.estado)}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {Object.entries(vehiculo.documentos).map(([tipo, doc]) => (
+                                <div key={tipo} className="p-3 border border-border rounded-lg">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <p className="font-medium text-sm capitalize">
+                                        {tipo.replace(/([A-Z])/g, ' $1').trim()}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">
+                                        Vence: {new Date(doc.fecha).toLocaleDateString('es-CO')}
+                                      </p>
+                                    </div>
+                                    {getDocumentoBadge(doc.estado)}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    {doc.documento && (
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => handleVerPdf(doc.documento!)}
+                                        className="text-xs"
+                                      >
+                                        <FileText className="h-3 w-3 mr-1" />
+                                        Ver PDF
+                                      </Button>
+                                    )}
+                                    {doc.estado === 'pendiente' && (
+                                      <>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="text-success hover:text-success text-xs"
+                                        >
+                                          <Check className="h-3 w-3" />
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive text-xs"
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ))}
@@ -534,13 +620,13 @@ export default function ValidacionProveedores() {
                 <TabsContent value="conductores" className="space-y-4">
                   <Card>
                     <CardHeader>
-                      <CardTitle>Conductores Registrados</CardTitle>
+                      <CardTitle>Conductores y Documentos</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         {conductoresEjemplo.map((conductor) => (
-                          <div key={conductor.id} className="flex items-center justify-between p-4 border border-border rounded-lg">
-                            <div className="flex items-center gap-4">
+                          <div key={conductor.id} className="border border-border rounded-lg p-4">
+                            <div className="flex items-center gap-4 mb-4">
                               <User className="h-8 w-8 text-primary" />
                               <div>
                                 <p className="font-medium">{conductor.nombre}</p>
@@ -550,10 +636,54 @@ export default function ValidacionProveedores() {
                                 {getDocumentoBadge(conductor.estado)}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                              {Object.entries(conductor.documentos).map(([tipo, doc]) => (
+                                <div key={tipo} className="p-3 border border-border rounded-lg">
+                                  <div className="flex justify-between items-start mb-2">
+                                    <div>
+                                      <p className="font-medium text-sm capitalize">
+                                        {tipo.replace(/([A-Z])/g, ' $1').trim()}
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">
+                                        Vence: {new Date(doc.fecha).toLocaleDateString('es-CO')}
+                                      </p>
+                                    </div>
+                                    {getDocumentoBadge(doc.estado)}
+                                  </div>
+                                  <div className="flex gap-2">
+                                    {doc.documento && (
+                                      <Button 
+                                        variant="ghost" 
+                                        size="sm"
+                                        onClick={() => handleVerPdf(doc.documento!)}
+                                        className="text-xs"
+                                      >
+                                        <FileText className="h-3 w-3 mr-1" />
+                                        Ver PDF
+                                      </Button>
+                                    )}
+                                    {doc.estado === 'pendiente' && (
+                                      <>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="text-success hover:text-success text-xs"
+                                        >
+                                          <Check className="h-3 w-3" />
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm"
+                                          className="text-destructive hover:text-destructive text-xs"
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </Button>
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
                           </div>
                         ))}
@@ -577,6 +707,22 @@ export default function ValidacionProveedores() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para ver PDF */}
+      <Dialog open={pdfViewerOpen} onOpenChange={setPdfViewerOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle>Visualizar Documento</DialogTitle>
+          </DialogHeader>
+          <div className="h-[70vh] w-full border border-border rounded-lg overflow-hidden">
+            <iframe 
+              src={selectedPdf}
+              className="w-full h-full"
+              title="Documento PDF"
+            />
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -529,11 +529,13 @@ export default function Vehiculos() {
       <DataTable
         title="Lista de Vehículos"
         columns={columns}
-        data={vehiculos}
+        data={statusFilter ? vehiculos.filter(v => v.estado === statusFilter) : vehiculos}
         searchable
         filterable
         exportable
         renderCell={renderCell}
+        statusFilter={true}
+        onStatusFilterChange={setStatusFilter}
       />
 
       {/* Edit Dialog */}

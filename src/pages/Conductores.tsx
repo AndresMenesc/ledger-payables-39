@@ -496,11 +496,13 @@ export default function Conductores() {
       <DataTable
         title="Lista de Conductores"
         columns={columns}
-        data={conductores}
+        data={statusFilter ? conductores.filter(c => c.estado === statusFilter) : conductores}
         searchable
         filterable
         exportable
         renderCell={renderCell}
+        statusFilter={true}
+        onStatusFilterChange={setStatusFilter}
       />
 
       {/* Edit Dialog */}
