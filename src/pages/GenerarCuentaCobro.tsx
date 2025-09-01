@@ -115,43 +115,40 @@ export default function GenerarCuentaCobro() {
         </Card>
       </div>
 
-      {/* Formulario de Creación */}
+      {/* Formulario de Adjuntar Seguridad Social */}
       <Card>
         <CardHeader>
-          <CardTitle>Crear Nueva Cuenta de Cobro</CardTitle>
+          <CardTitle>Documentación Requerida</CardTitle>
           <CardDescription>
-            Complete la información necesaria para generar la cuenta de cobro
+            Adjunte la seguridad social antes de generar la cuenta de cobro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="proveedor">Proveedor</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar proveedor" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="transportes-colombia">Transportes Colombia SAS</SelectItem>
-                    <SelectItem value="movilidad-express">Movilidad Express LTDA</SelectItem>
-                    <SelectItem value="rutas-del-sur">Rutas del Sur S.A.</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="periodo">Período</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Seleccionar período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="enero-2024">Enero 2024</SelectItem>
-                    <SelectItem value="febrero-2024">Febrero 2024</SelectItem>
-                    <SelectItem value="marzo-2024">Marzo 2024</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="seguridadSocial">Adjuntar Seguridad Social</Label>
+              <Input
+                id="seguridadSocial"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                className="cursor-pointer"
+              />
+              <p className="text-sm text-muted-foreground">
+                Formatos permitidos: PDF, JPG, PNG (máx. 5MB)
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="periodo">Período de Facturación</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="enero-2024">Enero 2024</SelectItem>
+                  <SelectItem value="febrero-2024">Febrero 2024</SelectItem>
+                  <SelectItem value="marzo-2024">Marzo 2024</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="observaciones">Observaciones</Label>
@@ -161,7 +158,7 @@ export default function GenerarCuentaCobro() {
                 rows={3}
               />
             </div>
-          </form>
+          </div>
         </CardContent>
       </Card>
 

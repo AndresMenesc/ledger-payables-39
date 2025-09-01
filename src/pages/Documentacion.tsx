@@ -3,76 +3,90 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
-  FileText, Upload, Download, Search, Filter, Eye, 
-  CheckCircle, AlertCircle, Clock, Folder, Calendar,
-  User, Building2
+  FileText, Upload, Download, Search, Eye, 
+  CheckCircle, AlertTriangle, Clock, Folder, Calendar,
+  Building2, X
 } from "lucide-react";
 
 export default function Documentacion() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterEstado, setFilterEstado] = useState("todos");
   const [filterTipo, setFilterTipo] = useState("todos");
+  const [selectedDocument, setSelectedDocument] = useState<any>(null);
+  const [uploadDocument, setUploadDocument] = useState<any>(null);
 
-  // Datos mock de documentos
+  // Datos mock de documentos basados en los 6 documentos de vehículos
   const documentos = [
     {
       id: 1,
-      nombre: "Cuenta de Cobro #001 - Enero 2024",
-      tipo: "Cuenta de Cobro",
-      proveedor: "Transportes Colombia SAS",
-      fecha: "2024-01-15",
-      estado: "Aprobado",
-      tamaño: "2.4 MB",
-      formato: "PDF"
-    },
-    {
-      id: 2,
-      nombre: "RUT - Transportes Colombia SAS",
-      tipo: "Documento Legal",
-      proveedor: "Transportes Colombia SAS",
-      fecha: "2024-01-10",
+      nombre: "Revisión Preventiva",
+      tipo: "Vehículo",
+      fechaVencimiento: "2024-12-31",
       estado: "Vigente",
+      archivo: "revision_preventiva.pdf",
       tamaño: "1.2 MB",
       formato: "PDF"
     },
     {
-      id: 3,
-      nombre: "Certificado RUNT - Vehículo ABC-123",
-      tipo: "Certificado",
-      proveedor: "Movilidad Express LTDA",
-      fecha: "2024-01-12",
-      estado: "Pendiente",
+      id: 2,
+      nombre: "Tecnomecánica",
+      tipo: "Vehículo",
+      fechaVencimiento: "2024-11-30",
+      estado: "Vigente",
+      archivo: "tecnomecanica.pdf",
       tamaño: "890 KB",
       formato: "PDF"
     },
     {
+      id: 3,
+      nombre: "Tarjeta de Operación",
+      tipo: "Vehículo",
+      fechaVencimiento: "2025-06-15",
+      estado: "Vigente",
+      archivo: "tarjeta_operacion.pdf",
+      tamaño: "1.5 MB",
+      formato: "PDF"
+    },
+    {
       id: 4,
-      nombre: "Póliza de Seguros - Vehículo XYZ-789",
+      nombre: "SOAT",
       tipo: "Seguro",
-      proveedor: "Rutas del Sur S.A.",
-      fecha: "2024-01-08",
-      estado: "Vencido",
-      tamaño: "3.1 MB",
+      fechaVencimiento: "2024-10-15",
+      estado: "Por Vencer",
+      archivo: "soat.pdf",
+      tamaño: "567 KB",
       formato: "PDF"
     },
     {
       id: 5,
-      nombre: "Licencia de Conducir - Juan Pérez",
-      tipo: "Licencia",
-      proveedor: "Transportes Colombia SAS",
-      fecha: "2024-01-14",
-      estado: "Vigente",
-      tamaño: "567 KB",
-      formato: "JPG"
+      nombre: "Póliza Contractual",
+      tipo: "Seguro",
+      fechaVencimiento: "2024-09-20",
+      estado: "Vencido",
+      archivo: "poliza_contractual.pdf",
+      tamaño: "2.1 MB",
+      formato: "PDF"
+    },
+    {
+      id: 6,
+      nombre: "Póliza Extra Contractual",
+      tipo: "Seguro",
+      fechaVencimiento: "2024-08-30",
+      estado: "Vencido",
+      archivo: "poliza_extra_contractual.pdf",
+      tamaño: "1.8 MB",
+      formato: "PDF"
     }
   ];
 
   const documentosFiltrados = documentos.filter(doc => {
     const matchesSearch = 
       doc.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.proveedor.toLowerCase().includes(searchTerm.toLowerCase());
+      doc.tipo.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesEstado = filterEstado === "todos" || doc.estado.toLowerCase() === filterEstado;
     const matchesTipo = filterTipo === "todos" || doc.tipo.toLowerCase() === filterTipo.toLowerCase();
     
@@ -81,10 +95,9 @@ export default function Documentacion() {
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
-      case "Aprobado":
       case "Vigente":
         return <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/20">{estado}</Badge>;
-      case "Pendiente":
+      case "Por Vencer":
         return <Badge className="bg-yellow-500/10 text-yellow-700 hover:bg-yellow-500/20">{estado}</Badge>;
       case "Vencido":
         return <Badge className="bg-red-500/10 text-red-700 hover:bg-red-500/20">{estado}</Badge>;
@@ -95,13 +108,12 @@ export default function Documentacion() {
 
   const getEstadoIcon = (estado: string) => {
     switch (estado) {
-      case "Aprobado":
       case "Vigente":
         return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case "Pendiente":
+      case "Por Vencer":
         return <Clock className="h-4 w-4 text-yellow-600" />;
       case "Vencido":
-        return <AlertCircle className="h-4 w-4 text-red-600" />;
+        return <AlertTriangle className="h-4 w-4 text-red-600" />;
       default:
         return <FileText className="h-4 w-4 text-muted-foreground" />;
     }
@@ -114,7 +126,7 @@ export default function Documentacion() {
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Documentación</h1>
           <p className="text-muted-foreground mt-1">
-            Gestión y almacenamiento de documentos de proveedores
+            Gestión de documentos del vehículo y seguros
           </p>
         </div>
         <Button className="w-full sm:w-auto">
@@ -131,45 +143,45 @@ export default function Documentacion() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">248</div>
+            <div className="text-2xl font-bold">6</div>
             <p className="text-xs text-muted-foreground">
-              +12 este mes
+              Total de documentos
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Documentos Vigentes</CardTitle>
+            <CardTitle className="text-sm font-medium">Documentos Vencidos</CardTitle>
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">2</div>
+            <p className="text-xs text-muted-foreground">
+              Requieren actualización
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Por Vencer (30 días)</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">1</div>
+            <p className="text-xs text-muted-foreground">
+              Próximos a vencer
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Actualizados Hoy</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">189</div>
+            <div className="text-2xl font-bold">3</div>
             <p className="text-xs text-muted-foreground">
-              76% del total
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Por Vencer</CardTitle>
-            <AlertCircle className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">23</div>
-            <p className="text-xs text-muted-foreground">
-              Próximos 30 días
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Almacenamiento</CardTitle>
-            <Folder className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">2.1 GB</div>
-            <p className="text-xs text-muted-foreground">
-              de 10 GB disponibles
+              Documentos vigentes
             </p>
           </CardContent>
         </Card>
@@ -197,11 +209,8 @@ export default function Documentacion() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todos los tipos</SelectItem>
-                <SelectItem value="cuenta de cobro">Cuenta de Cobro</SelectItem>
-                <SelectItem value="documento legal">Documento Legal</SelectItem>
-                <SelectItem value="certificado">Certificado</SelectItem>
+                <SelectItem value="vehículo">Vehículo</SelectItem>
                 <SelectItem value="seguro">Seguro</SelectItem>
-                <SelectItem value="licencia">Licencia</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterEstado} onValueChange={setFilterEstado}>
@@ -211,8 +220,7 @@ export default function Documentacion() {
               <SelectContent>
                 <SelectItem value="todos">Todos los estados</SelectItem>
                 <SelectItem value="vigente">Vigente</SelectItem>
-                <SelectItem value="aprobado">Aprobado</SelectItem>
-                <SelectItem value="pendiente">Pendiente</SelectItem>
+                <SelectItem value="por vencer">Por Vencer</SelectItem>
                 <SelectItem value="vencido">Vencido</SelectItem>
               </SelectContent>
             </Select>
@@ -223,47 +231,58 @@ export default function Documentacion() {
       {/* Lista de Documentos */}
       <Card>
         <CardHeader>
-          <CardTitle>Documentos Almacenados</CardTitle>
+          <CardTitle>Documentos del Vehículo</CardTitle>
           <CardDescription>
-            Lista completa de documentos organizados por proveedor
+            Documentos requeridos para operación del vehículo
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {documentosFiltrados.map((doc) => (
+            {documentosFiltrados.map((documento) => (
               <div
-                key={doc.id}
+                key={documento.id}
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
               >
                 <div className="flex items-center space-x-4 min-w-0 flex-1">
-                  {getEstadoIcon(doc.estado)}
+                  {getEstadoIcon(documento.estado)}
                   <div className="min-w-0 flex-1">
-                    <h4 className="font-medium truncate">{doc.nombre}</h4>
+                    <h4 className="font-medium truncate">{documento.nombre}</h4>
                     <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
                       <span className="flex items-center gap-1">
                         <Building2 className="h-3 w-3" />
-                        <span className="truncate">{doc.proveedor}</span>
+                        <span className="truncate">{documento.tipo}</span>
                       </span>
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {doc.fecha}
+                        Vence: {documento.fechaVencimiento}
                       </span>
-                      <Badge variant="outline" className="text-xs">
-                        {doc.tipo}
-                      </Badge>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 ml-4">
                   <div className="text-right hidden sm:block">
-                    <div className="text-sm font-medium">{doc.formato}</div>
-                    <div className="text-xs text-muted-foreground">{doc.tamaño}</div>
+                    <div className="text-sm font-medium">{documento.formato}</div>
+                    <div className="text-xs text-muted-foreground">{documento.tamaño}</div>
                   </div>
-                  {getEstadoBadge(doc.estado)}
+                  {getEstadoBadge(documento.estado)}
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm">
+                    <Button
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => setSelectedDocument(documento)}
+                    >
                       <Eye className="h-4 w-4" />
                     </Button>
+                    {(documento.estado === "Vencido" || documento.estado === "Por Vencer") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setUploadDocument(documento)}
+                      >
+                        <Upload className="h-4 w-4 mr-1" />
+                        Adjuntar
+                      </Button>
+                    )}
                     <Button variant="ghost" size="sm">
                       <Download className="h-4 w-4" />
                     </Button>
@@ -281,47 +300,56 @@ export default function Documentacion() {
         </CardContent>
       </Card>
 
-      {/* Acciones Rápidas */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Acciones Rápidas</CardTitle>
-          <CardDescription>
-            Herramientas para gestión masiva de documentos
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Button variant="outline" className="h-auto p-4">
-              <div className="text-center">
-                <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Carga Masiva</div>
-                <div className="text-xs text-muted-foreground">Subir múltiples documentos</div>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4">
-              <div className="text-center">
-                <Download className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Exportar Todo</div>
-                <div className="text-xs text-muted-foreground">Descargar documentos seleccionados</div>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4">
-              <div className="text-center">
-                <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Por Vencer</div>
-                <div className="text-xs text-muted-foreground">Revisar documentos próximos a vencer</div>
-              </div>
-            </Button>
-            <Button variant="outline" className="h-auto p-4">
-              <div className="text-center">
-                <FileText className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                <div className="font-medium">Generar Reporte</div>
-                <div className="text-xs text-muted-foreground">Estado de documentación</div>
-              </div>
-            </Button>
+      {/* Modal para vista previa del documento */}
+      <Dialog open={!!selectedDocument} onOpenChange={() => setSelectedDocument(null)}>
+        <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Vista Previa - {selectedDocument?.nombre}</DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 bg-muted/30 rounded-lg p-4 min-h-[500px] flex items-center justify-center">
+            <div className="text-center">
+              <FileText className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+              <p className="text-muted-foreground">
+                Vista previa del documento: {selectedDocument?.archivo}
+              </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Fecha de vencimiento: {selectedDocument?.fechaVencimiento}
+              </p>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para adjuntar documento */}
+      <Dialog open={!!uploadDocument} onOpenChange={() => setUploadDocument(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adjuntar Documento - {uploadDocument?.nombre}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="file">Seleccionar archivo</Label>
+              <Input id="file" type="file" accept=".pdf,.jpg,.jpeg,.png" />
+            </div>
+            <div>
+              <Label htmlFor="fecha">Nueva fecha de vencimiento</Label>
+              <Input id="fecha" type="date" />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setUploadDocument(null)}>
+                Cancelar
+              </Button>
+              <Button onClick={() => {
+                // Aquí iría la lógica para subir el archivo
+                alert('Documento adjuntado exitosamente');
+                setUploadDocument(null);
+              }}>
+                Adjuntar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
