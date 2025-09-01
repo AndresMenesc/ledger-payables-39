@@ -15,13 +15,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 interface Conductor {
   id: string;
   nombreCompleto: string;
-  identificacion: string;
-  telefono: string;
-  email: string;
-  direccion: string;
-  fechaNacimiento: string;
-  licenciaConducir: string;
-  fechaVencimientoLicencia: string;
   proveedor: string;
   estado: "activo" | "inactivo";
   fechaCreacion: string;
@@ -30,6 +23,11 @@ interface Conductor {
     bloqueado: boolean;
     fechaBloqueo?: string;
     ultimoLogin?: string;
+  };
+  documentos: {
+    seguridadSocial: string;
+    licenciaConduccion: string;
+    examenesPsicosensometricos: string;
   };
 }
 
@@ -47,13 +45,6 @@ const mockConductores: Conductor[] = [
   {
     id: "1",
     nombreCompleto: "Juan Carlos Pérez",
-    identificacion: "12345678",
-    telefono: "300-123-4567",
-    email: "juan.perez@email.com",
-    direccion: "Calle 123 #45-67",
-    fechaNacimiento: "1985-05-15",
-    licenciaConducir: "C1-987654321",
-    fechaVencimientoLicencia: "2025-12-31",
     proveedor: "Transportes del Valle",
     estado: "activo",
     fechaCreacion: "2024-01-15",
@@ -61,18 +52,16 @@ const mockConductores: Conductor[] = [
     usuarioBloqueo: {
       bloqueado: false,
       ultimoLogin: "2024-01-14 10:30:00"
+    },
+    documentos: {
+      seguridadSocial: "2025-06-30",
+      licenciaConduccion: "2025-12-31",
+      examenesPsicosensometricos: "2024-12-15"
     }
   },
   {
     id: "2",
     nombreCompleto: "María José García",
-    identificacion: "87654321",
-    telefono: "301-987-6543",
-    email: "maria.garcia@email.com",
-    direccion: "Carrera 45 #67-89",
-    fechaNacimiento: "1990-08-22",
-    licenciaConducir: "C2-123456789",
-    fechaVencimientoLicencia: "2026-06-15",
     proveedor: "Logística Andina",
     estado: "inactivo",
     fechaCreacion: "2024-01-10",
@@ -81,6 +70,11 @@ const mockConductores: Conductor[] = [
       bloqueado: true,
       fechaBloqueo: "2024-01-20 15:45:00",
       ultimoLogin: "2024-01-19 08:15:00"
+    },
+    documentos: {
+      seguridadSocial: "2024-11-20",
+      licenciaConduccion: "2026-06-15",
+      examenesPsicosensometricos: "2024-09-10"
     }
   }
 ];
@@ -94,22 +88,24 @@ export default function Conductores() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showDocumentDialog, setShowDocumentDialog] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<{ conductor: Conductor; newStatus: "activo" | "inactivo" } | null>(null);
   const [pendingBlockChange, setPendingBlockChange] = useState<{ conductor: Conductor; block: boolean } | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<{ conductor: Conductor; tipo: keyof Conductor['documentos'] } | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
   const { toast } = useToast();
 
   const form = useForm({
     defaultValues: {
       nombreCompleto: "",
-      identificacion: "",
-      telefono: "",
-      email: "",
-      direccion: "",
-      fechaNacimiento: "",
-      licenciaConducir: "",
-      fechaVencimientoLicencia: "",
       proveedor: ""
+    }
+  });
+
+  const documentForm = useForm({
+    defaultValues: {
+      fecha: "",
+      archivo: null
     }
   });
 
@@ -120,21 +116,16 @@ export default function Conductores() {
       sortable: true
     },
     {
-      key: "identificacion", 
-      label: "Identificación",
-      sortable: true
+      key: "seguridadSocial",
+      label: "Seguridad Social"
     },
     {
-      key: "telefono",
-      label: "Teléfono"
+      key: "licenciaConduccion",
+      label: "Licencia de Conducción"
     },
     {
-      key: "email",
-      label: "Correo"
-    },
-    {
-      key: "licenciaConducir",
-      label: "Licencia"
+      key: "examenesPsicosensometricos",
+      label: "Exámenes Psicosensométricos"
     },
     {
       key: "estado",
@@ -150,6 +141,52 @@ export default function Conductores() {
     }
   ];
 
+  const getStatusBadge = (fecha: string) => {
+    const today = new Date();
+    const expirationDate = new Date(fecha);
+    const diffTime = expirationDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { status: "vencido", variant: "destructive" as const, text: "Vencido" };
+    } else if (diffDays <= 7) {
+      return { status: "por-vencer", variant: "secondary" as const, text: "Por vencer" };
+    } else {
+      return { status: "vigente", variant: "default" as const, text: "Vigente" };
+    }
+  };
+
+  const handleDocumentClick = (conductor: Conductor, tipo: keyof Conductor['documentos']) => {
+    setSelectedDocument({ conductor, tipo });
+    documentForm.setValue("fecha", conductor.documentos[tipo]);
+    setShowDocumentDialog(true);
+  };
+
+  const handleDocumentUpdate = (data: any) => {
+    if (!selectedDocument) return;
+    
+    const updatedConductores = conductores.map(c =>
+      c.id === selectedDocument.conductor.id
+        ? { 
+            ...c, 
+            documentos: {
+              ...c.documentos,
+              [selectedDocument.tipo]: data.fecha
+            },
+            fechaActualizacion: new Date().toISOString().split('T')[0] 
+          }
+        : c
+    );
+    setConductores(updatedConductores);
+    setShowDocumentDialog(false);
+    setSelectedDocument(null);
+    documentForm.reset();
+    toast({
+      title: "Documento actualizado",
+      description: "La fecha del documento ha sido actualizada."
+    });
+  };
+
   const handleCreate = (data: any) => {
     const newConductor: Conductor = {
       id: Date.now().toString(),
@@ -159,6 +196,11 @@ export default function Conductores() {
       fechaActualizacion: new Date().toISOString().split('T')[0],
       usuarioBloqueo: {
         bloqueado: false
+      },
+      documentos: {
+        seguridadSocial: "",
+        licenciaConduccion: "",
+        examenesPsicosensometricos: ""
       }
     };
     setConductores([...conductores, newConductor]);
@@ -265,9 +307,9 @@ export default function Conductores() {
       },
       {
         id: "2",
-        campo: "telefono",
-        valorAnterior: "300-111-1111",
-        valorNuevo: conductor.telefono,
+        campo: "documentos.seguridadSocial",
+        valorAnterior: "2024-06-30",
+        valorNuevo: conductor.documentos.seguridadSocial,
         usuario: "admin@sistema.com",
         fecha: conductor.fechaActualizacion + " 14:30:00",
         tipo: "actualizacion"
@@ -285,6 +327,37 @@ export default function Conductores() {
           <div>
             <div className="font-medium">{conductor.nombreCompleto}</div>
             <div className="text-sm text-muted-foreground">{conductor.proveedor}</div>
+          </div>
+        );
+      case "seguridadSocial":
+      case "licenciaConduccion":
+      case "examenesPsicosensometricos":
+        const fecha = conductor.documentos[key as keyof Conductor['documentos']];
+        if (!fecha) {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDocumentClick(conductor, key as keyof Conductor['documentos'])}
+            >
+              Sin fecha
+            </Button>
+          );
+        }
+        const badge = getStatusBadge(fecha);
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">{new Date(fecha).toLocaleDateString()}</div>
+            <Button
+              variant={badge.variant}
+              size="sm"
+              className={`w-full ${badge.status === 'vencido' ? 'bg-red-600 hover:bg-red-700' : 
+                badge.status === 'por-vencer' ? 'bg-yellow-600 hover:bg-yellow-700' : 
+                'bg-green-600 hover:bg-green-700'}`}
+              onClick={() => handleDocumentClick(conductor, key as keyof Conductor['documentos'])}
+            >
+              {badge.text}
+            </Button>
           </div>
         );
       case "estado":
@@ -387,97 +460,6 @@ export default function Conductores() {
                 />
                 <FormField
                   control={form.control}
-                  name="identificacion"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Identificación</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="telefono"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teléfono</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Correo</FormLabel>
-                      <FormControl>
-                        <Input type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="direccion"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Dirección</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fechaNacimiento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Fecha de Nacimiento</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="licenciaConducir"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Licencia de Conducir</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fechaVencimientoLicencia"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vencimiento Licencia</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="proveedor"
                   render={({ field }) => (
                     <FormItem>
@@ -489,9 +471,9 @@ export default function Conductores() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="transportes-valle">Transportes del Valle</SelectItem>
-                          <SelectItem value="logistica-andina">Logística Andina</SelectItem>
-                          <SelectItem value="rapido-express">Rápido Express</SelectItem>
+                          <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
+                          <SelectItem value="Logística Andina">Logística Andina</SelectItem>
+                          <SelectItem value="Rápido Express">Rápido Express</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -543,97 +525,6 @@ export default function Conductores() {
               />
               <FormField
                 control={form.control}
-                name="identificacion"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Identificación</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="telefono"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Teléfono</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Correo</FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="direccion"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Dirección</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="fechaNacimiento"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de Nacimiento</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="licenciaConducir"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Licencia de Conducir</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="fechaVencimientoLicencia"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vencimiento Licencia</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="proveedor"
                 render={({ field }) => (
                   <FormItem>
@@ -645,9 +536,9 @@ export default function Conductores() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="transportes-valle">Transportes del Valle</SelectItem>
-                        <SelectItem value="logistica-andina">Logística Andina</SelectItem>
-                        <SelectItem value="rapido-express">Rápido Express</SelectItem>
+                        <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
+                        <SelectItem value="Logística Andina">Logística Andina</SelectItem>
+                        <SelectItem value="Rápido Express">Rápido Express</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -750,6 +641,51 @@ export default function Conductores() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Document Update Dialog */}
+      <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Actualizar Documento</DialogTitle>
+          </DialogHeader>
+          <Form {...documentForm}>
+            <form onSubmit={documentForm.handleSubmit(handleDocumentUpdate)} className="space-y-4">
+              <FormField
+                control={documentForm.control}
+                name="fecha"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha de Vencimiento</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={documentForm.control}
+                name="archivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Documento PDF</FormLabel>
+                    <FormControl>
+                      <Input type="file" accept=".pdf" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setShowDocumentDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Actualizar</Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

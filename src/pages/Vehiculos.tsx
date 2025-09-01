@@ -15,16 +15,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 interface Vehiculo {
   id: string;
   placa: string;
-  marca: string;
-  modelo: string;
-  año: string;
-  color: string;
-  tipoVehiculo: string;
-  capacidadCarga: string;
-  numeroChasis: string;
-  numeroMotor: string;
-  fechaVencimientoSOAT: string;
-  fechaVencimientoTecnomecanica: string;
   proveedor: string;
   estado: "activo" | "inactivo";
   fechaCreacion: string;
@@ -34,6 +24,20 @@ interface Vehiculo {
     fechaBloqueo?: string;
     ultimoLogin?: string;
   };
+  documentos: {
+    revisionPreventiva: string;
+    tecnomecanica: string;
+    tarjetaOperacion: string;
+    soat: string;
+    polizaContractual: string;
+    polizaExtraContractual: string;
+  };
+}
+
+interface DocumentoUpdate {
+  tipo: keyof Vehiculo['documentos'];
+  fecha: string;
+  archivo?: File;
 }
 
 interface HistorialCambio {
@@ -50,16 +54,6 @@ const mockVehiculos: Vehiculo[] = [
   {
     id: "1",
     placa: "ABC123",
-    marca: "Chevrolet",
-    modelo: "NPR",
-    año: "2020",
-    color: "Blanco",
-    tipoVehiculo: "Camión",
-    capacidadCarga: "3.5 Ton",
-    numeroChasis: "CH123456789",
-    numeroMotor: "MT987654321",
-    fechaVencimientoSOAT: "2024-12-31",
-    fechaVencimientoTecnomecanica: "2024-11-30",
     proveedor: "Transportes del Valle",
     estado: "activo",
     fechaCreacion: "2024-01-15",
@@ -67,21 +61,19 @@ const mockVehiculos: Vehiculo[] = [
     usuarioBloqueo: {
       bloqueado: false,
       ultimoLogin: "2024-01-14 10:30:00"
+    },
+    documentos: {
+      revisionPreventiva: "2024-12-31",
+      tecnomecanica: "2024-11-30",
+      tarjetaOperacion: "2025-06-15",
+      soat: "2024-10-20",
+      polizaContractual: "2025-03-10",
+      polizaExtraContractual: "2025-01-25"
     }
   },
   {
     id: "2",
     placa: "XYZ789",
-    marca: "Ford",
-    modelo: "Transit",
-    año: "2019",
-    color: "Azul",
-    tipoVehiculo: "Van",
-    capacidadCarga: "2.0 Ton",
-    numeroChasis: "FD123456789",
-    numeroMotor: "FM987654321",
-    fechaVencimientoSOAT: "2024-10-15",
-    fechaVencimientoTecnomecanica: "2024-09-20",
     proveedor: "Logística Andina",
     estado: "inactivo",
     fechaCreacion: "2024-01-10",
@@ -90,6 +82,14 @@ const mockVehiculos: Vehiculo[] = [
       bloqueado: true,
       fechaBloqueo: "2024-01-20 15:45:00",
       ultimoLogin: "2024-01-19 08:15:00"
+    },
+    documentos: {
+      revisionPreventiva: "2024-09-15",
+      tecnomecanica: "2024-09-20",
+      tarjetaOperacion: "2025-02-28",
+      soat: "2024-08-30",
+      polizaContractual: "2024-12-05",
+      polizaExtraContractual: "2024-11-18"
     }
   }
 ];
@@ -103,54 +103,56 @@ export default function Vehiculos() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showDocumentDialog, setShowDocumentDialog] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<{ vehiculo: Vehiculo; newStatus: "activo" | "inactivo" } | null>(null);
   const [pendingBlockChange, setPendingBlockChange] = useState<{ vehiculo: Vehiculo; block: boolean } | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<{ vehiculo: Vehiculo; tipo: keyof Vehiculo['documentos'] } | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
   const { toast } = useToast();
 
   const form = useForm({
     defaultValues: {
       placa: "",
-      marca: "",
-      modelo: "",
-      año: "",
-      color: "",
-      tipoVehiculo: "",
-      capacidadCarga: "",
-      numeroChasis: "",
-      numeroMotor: "",
-      fechaVencimientoSOAT: "",
-      fechaVencimientoTecnomecanica: "",
       proveedor: ""
+    }
+  });
+
+  const documentForm = useForm({
+    defaultValues: {
+      fecha: "",
+      archivo: null
     }
   });
 
   const columns = [
     {
       key: "placa",
-      label: "Vehículo",
+      label: "Placa",
       sortable: true
     },
     {
-      key: "marca", 
-      label: "Marca",
-      sortable: true
+      key: "revisionPreventiva",
+      label: "Revisión Preventiva"
     },
     {
-      key: "modelo",
-      label: "Modelo"
+      key: "tecnomecanica",
+      label: "Tecnomecanica"
     },
     {
-      key: "año",
-      label: "Año"
+      key: "tarjetaOperacion",
+      label: "Tarjeta de Operación"
     },
     {
-      key: "tipoVehiculo",
-      label: "Tipo"
+      key: "soat",
+      label: "SOAT"
     },
     {
-      key: "capacidadCarga",
-      label: "Capacidad"
+      key: "polizaContractual",
+      label: "Póliza Contractual"
+    },
+    {
+      key: "polizaExtraContractual",
+      label: "Póliza Extra Contractual"
     },
     {
       key: "estado",
@@ -166,6 +168,52 @@ export default function Vehiculos() {
     }
   ];
 
+  const getStatusBadge = (fecha: string) => {
+    const today = new Date();
+    const expirationDate = new Date(fecha);
+    const diffTime = expirationDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) {
+      return { status: "vencido", variant: "destructive" as const, text: "Vencido" };
+    } else if (diffDays <= 7) {
+      return { status: "por-vencer", variant: "secondary" as const, text: "Por vencer" };
+    } else {
+      return { status: "vigente", variant: "default" as const, text: "Vigente" };
+    }
+  };
+
+  const handleDocumentClick = (vehiculo: Vehiculo, tipo: keyof Vehiculo['documentos']) => {
+    setSelectedDocument({ vehiculo, tipo });
+    documentForm.setValue("fecha", vehiculo.documentos[tipo]);
+    setShowDocumentDialog(true);
+  };
+
+  const handleDocumentUpdate = (data: any) => {
+    if (!selectedDocument) return;
+    
+    const updatedVehiculos = vehiculos.map(v =>
+      v.id === selectedDocument.vehiculo.id
+        ? { 
+            ...v, 
+            documentos: {
+              ...v.documentos,
+              [selectedDocument.tipo]: data.fecha
+            },
+            fechaActualizacion: new Date().toISOString().split('T')[0] 
+          }
+        : v
+    );
+    setVehiculos(updatedVehiculos);
+    setShowDocumentDialog(false);
+    setSelectedDocument(null);
+    documentForm.reset();
+    toast({
+      title: "Documento actualizado",
+      description: "La fecha del documento ha sido actualizada."
+    });
+  };
+
   const handleCreate = (data: any) => {
     const newVehiculo: Vehiculo = {
       id: Date.now().toString(),
@@ -175,6 +223,14 @@ export default function Vehiculos() {
       fechaActualizacion: new Date().toISOString().split('T')[0],
       usuarioBloqueo: {
         bloqueado: false
+      },
+      documentos: {
+        revisionPreventiva: "",
+        tecnomecanica: "",
+        tarjetaOperacion: "",
+        soat: "",
+        polizaContractual: "",
+        polizaExtraContractual: ""
       }
     };
     setVehiculos([...vehiculos, newVehiculo]);
@@ -281,9 +337,9 @@ export default function Vehiculos() {
       },
       {
         id: "2",
-        campo: "fechaVencimientoSOAT",
+        campo: "documentos.soat",
         valorAnterior: "2024-06-30",
-        valorNuevo: vehiculo.fechaVencimientoSOAT,
+        valorNuevo: vehiculo.documentos.soat,
         usuario: "admin@sistema.com",
         fecha: vehiculo.fechaActualizacion + " 14:30:00",
         tipo: "actualizacion"
@@ -301,6 +357,40 @@ export default function Vehiculos() {
           <div>
             <div className="font-medium">{vehiculo.placa}</div>
             <div className="text-sm text-muted-foreground">{vehiculo.proveedor}</div>
+          </div>
+        );
+      case "revisionPreventiva":
+      case "tecnomecanica":
+      case "tarjetaOperacion":
+      case "soat":
+      case "polizaContractual":
+      case "polizaExtraContractual":
+        const fecha = vehiculo.documentos[key as keyof Vehiculo['documentos']];
+        if (!fecha) {
+          return (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleDocumentClick(vehiculo, key as keyof Vehiculo['documentos'])}
+            >
+              Sin fecha
+            </Button>
+          );
+        }
+        const badge = getStatusBadge(fecha);
+        return (
+          <div className="space-y-1">
+            <div className="text-xs">{new Date(fecha).toLocaleDateString()}</div>
+            <Button
+              variant={badge.variant}
+              size="sm"
+              className={`w-full ${badge.status === 'vencido' ? 'bg-red-600 hover:bg-red-700' : 
+                badge.status === 'por-vencer' ? 'bg-yellow-600 hover:bg-yellow-700' : 
+                'bg-green-600 hover:bg-green-700'}`}
+              onClick={() => handleDocumentClick(vehiculo, key as keyof Vehiculo['documentos'])}
+            >
+              {badge.text}
+            </Button>
           </div>
         );
       case "estado":
@@ -403,146 +493,6 @@ export default function Vehiculos() {
                 />
                 <FormField
                   control={form.control}
-                  name="marca"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Marca</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="modelo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Modelo</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="año"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Año</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="color"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Color</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="tipoVehiculo"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tipo de Vehículo</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar tipo" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="camion">Camión</SelectItem>
-                          <SelectItem value="van">Van</SelectItem>
-                          <SelectItem value="camioneta">Camioneta</SelectItem>
-                          <SelectItem value="trailer">Tráiler</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="capacidadCarga"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Capacidad de Carga</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="Ej: 3.5 Ton" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="numeroChasis"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número de Chasis</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="numeroMotor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Número de Motor</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fechaVencimientoSOAT"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vencimiento SOAT</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="fechaVencimientoTecnomecanica"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Vencimiento Tecnomecánica</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="proveedor"
                   render={({ field }) => (
                     <FormItem>
@@ -554,9 +504,9 @@ export default function Vehiculos() {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="transportes-valle">Transportes del Valle</SelectItem>
-                          <SelectItem value="logistica-andina">Logística Andina</SelectItem>
-                          <SelectItem value="rapido-express">Rápido Express</SelectItem>
+                          <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
+                          <SelectItem value="Logística Andina">Logística Andina</SelectItem>
+                          <SelectItem value="Rápido Express">Rápido Express</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -608,146 +558,6 @@ export default function Vehiculos() {
               />
               <FormField
                 control={form.control}
-                name="marca"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Marca</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="modelo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Modelo</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="año"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Año</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="color"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Color</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="tipoVehiculo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tipo de Vehículo</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar tipo" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="camion">Camión</SelectItem>
-                        <SelectItem value="van">Van</SelectItem>
-                        <SelectItem value="camioneta">Camioneta</SelectItem>
-                        <SelectItem value="trailer">Tráiler</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="capacidadCarga"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Capacidad de Carga</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="Ej: 3.5 Ton" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="numeroChasis"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número de Chasis</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="numeroMotor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Número de Motor</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="fechaVencimientoSOAT"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vencimiento SOAT</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="fechaVencimientoTecnomecanica"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vencimiento Tecnomecánica</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
                 name="proveedor"
                 render={({ field }) => (
                   <FormItem>
@@ -759,9 +569,9 @@ export default function Vehiculos() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="transportes-valle">Transportes del Valle</SelectItem>
-                        <SelectItem value="logistica-andina">Logística Andina</SelectItem>
-                        <SelectItem value="rapido-express">Rápido Express</SelectItem>
+                        <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
+                        <SelectItem value="Logística Andina">Logística Andina</SelectItem>
+                        <SelectItem value="Rápido Express">Rápido Express</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -864,6 +674,51 @@ export default function Vehiculos() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Document Update Dialog */}
+      <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Actualizar Documento</DialogTitle>
+          </DialogHeader>
+          <Form {...documentForm}>
+            <form onSubmit={documentForm.handleSubmit(handleDocumentUpdate)} className="space-y-4">
+              <FormField
+                control={documentForm.control}
+                name="fecha"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha de Vencimiento</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={documentForm.control}
+                name="archivo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Documento PDF</FormLabel>
+                    <FormControl>
+                      <Input type="file" accept=".pdf" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setShowDocumentDialog(false)}>
+                  Cancelar
+                </Button>
+                <Button type="submit">Actualizar</Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
