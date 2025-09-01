@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   BarChart3, FileText, Clock, Package, CheckCircle, 
   DollarSign, AlertTriangle, CreditCard, Truck, Building2,
-  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users, User
+  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users, User, FileCheck
 } from "lucide-react"
 import {
   Sidebar,
@@ -99,6 +99,11 @@ const navigationItems = [
     title: "Vehículos",
     url: "/vehiculos",
     icon: Truck
+  },
+  {
+    title: "FUEC",
+    url: "/fuec",
+    icon: FileCheck
   },
   {
     title: "Préstamos",

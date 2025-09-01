@@ -19,6 +19,7 @@ import ValidacionProveedores from "./pages/ValidacionProveedores";
 import Conductores from "./pages/Conductores";
 import Vehiculos from "./pages/Vehiculos";
 import Prestamos from "./pages/Prestamos";
+import FUEC from "./pages/FUEC";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +63,7 @@ const App = () => (
                   <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
                   <Route path="conductores" element={<Conductores />} />
                   <Route path="vehiculos" element={<Vehiculos />} />
+                  <Route path="fuec" element={<FUEC />} />
                   <Route path="prestamos" element={<Prestamos />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
