@@ -237,7 +237,7 @@ export default function Facturas() {
   }
 
   const filteredData = mockFacturas.filter(factura => {
-    if (filters.contrato && !factura.contrato.toLowerCase().includes(filters.contrato.toLowerCase())) return false
+    if (filters.contrato && filters.contrato !== "todos" && !factura.contrato.toLowerCase().includes(filters.contrato.toLowerCase())) return false
     if (filters.numeroFactura && !factura.numeroFactura.toLowerCase().includes(filters.numeroFactura.toLowerCase())) return false
     return true
   })
@@ -294,7 +294,7 @@ export default function Facturas() {
                   <SelectValue placeholder="Seleccionar" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos</SelectItem>
+                  <SelectItem value="todos">Todos</SelectItem>
                   {mockContratos.map(contrato => (
                     <SelectItem key={contrato} value={contrato}>{contrato}</SelectItem>
                   ))}
