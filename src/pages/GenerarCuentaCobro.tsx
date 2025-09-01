@@ -61,10 +61,6 @@ export default function GenerarCuentaCobro() {
             Crea cuentas de cobro para servicios de transporte realizados
           </p>
         </div>
-        <Button className="w-full sm:w-auto">
-          <Plus className="w-4 h-4 mr-2" />
-          Nueva Cuenta de Cobro
-        </Button>
       </div>
 
       {/* Stats Cards */}
@@ -95,13 +91,13 @@ export default function GenerarCuentaCobro() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Proveedores Activos</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Servicios Completados</CardTitle>
+            <User className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">18</div>
+            <div className="text-2xl font-bold">42</div>
             <p className="text-xs text-muted-foreground">
-              +2 nuevos este mes
+              +5 este mes
             </p>
           </CardContent>
         </Card>
@@ -111,9 +107,9 @@ export default function GenerarCuentaCobro() {
             <FileText className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">156</div>
+            <div className="text-2xl font-bold">6</div>
             <p className="text-xs text-muted-foreground">
-              +23 este mes
+              +2 este mes
             </p>
           </CardContent>
         </Card>
@@ -140,19 +136,6 @@ export default function GenerarCuentaCobro() {
               <p className="text-sm text-muted-foreground">
                 Formatos permitidos: PDF, JPG, PNG (máx. 5MB)
               </p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="periodo">Período de Facturación</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar período" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="enero-2024">Enero 2024</SelectItem>
-                  <SelectItem value="febrero-2024">Febrero 2024</SelectItem>
-                  <SelectItem value="marzo-2024">Marzo 2024</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="observaciones">Observaciones</Label>
