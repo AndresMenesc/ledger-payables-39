@@ -93,6 +93,7 @@ export default function Conductores() {
   const [pendingBlockChange, setPendingBlockChange] = useState<{ conductor: Conductor; block: boolean } | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<{ conductor: Conductor; tipo: keyof Conductor['documentos'] } | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
+  const [statusFilter, setStatusFilter] = useState("")
   const { toast } = useToast();
 
   const form = useForm({

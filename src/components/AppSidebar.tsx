@@ -86,6 +86,11 @@ const navigationItems = [
     icon: Users
   },
   {
+    title: "Validación de Proveedores",
+    url: "/validacion-proveedores",
+    icon: CheckCircle
+  },
+  {
     title: "Conductores",
     url: "/conductores",
     icon: User

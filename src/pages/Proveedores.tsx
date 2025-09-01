@@ -128,6 +128,7 @@ const proveedoresData: Proveedor[] = [
 ]
 
 export default function Proveedores() {
+  const [statusFilter, setStatusFilter] = useState("")
   const { toast } = useToast()
   const [selectedProveedor, setSelectedProveedor] = useState<Proveedor | null>(null)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
@@ -687,12 +688,14 @@ export default function Proveedores() {
         <CardContent>
           <DataTable
             columns={columns}
-            data={proveedoresData}
+            data={statusFilter ? proveedoresData.filter(p => p.estado === statusFilter) : proveedoresData}
             searchable
             filterable
             exportable
             renderCell={renderCell}
             title="Proveedores"
+            statusFilter={true}
+            onStatusFilterChange={setStatusFilter}
           />
         </CardContent>
       </Card>

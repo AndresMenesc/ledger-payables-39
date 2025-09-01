@@ -15,6 +15,7 @@ import LotesAprobados from "./pages/LotesAprobados";
 import CuentaCobro from "./pages/CuentaCobro";
 import PQR from "./pages/PQR";
 import Proveedores from "./pages/Proveedores";
+import ValidacionProveedores from "./pages/ValidacionProveedores";
 import Conductores from "./pages/Conductores";
 import Vehiculos from "./pages/Vehiculos";
 import Prestamos from "./pages/Prestamos";
@@ -58,6 +59,7 @@ const App = () => (
                   <Route path="cuenta-cobro" element={<CuentaCobro />} />
                   <Route path="pqr" element={<PQR />} />
                   <Route path="proveedores" element={<Proveedores />} />
+                  <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
                   <Route path="conductores" element={<Conductores />} />
                   <Route path="vehiculos" element={<Vehiculos />} />
                   <Route path="prestamos" element={<Prestamos />} />

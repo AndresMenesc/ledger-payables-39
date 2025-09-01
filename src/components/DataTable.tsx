@@ -23,6 +23,8 @@ interface DataTableProps {
   actions?: (row: any) => React.ReactNode
   renderCell?: (key: string, value: any, row: any) => React.ReactNode
   summary?: React.ReactNode
+  statusFilter?: boolean
+  onStatusFilterChange?: (status: string) => void
 }
 
 export function DataTable({
@@ -34,7 +36,9 @@ export function DataTable({
   exportable = true,
   actions,
   renderCell,
-  summary
+  summary,
+  statusFilter = false,
+  onStatusFilterChange
 }: DataTableProps) {
   const [searchTerm, setSearchTerm] = useState("")
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null)
@@ -118,6 +122,17 @@ export function DataTable({
             )}
             
             <div className="flex gap-2">
+              {statusFilter && (
+                <select 
+                  className="px-3 py-1.5 text-sm border border-input bg-background rounded-md"
+                  onChange={(e) => onStatusFilterChange?.(e.target.value)}
+                >
+                  <option value="">Todos los estados</option>
+                  <option value="activo">Activo</option>
+                  <option value="inactivo">Inactivo</option>
+                </select>
+              )}
+              
               {filterable && (
                 <Button variant="outline" size="sm">
                   <Filter className="h-4 w-4 mr-2" />

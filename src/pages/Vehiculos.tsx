@@ -108,6 +108,7 @@ export default function Vehiculos() {
   const [pendingBlockChange, setPendingBlockChange] = useState<{ vehiculo: Vehiculo; block: boolean } | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<{ vehiculo: Vehiculo; tipo: keyof Vehiculo['documentos'] } | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
+  const [statusFilter, setStatusFilter] = useState("")
   const { toast } = useToast();
 
   const form = useForm({
