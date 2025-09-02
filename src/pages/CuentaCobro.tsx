@@ -112,7 +112,7 @@ const contratistasFaltantes = [
 const detalleServicios = [
   {
     id: 1,
-    cliente: "CINEMARK COLOMBIA FLORESTA",
+    cliente: "Center Source",
     origen: "ENGATIVA",
     destino: "ENGATIVA",
     fecha: "Julio 01, 2025",
@@ -124,7 +124,7 @@ const detalleServicios = [
   },
   {
     id: 2,
-    cliente: "CINEMARK COLOMBIA FLORESTA",
+    cliente: "Center Source",
     origen: "ENGATIVA",
     destino: "ENGATIVA",
     fecha: "Julio 02, 2025",
@@ -136,7 +136,7 @@ const detalleServicios = [
   },
   {
     id: 3,
-    cliente: "CINEMARK COLOMBIA FLORESTA",
+    cliente: "Center Source",
     origen: "ENGATIVA",
     destino: "ENGATIVA",
     fecha: "Julio 03, 2025",
