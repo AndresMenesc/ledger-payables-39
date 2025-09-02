@@ -452,6 +452,20 @@ export default function LotesAprobados() {
     return value
   }
 
+  const handleExportBCOL = (loteId: number) => {
+    console.log(`Exportando archivo BCOL para lote ${loteId}`)
+    // Simulación de exportación Excel con datos bancarios para BCOL
+    const fileName = `BCOL_Lote_${loteId}_${new Date().toISOString().slice(0, 10)}.xlsx`
+    console.log(`Archivo generado: ${fileName}`)
+  }
+
+  const handleExportBDAV = (loteId: number) => {
+    console.log(`Exportando archivo BDAV para lote ${loteId}`)
+    // Simulación de exportación Excel con datos bancarios para BDAV
+    const fileName = `BDAV_Lote_${loteId}_${new Date().toISOString().slice(0, 10)}.xlsx`
+    console.log(`Archivo generado: ${fileName}`)
+  }
+
   const actions = (row: any) => (
     <div className="flex gap-2">
       <Button 
@@ -468,11 +482,20 @@ export default function LotesAprobados() {
       
       <Button 
         size="sm"
-        variant="outline"
-        onClick={() => handleDownloadReport(row.id)}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white"
+        onClick={() => handleExportBCOL(row.id)}
       >
         <Download className="h-4 w-4 mr-2" />
-        Reporte
+        BCOL
+      </Button>
+
+      <Button 
+        size="sm"
+        className="bg-red-500 hover:bg-red-600 text-white"
+        onClick={() => handleExportBDAV(row.id)}
+      >
+        <Download className="h-4 w-4 mr-2" />
+        BDAV
       </Button>
     </div>
   )
