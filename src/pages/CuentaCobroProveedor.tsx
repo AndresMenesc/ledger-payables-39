@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { Eye, Download, Truck, MapPin, Clock, Calculator, Building2, FileText, Users, Calendar, CheckCircle, X, Upload, Mail } from "lucide-react"
+import { Eye, Download, Truck, MapPin, Clock, Calculator, Building2, FileText, Users, Calendar, CheckCircle, X, Upload, Mail, AlertTriangle } from "lucide-react"
+import { Switch } from "@/components/ui/switch"
 
 // Datos de ejemplo de proveedores
 const proveedoresData = [
@@ -196,6 +197,11 @@ export default function CuentaCobroProveedor() {
   const [selectedCliente, setSelectedCliente] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("vehiculo")
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [showRejectModal, setShowRejectModal] = useState(false)
+  const [showRejectConfirmModal, setShowRejectConfirmModal] = useState(false)
+  const [showFileProcessModal, setShowFileProcessModal] = useState(false)
+  const [showAdvancedActions, setShowAdvancedActions] = useState(false)
+  const [rejectReason, setRejectReason] = useState("")
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -237,11 +243,17 @@ export default function CuentaCobroProveedor() {
 
   const rechazarServicios = () => {
     setShowApprovalModal(false)
+    setShowRejectModal(true)
+  }
+
+  const confirmarRechazo = () => {
+    setShowRejectModal(false)
+    setShowRejectConfirmModal(true)
     toast({
       title: "Servicios Rechazados",
-      description: "Se ha rechazado la aprobación de servicios.",
+      description: "Se ha enviado notificación por correo electrónico con el motivo del rechazo",
       variant: "destructive",
-      duration: 3000,
+      duration: 5000,
     })
   }
 
@@ -250,13 +262,12 @@ export default function CuentaCobroProveedor() {
     if (file) {
       setSelectedFile(file)
       setShowUploadModal(false)
-      setShowSuccessModal(true)
-      toast({
-        title: "Planilla Subida",
-        description: "La planilla de seguridad social se ha subido exitosamente",
-        duration: 3000,
-      })
+      setShowFileProcessModal(true)
     }
+  }
+
+  const selectFile = () => {
+    setShowFileProcessModal(true)
   }
 
   const emailProveedor = (proveedor: any) => {
@@ -303,6 +314,30 @@ export default function CuentaCobroProveedor() {
     return Object.values(clientesAgrupados)
   }
 
+  // Función para calcular descuentos totales unificados
+  const getUnifiedDiscounts = (vehiculos: any[]) => {
+    let totalGps = 0
+    let totalExamenes = 0
+    let totalChaqueta = 0
+    let totalImpuestos = 0
+    
+    vehiculos.forEach(vehiculo => {
+      vehiculo.clientes.forEach((cliente: any) => {
+        totalGps += Math.abs(parseInt(cliente.gps.replace(/[^\d]/g, '')))
+        totalExamenes += Math.abs(parseInt(cliente.examenes.replace(/[^\d]/g, '')))
+        totalChaqueta += Math.abs(parseInt(cliente.chaqueta.replace(/[^\d]/g, '')))
+        totalImpuestos += Math.abs(parseInt(cliente.impuestos.replace(/[^\d]/g, '')))
+      })
+    })
+    
+    return {
+      gps: `-$${totalGps.toLocaleString()}`,
+      examenes: `-$${totalExamenes.toLocaleString()}`,
+      chaqueta: `-$${totalChaqueta.toLocaleString()}`,
+      impuestos: `-$${totalImpuestos.toLocaleString()}`
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -312,6 +347,18 @@ export default function CuentaCobroProveedor() {
             Gestión de prefacturas y cuentas de cobro por proveedor
           </p>
         </div>
+      </div>
+
+      {/* Switch para mostrar/ocultar acciones avanzadas */}
+      <div className="flex items-center gap-3">
+        <Switch 
+          checked={showAdvancedActions} 
+          onCheckedChange={setShowAdvancedActions}
+          id="advanced-actions"
+        />
+        <Label htmlFor="advanced-actions" className="text-sm font-medium">
+          Mostrar acciones avanzadas
+        </Label>
       </div>
 
       {/* Tabs de filtros */}
@@ -384,15 +431,19 @@ export default function CuentaCobroProveedor() {
                     Ver Detalle
                   </Button>
                   
-                  <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Revisar Servicios
-                  </Button>
-                  
-                  <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
-                    <Mail className="h-4 w-4 mr-2" />
-                    E-mail Proveedor
-                  </Button>
+                  {showAdvancedActions && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Revisar Servicios
+                      </Button>
+                      
+                      <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
+                        <Mail className="h-4 w-4 mr-2" />
+                        E-mail Proveedor
+                      </Button>
+                    </>
+                  )}
                   
                   {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
                     <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
@@ -465,15 +516,19 @@ export default function CuentaCobroProveedor() {
                     Ver Detalle
                   </Button>
                   
-                  <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Revisar Servicios
-                  </Button>
-                  
-                  <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
-                    <Mail className="h-4 w-4 mr-2" />
-                    E-mail Proveedor
-                  </Button>
+                  {showAdvancedActions && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Revisar Servicios
+                      </Button>
+                      
+                      <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
+                        <Mail className="h-4 w-4 mr-2" />
+                        E-mail Proveedor
+                      </Button>
+                    </>
+                  )}
                   
                   {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
                     <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
@@ -538,15 +593,19 @@ export default function CuentaCobroProveedor() {
                     Ver Detalle
                   </Button>
                   
-                  <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Revisar Servicios
-                  </Button>
-                  
-                  <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
-                    <Mail className="h-4 w-4 mr-2" />
-                    E-mail Proveedor
-                  </Button>
+                  {showAdvancedActions && (
+                    <>
+                      <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
+                        <FileText className="h-4 w-4 mr-2" />
+                        Revisar Servicios
+                      </Button>
+                      
+                      <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
+                        <Mail className="h-4 w-4 mr-2" />
+                        E-mail Proveedor
+                      </Button>
+                    </>
+                  )}
                   
                   {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
                     <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
@@ -682,22 +741,6 @@ export default function CuentaCobroProveedor() {
                           <p className="text-muted-foreground">Valor Bruto:</p>
                           <p className="font-medium">{cliente.valorBruto}</p>
                         </div>
-                        <div>
-                          <p className="text-muted-foreground">GPS:</p>
-                          <p className="font-medium text-red-600">{cliente.gps}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Exámenes:</p>
-                          <p className="font-medium text-red-600">{cliente.examenes}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Chaqueta:</p>
-                          <p className="font-medium text-red-600">{cliente.chaqueta}</p>
-                        </div>
-                        <div>
-                          <p className="text-muted-foreground">Impuestos:</p>
-                          <p className="font-medium text-red-600">{cliente.impuestos}</p>
-                        </div>
                         <div className="bg-green-50 p-2 rounded">
                           <p className="text-muted-foreground">Valor Neto:</p>
                           <p className="font-medium text-green-600">{cliente.valorNeto}</p>
@@ -706,6 +749,31 @@ export default function CuentaCobroProveedor() {
                     </div>
                   ))}
                 </div>
+                
+                {/* Descuentos Unificados */}
+                {selectedProveedor?.detalleFacturacion?.vehiculos && (
+                  <div className="border-t pt-4 mt-4">
+                    <h4 className="font-medium mb-3">Descuentos Aplicados</h4>
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div className="bg-red-50 p-3 rounded">
+                        <p className="text-muted-foreground">GPS Total</p>
+                        <p className="font-semibold text-red-600">{getUnifiedDiscounts(selectedProveedor.detalleFacturacion.vehiculos).gps}</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded">
+                        <p className="text-muted-foreground">Exámenes Total</p>
+                        <p className="font-semibold text-red-600">{getUnifiedDiscounts(selectedProveedor.detalleFacturacion.vehiculos).examenes}</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded">
+                        <p className="text-muted-foreground">Chaqueta Total</p>
+                        <p className="font-semibold text-red-600">{getUnifiedDiscounts(selectedProveedor.detalleFacturacion.vehiculos).chaqueta}</p>
+                      </div>
+                      <div className="bg-red-50 p-3 rounded">
+                        <p className="text-muted-foreground">Impuestos Total</p>
+                        <p className="font-semibold text-red-600">{getUnifiedDiscounts(selectedProveedor.detalleFacturacion.vehiculos).impuestos}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
                 
                 {/* Total General para el tab Por Cliente */}
                 <div className="border-t pt-4 mt-4">
@@ -931,7 +999,7 @@ export default function CuentaCobroProveedor() {
                     onChange={handleFileUpload}
                   />
                   <label htmlFor="file-upload">
-                    <Button variant="outline" className="cursor-pointer">
+                    <Button variant="outline" className="cursor-pointer" onClick={selectFile}>
                       Seleccionar Archivo
                     </Button>
                   </label>
@@ -977,6 +1045,143 @@ export default function CuentaCobroProveedor() {
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700"
                 onClick={() => setShowSuccessModal(false)}
+              >
+                Cerrar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal de Proceso de Archivo */}
+      {showFileProcessModal && (
+        <Dialog open={showFileProcessModal} onOpenChange={setShowFileProcessModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <DialogTitle>¡Proceso Completado!</DialogTitle>
+              </div>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="bg-green-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="font-medium text-lg mb-2">¡Todo Listo!</h3>
+                <p className="text-muted-foreground">
+                  Servicios aprobados y planilla de seguridad social subida exitosamente. El área administrativa procesará tu cuenta de cobro.
+                </p>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                  Estado: Pendiente de Pago
+                </Badge>
+              </div>
+
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => setShowFileProcessModal(false)}
+              >
+                Cerrar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal de Rechazar Servicios */}
+      {showRejectModal && (
+        <Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-red-600">
+                <X className="h-5 w-5" />
+                <DialogTitle>Rechazar Servicios - Motivo Requerido</DialogTitle>
+              </div>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-red-700 mb-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="font-medium">Especifica el motivo del rechazo</span>
+                </div>
+                <p className="text-sm text-red-600">
+                  Este mensaje será enviado al área administrativa para revisión.
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="motivo" className="font-medium">Motivo del rechazo:</Label>
+                <Textarea
+                  id="motivo"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  placeholder="Ejemplo: Tarifas erróneas en servicios del 10 de agosto, me falta un servicio de la fecha 15 agosto horario 2:00 PM..."
+                  className="mt-2 min-h-[100px]"
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setShowRejectModal(false)}
+                >
+                  Volver
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  className="flex-1"
+                  onClick={confirmarRechazo}
+                  disabled={!rejectReason.trim()}
+                >
+                  Confirmar Rechazo
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal de Confirmación de Rechazo */}
+      {showRejectConfirmModal && (
+        <Dialog open={showRejectConfirmModal} onOpenChange={setShowRejectConfirmModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-2 text-green-600">
+                <CheckCircle className="h-5 w-5" />
+                <DialogTitle>Rechazo Registrado</DialogTitle>
+              </div>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="bg-red-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <X className="h-8 w-8 text-red-600" />
+                </div>
+                <h3 className="font-medium text-lg mb-2">Rechazo Registrado</h3>
+                <p className="text-muted-foreground">
+                  Tu feedback ha sido enviado al área administrativa para revisión.
+                </p>
+              </div>
+
+              <div className="bg-gray-50 border rounded-lg p-3">
+                <p className="text-sm font-medium">Motivo: {rejectReason}</p>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <Badge variant="outline" className="bg-red-100 text-red-700 border-red-300">
+                  Estado: En Revisión
+                </Badge>
+              </div>
+
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => setShowRejectConfirmModal(false)}
               >
                 Cerrar
               </Button>
