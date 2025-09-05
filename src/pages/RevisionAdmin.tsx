@@ -28,6 +28,43 @@ interface CuentaCobro {
   plazoSubsanar?: string
 }
 
+interface Lote {
+  id: string
+  numero: string
+  estado: string
+  valorActual: number
+  cuentas: number
+  fechaCreacion: string
+  responsable: string
+  fechaPago: string
+  diasRestantes: number
+}
+
+const lotesDisponibles: Lote[] = [
+  {
+    id: "1",
+    numero: "LOTE-2025-001",
+    estado: "EN PREPARACIÓN",
+    valorActual: 15450000,
+    cuentas: 12,
+    fechaCreacion: "2025-01-15",
+    responsable: "Ana García",
+    fechaPago: "2025-02-10",
+    diasRestantes: 15
+  },
+  {
+    id: "2", 
+    numero: "LOTE-2025-002",
+    estado: "EN REVISIÓN",
+    valorActual: 8920000,
+    cuentas: 8,
+    fechaCreacion: "2025-01-18",
+    responsable: "Carlos Mendez",
+    fechaPago: "2025-02-15",
+    diasRestantes: 20
+  }
+]
+
 const cuentasCobro: CuentaCobro[] = [
   {
     id: "1",
@@ -81,6 +118,9 @@ export default function RevisionAdmin() {
   const [showRechazoModal, setShowRechazoModal] = useState(false)
   const [showRechazadaModal, setShowRechazadaModal] = useState(false)
   const [motivoRechazo, setMotivoRechazo] = useState("")
+  const [modalSeleccionarLote, setModalSeleccionarLote] = useState(false)
+  const [modalCuentaAprobada, setModalCuentaAprobada] = useState(false)
+  const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null)
   const [filtros, setFiltros] = useState({
     proveedor: "",
     estado: "",
@@ -125,11 +165,31 @@ export default function RevisionAdmin() {
 
   const handleAprobar = () => {
     setShowRevisionModal(false)
-    setShowAprobadaModal(true)
-    toast({
-      title: "Cuenta aprobada",
-      description: "La cuenta ha sido aprobada y programada para pago"
-    })
+    setModalSeleccionarLote(true)
+  }
+
+  const handleRadicarLote = () => {
+    if (!loteSeleccionado) {
+      toast({
+        title: "Error",
+        description: "Debe seleccionar un lote",
+        variant: "destructive"
+      })
+      return
+    }
+    setModalSeleccionarLote(false)
+    setModalCuentaAprobada(true)
+  }
+
+  const getEstadoLoteBadge = (estado: string) => {
+    switch (estado) {
+      case "EN PREPARACIÓN":
+        return <Badge variant="warning">{estado}</Badge>
+      case "EN REVISIÓN":
+        return <Badge variant="pending">{estado}</Badge>
+      default:
+        return <Badge variant="secondary">{estado}</Badge>
+    }
   }
 
   const handleRechazar = () => {
@@ -604,6 +664,153 @@ export default function RevisionAdmin() {
 
           <div className="flex justify-center pt-4">
             <Button onClick={() => setShowRechazadaModal(false)} className="w-full">
+              Cerrar
+            </Button>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Modal Seleccionar Lote para Radicar */}
+      <Dialog open={modalSeleccionarLote} onOpenChange={setModalSeleccionarLote}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <div className="flex items-center justify-between">
+              <DialogTitle className="text-primary">
+                Seleccionar Lote para Radicar Cuenta de Cobro
+              </DialogTitle>
+              <Button variant="ghost" size="sm" onClick={() => setModalSeleccionarLote(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="bg-background border rounded-lg p-4">
+              <div className="text-sm text-muted-foreground mb-1">Cuenta: {selectedCuenta?.idFactura} - {selectedCuenta?.proveedor}</div>
+              <div className="text-lg font-semibold text-success">
+                Valor: ${selectedCuenta?.total.toLocaleString()}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold">Lotes Disponibles</h3>
+                <Input 
+                  placeholder="Buscar lote..." 
+                  className="w-48"
+                />
+              </div>
+
+              <div className="space-y-3 max-h-96 overflow-y-auto">
+                {lotesDisponibles.map((lote) => (
+                  <div 
+                    key={lote.id}
+                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
+                      loteSeleccionado === lote.id 
+                        ? 'border-primary border-2 bg-primary/5' 
+                        : 'border-border hover:border-primary/50'
+                    }`}
+                    onClick={() => setLoteSeleccionado(lote.id)}
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <h4 className="font-semibold">{lote.numero}</h4>
+                        {getEstadoLoteBadge(lote.estado)}
+                        {loteSeleccionado === lote.id && (
+                          <CheckCircle className="h-5 w-5 text-primary" />
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <Badge variant="outline" className="mb-1">
+                          {lote.fechaPago} ({lote.diasRestantes} días)
+                        </Badge>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Valor Actual:</span>
+                        <p className="font-medium">${lote.valorActual.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Cuentas:</span>
+                        <p className="font-medium">{lote.cuentas} cuentas</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Fecha Creación:</span>
+                        <p className="font-medium">{lote.fechaCreacion}</p>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Responsable:</span>
+                        <p className="font-medium">{lote.responsable}</p>
+                      </div>
+                    </div>
+
+                    {loteSeleccionado === lote.id && (
+                      <div className="mt-3 pt-3 border-t">
+                        <div className="text-sm text-primary">
+                          <strong>Valor Final si se radica:</strong> ${(lote.valorActual + (selectedCuenta?.total || 0)).toLocaleString()}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={() => setModalSeleccionarLote(false)} className="flex-1">
+                Cancelar
+              </Button>
+              <Button 
+                onClick={handleRadicarLote} 
+                className="flex-1"
+                disabled={!loteSeleccionado}
+              >
+                + Radicar a Lote Seleccionado
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Cuenta Aprobada y Radiada */}
+      <AlertDialog open={modalCuentaAprobada} onOpenChange={setModalCuentaAprobada}>
+        <AlertDialogContent className="max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-success">
+              <CheckCircle className="h-5 w-5" />
+              ¡Cuenta Aprobada!
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="bg-success/10 border border-success/20 rounded-lg p-4 text-center">
+              <CheckCircle className="h-12 w-12 text-success mx-auto mb-3" />
+              <h3 className="font-semibold mb-2">Cuenta Aprobada y Programada</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                La cuenta de cobro de <strong>{selectedCuenta?.proveedor}</strong> ha sido 
+                aprobada y programada para pago.
+              </p>
+              
+              <div className="flex items-center justify-center gap-2 text-success text-sm">
+                <Mail className="h-4 w-4" />
+                <span>Notificación Enviada</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Se ha enviado confirmación por correo electrónico al proveedor
+              </p>
+            </div>
+
+            <div className="bg-primary/10 border border-primary/20 rounded-lg p-3">
+              <Button variant="default" className="w-full">
+                Estado: Aprobado - Programada para Pago
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex justify-center">
+            <Button onClick={() => setModalCuentaAprobada(false)} className="w-full">
               Cerrar
             </Button>
           </div>
