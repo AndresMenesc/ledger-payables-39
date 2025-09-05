@@ -39,7 +39,8 @@ const proveedoresData = [
               examenes: "-$25.000",
               chaqueta: "-$15.000",
               impuestos: "-$270.000",
-              valorNeto: "$4.140.000"
+              valorNeto: "$4.140.000",
+              estado: "aprobado"
             },
             {
               nombre: "Sutherland",
@@ -49,7 +50,8 @@ const proveedoresData = [
               examenes: "$0",
               chaqueta: "$0",
               impuestos: "-$132.000",
-              valorNeto: "$2.043.000"
+              valorNeto: "$2.043.000",
+              estado: "rechazado"
             }
           ]
         },
@@ -64,7 +66,8 @@ const proveedoresData = [
               examenes: "-$25.000",
               chaqueta: "-$15.000",
               impuestos: "-$225.000",
-              valorNeto: "$3.495.000"
+              valorNeto: "$3.495.000",
+              estado: "aprobado"
             }
           ]
         }
@@ -745,6 +748,20 @@ export default function CuentaCobroProveedor() {
                               <p className="font-semibold text-red-600">{cliente.chaqueta}</p>
                             </div>
                           </div>
+                          {/* Estado del cliente */}
+                          <div className="mt-3 flex justify-center">
+                            <Badge 
+                              variant="outline" 
+                              className={
+                                cliente.estado === 'aprobado' 
+                                  ? "bg-green-50 text-green-700 border-green-200" 
+                                  : "bg-red-50 text-red-700 border-red-200"
+                              }
+                            >
+                              {cliente.estado === 'aprobado' ? 'APROBADO' : 'RECHAZADO'}
+                            </Badge>
+                          </div>
+
                           <div className="mt-4 pt-4 border-t">
                             <div className="flex justify-between items-center">
                               <div>

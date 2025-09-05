@@ -456,17 +456,6 @@ export default function Anticipos() {
                 </div>
               </div>
 
-              {anticipo.estado === "por descontar" && (
-                <div className="mt-4">
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handleChangeStatus(anticipo.id, "descontado")}
-                  >
-                    Marcar como descontado
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}
