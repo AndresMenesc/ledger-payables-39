@@ -26,7 +26,9 @@ import {
   FileText,
   Calendar,
   Star,
-  Upload
+  Upload,
+  CheckCircle,
+  FileSpreadsheet
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { useToast } from "@/hooks/use-toast"
@@ -155,6 +157,9 @@ export default function Proveedores() {
     open: boolean
     proveedor: Proveedor | null
   }>({ open: false, proveedor: null })
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false)
+  const [isSuccessDialogOpen, setIsSuccessDialogOpen] = useState(false)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   // Columnas para la tabla
   const columns = [
@@ -305,6 +310,34 @@ export default function Proveedores() {
     setBloquearUsuarioDialog({ open: false, proveedor: null })
   }
 
+  const handleImportFile = () => {
+    if (!selectedFile) {
+      toast({
+        title: "Error",
+        description: "Por favor selecciona un archivo Excel.",
+        variant: "destructive"
+      })
+      return
+    }
+    
+    setIsImportDialogOpen(false)
+    setIsSuccessDialogOpen(true)
+    setSelectedFile(null)
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file && (file.type === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || file.type === "application/vnd.ms-excel")) {
+      setSelectedFile(file)
+    } else {
+      toast({
+        title: "Error",
+        description: "Por favor selecciona un archivo Excel válido (.xlsx o .xls).",
+        variant: "destructive"
+      })
+    }
+  }
+
   const handleCreateProveedor = () => {
     toast({
       title: "Proveedor creado",
@@ -402,13 +435,60 @@ export default function Proveedores() {
             Administra y gestiona todos los proveedores del sistema
           </p>
         </div>
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-          <DialogTrigger asChild>
-            <Button className="gap-2">
-              <Plus className="h-4 w-4" />
-              Nuevo Proveedor
-            </Button>
-          </DialogTrigger>
+      </div>
+        <div className="flex gap-2">
+          <Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" className="gap-2 bg-green-600 text-white hover:bg-green-700">
+                <FileSpreadsheet className="h-4 w-4" />
+                Importar Masivo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Importar Proveedores Masivamente</DialogTitle>
+                <DialogDescription>
+                  Adjunta un archivo Excel con los datos de los proveedores
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="excelFile">Archivo Excel</Label>
+                  <Input
+                    id="excelFile"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileChange}
+                    className="cursor-pointer"
+                  />
+                  {selectedFile && (
+                    <p className="text-sm text-green-600 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      {selectedFile.name}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex justify-end gap-2">
+                  <Button variant="outline" onClick={() => setIsImportDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button onClick={handleImportFile} className="bg-green-600 hover:bg-green-700">
+                    Importar Proveedores
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          
+          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="gap-2">
+                <Plus className="h-4 w-4" />
+                Nuevo Proveedor
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{selectedProveedor ? 'Editar Proveedor' : 'Creación de Nuevo Proveedor'}</DialogTitle>
@@ -1033,6 +1113,31 @@ export default function Proveedores() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Success Dialog */}
+      <Dialog open={isSuccessDialogOpen} onOpenChange={setIsSuccessDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-green-600">
+              <CheckCircle className="h-5 w-5" />
+              ¡Importación Exitosa!
+            </DialogTitle>
+            <DialogDescription>
+              Los proveedores han sido importados correctamente al sistema.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="flex justify-center py-4">
+            <CheckCircle className="h-16 w-16 text-green-500" />
+          </div>
+          
+          <div className="flex justify-end">
+            <Button onClick={() => setIsSuccessDialogOpen(false)} className="bg-green-600 hover:bg-green-700">
+              Continuar
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
     </div>
   )
