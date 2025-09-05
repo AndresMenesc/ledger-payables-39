@@ -937,7 +937,7 @@ export default function CuentaCobroProveedor() {
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedProveedor?.serviciosDetalle.map((servicio: any, index: number) => (
+                        {(selectedProveedor?.serviciosDetalle || []).map((servicio: any, index: number) => (
                           <tr key={index} className="border-b hover:bg-muted/50">
                             <td className="p-3">
                               <div className="flex items-center gap-2">
