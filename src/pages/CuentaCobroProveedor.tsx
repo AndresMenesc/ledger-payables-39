@@ -4,7 +4,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Eye, Download, Truck, MapPin, Clock, Calculator, Building2, FileText, Users, Calendar } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Label } from "@/components/ui/label"
+import { useToast } from "@/hooks/use-toast"
+import { Eye, Download, Truck, MapPin, Clock, Calculator, Building2, FileText, Users, Calendar, CheckCircle, X, Upload, Mail } from "lucide-react"
 
 // Datos de ejemplo de proveedores
 const proveedoresData = [
@@ -181,11 +185,17 @@ const proveedoresData = [
 ]
 
 export default function CuentaCobroProveedor() {
+  const { toast } = useToast()
   const [selectedProveedor, setSelectedProveedor] = useState<any>(null)
   const [showDetalleModal, setShowDetalleModal] = useState(false)
   const [showServiciosModal, setShowServiciosModal] = useState(false)
+  const [showApprovalModal, setShowApprovalModal] = useState(false)
+  const [showEmailModal, setShowEmailModal] = useState(false)
+  const [showUploadModal, setShowUploadModal] = useState(false)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [selectedCliente, setSelectedCliente] = useState<any>(null)
   const [activeTab, setActiveTab] = useState("vehiculo")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -210,12 +220,87 @@ export default function CuentaCobroProveedor() {
     setShowServiciosModal(true)
   }
 
-  const notificarProveedor = (proveedorId: number) => {
-    console.log(`Notificando proveedor ${proveedorId}`)
+  const revisarServicios = (proveedor: any) => {
+    setSelectedProveedor(proveedor)
+    setShowApprovalModal(true)
+  }
+
+  const aprobarServicios = () => {
+    setShowApprovalModal(false)
+    setShowUploadModal(true)
+    toast({
+      title: "¡Servicios Aprobados!",
+      description: "Se ha enviado confirmación por correo electrónico sobre la aprobación de servicios del mes Agosto 2024.",
+      duration: 5000,
+    })
+  }
+
+  const rechazarServicios = () => {
+    setShowApprovalModal(false)
+    toast({
+      title: "Servicios Rechazados",
+      description: "Se ha rechazado la aprobación de servicios.",
+      variant: "destructive",
+      duration: 3000,
+    })
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setShowUploadModal(false)
+      setShowSuccessModal(true)
+      toast({
+        title: "Planilla Subida",
+        description: "La planilla de seguridad social se ha subido exitosamente",
+        duration: 3000,
+      })
+    }
+  }
+
+  const emailProveedor = (proveedor: any) => {
+    setSelectedProveedor(proveedor)
+    setShowEmailModal(true)
+  }
+
+  const enviarEmail = () => {
+    setShowEmailModal(false)
+    toast({
+      title: "Email Enviado",
+      description: "Se ha enviado la notificación por correo electrónico al proveedor.",
+      duration: 3000,
+    })
   }
 
   const subirSegSocial = (proveedorId: number) => {
     console.log(`Subir seguridad social para proveedor ${proveedorId}`)
+  }
+
+  // Función para agrupar clientes por nombre y sumar sus valores
+  const groupClientsByName = (vehiculos: any[]) => {
+    const clientesAgrupados: { [key: string]: any } = {}
+    
+    vehiculos.forEach(vehiculo => {
+      vehiculo.clientes.forEach((cliente: any) => {
+        if (clientesAgrupados[cliente.nombre]) {
+          // Sumar servicios
+          clientesAgrupados[cliente.nombre].servicios += cliente.servicios
+          // Sumar valores (convertir de string a número, sumar, y volver a string)
+          const valorBrutoActual = parseInt(clientesAgrupados[cliente.nombre].valorBruto.replace(/[^\d]/g, ''))
+          const valorBrutoNuevo = parseInt(cliente.valorBruto.replace(/[^\d]/g, ''))
+          clientesAgrupados[cliente.nombre].valorBruto = `$${(valorBrutoActual + valorBrutoNuevo).toLocaleString()}`
+          
+          const valorNetoActual = parseInt(clientesAgrupados[cliente.nombre].valorNeto.replace(/[^\d]/g, ''))
+          const valorNetoNuevo = parseInt(cliente.valorNeto.replace(/[^\d]/g, ''))
+          clientesAgrupados[cliente.nombre].valorNeto = `$${(valorNetoActual + valorNetoNuevo).toLocaleString()}`
+        } else {
+          clientesAgrupados[cliente.nombre] = { ...cliente }
+        }
+      })
+    })
+    
+    return Object.values(clientesAgrupados)
   }
 
   return (
@@ -299,14 +384,14 @@ export default function CuentaCobroProveedor() {
                     Ver Detalle
                   </Button>
                   
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Revisar Servicios
                   </Button>
                   
-                  <Button variant="outline" size="sm" onClick={() => notificarProveedor(proveedor.id)}>
-                    <Users className="h-4 w-4 mr-2" />
-                    Notificar Proveedor
+                  <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    E-mail Proveedor
                   </Button>
                   
                   {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
@@ -380,14 +465,14 @@ export default function CuentaCobroProveedor() {
                     Ver Detalle
                   </Button>
                   
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Revisar Servicios
                   </Button>
                   
-                  <Button variant="outline" size="sm" onClick={() => notificarProveedor(proveedor.id)}>
-                    <Users className="h-4 w-4 mr-2" />
-                    Notificar Proveedor
+                  <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    E-mail Proveedor
                   </Button>
                   
                   {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
@@ -453,14 +538,14 @@ export default function CuentaCobroProveedor() {
                     Ver Detalle
                   </Button>
                   
-                  <Button variant="outline" size="sm">
+                  <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)}>
                     <FileText className="h-4 w-4 mr-2" />
                     Revisar Servicios
                   </Button>
                   
-                  <Button variant="outline" size="sm" onClick={() => notificarProveedor(proveedor.id)}>
-                    <Users className="h-4 w-4 mr-2" />
-                    Notificar Proveedor
+                  <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    E-mail Proveedor
                   </Button>
                   
                   {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
@@ -573,45 +658,64 @@ export default function CuentaCobroProveedor() {
                 </div>
               </TabsContent>
 
-              <TabsContent value="cliente" className="space-y-6">
-                {selectedProveedor?.detalleFacturacion?.vehiculos?.map((vehiculo: any, index: number) => (
-                  <div key={index} className="space-y-4">
-                    {vehiculo?.clientes?.map((cliente: any, clienteIndex: number) => (
-                      <Card key={clienteIndex} className="border-l-4 border-l-primary">
-                        <CardHeader>
-                          <div className="flex items-center gap-2">
-                            <Building2 className="h-4 w-4" />
-                            <CardTitle>{cliente.nombre}</CardTitle>
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-4 gap-6 text-center">
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                              <Calculator className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                              <p className="text-2xl font-bold text-blue-600">{cliente.servicios}</p>
-                              <p className="text-sm text-blue-600">Servicios</p>
-                            </div>
-                            <div className="bg-green-50 p-4 rounded-lg">
-                              <Calculator className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                              <p className="text-2xl font-bold text-green-600">{cliente.valorBruto}</p>
-                              <p className="text-sm text-green-600">Valor Bruto</p>
-                            </div>
-                            <div className="bg-red-50 p-4 rounded-lg">
-                              <Calculator className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                              <p className="text-2xl font-bold text-red-600">{cliente.examenes}</p>
-                              <p className="text-sm text-red-600">Descuentos</p>
-                            </div>
-                            <div className="bg-blue-50 p-4 rounded-lg">
-                              <Calculator className="h-8 w-8 text-blue-600 mx-auto mb-2" />
-                              <p className="text-2xl font-bold text-blue-600">{cliente.valorNeto}</p>
-                              <p className="text-sm text-blue-600">Valor Neto</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+              <TabsContent value="cliente" className="space-y-4">
+                <div className="space-y-3">
+                  {groupClientsByName(selectedProveedor?.detalleFacturacion?.vehiculos || []).map((cliente: any, clienteIndex: number) => (
+                    <div key={clienteIndex} className="border rounded-lg p-4">
+                      <div className="flex justify-between items-start mb-3">
+                        <div>
+                          <h4 className="font-medium">{cliente.nombre}</h4>
+                          <p className="text-sm text-muted-foreground">Total consolidado</p>
+                        </div>
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="text-blue-600"
+                          onClick={() => verServicios(cliente)}
+                        >
+                          {cliente.servicios} servicios
+                        </Button>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Valor Bruto:</p>
+                          <p className="font-medium">{cliente.valorBruto}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">GPS:</p>
+                          <p className="font-medium text-red-600">{cliente.gps}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Exámenes:</p>
+                          <p className="font-medium text-red-600">{cliente.examenes}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Chaqueta:</p>
+                          <p className="font-medium text-red-600">{cliente.chaqueta}</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Impuestos:</p>
+                          <p className="font-medium text-red-600">{cliente.impuestos}</p>
+                        </div>
+                        <div className="bg-green-50 p-2 rounded">
+                          <p className="text-muted-foreground">Valor Neto:</p>
+                          <p className="font-medium text-green-600">{cliente.valorNeto}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                {/* Total General para el tab Por Cliente */}
+                <div className="border-t pt-4 mt-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium text-blue-900">Total General:</span>
+                      <span className="text-xl font-bold text-blue-900">{selectedProveedor?.detalleFacturacion?.totalGeneral}</span>
+                    </div>
                   </div>
-                )) || []}
+                </div>
               </TabsContent>
             </Tabs>
           )}
@@ -740,6 +844,244 @@ export default function CuentaCobroProveedor() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Modal de Aprobación de Servicios */}
+      {showApprovalModal && (
+        <Dialog open={showApprovalModal} onOpenChange={setShowApprovalModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                <DialogTitle>Aprobar Servicios - Agosto 2024</DialogTitle>
+              </div>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-medium text-lg">{selectedProveedor?.nombre}</h3>
+                <div className="mt-4">
+                  <p className="text-sm text-muted-foreground">Total Liquidado:</p>
+                  <p className="text-2xl font-bold text-blue-600">{selectedProveedor?.valorLiquidado}</p>
+                </div>
+              </div>
+
+              <div>
+                <p className="font-medium mb-4">¿Apruebas los servicios facturados?</p>
+                <div className="flex gap-3">
+                  <Button 
+                    className="flex-1 bg-blue-600 hover:bg-blue-700"
+                    onClick={aprobarServicios}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Aprobar Servicios
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    className="flex-1"
+                    onClick={rechazarServicios}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Rechazar Servicios
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal de Subir Planilla */}
+      {showUploadModal && (
+        <Dialog open={showUploadModal} onOpenChange={setShowUploadModal}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <DialogTitle>¡Servicios Aprobados! - Subir Planilla</DialogTitle>
+              </div>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-center gap-2 text-green-700 mb-2">
+                  <CheckCircle className="h-4 w-4" />
+                  <span className="font-medium">Correo Enviado</span>
+                </div>
+                <p className="text-sm text-green-600">
+                  Se ha enviado confirmación por correo electrónico sobre la aprobación de servicios del mes Agosto 2024.
+                </p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Upload className="h-5 w-5 text-blue-600" />
+                  <span className="font-medium">Siguiente Paso: Subir Planilla de Seguridad Social</span>
+                </div>
+                
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+                  <Upload className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="font-medium mb-2">Arrastra tu planilla aquí o haz clic para seleccionar</p>
+                  <p className="text-sm text-muted-foreground mb-4">Formatos aceptados: PDF, JPG, PNG (máx. 10MB)</p>
+                  
+                  <input
+                    type="file"
+                    id="file-upload"
+                    className="hidden"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={handleFileUpload}
+                  />
+                  <label htmlFor="file-upload">
+                    <Button variant="outline" className="cursor-pointer">
+                      Seleccionar Archivo
+                    </Button>
+                  </label>
+                </div>
+                
+                <p className="text-sm text-muted-foreground mt-4">
+                  Recordatorio: La planilla de seguridad social debe corresponder al mes Agosto 2024.
+                </p>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal de Proceso Completado */}
+      {showSuccessModal && (
+        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <DialogTitle>¡Proceso Completado!</DialogTitle>
+              </div>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="text-center">
+                <div className="bg-green-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="font-medium text-lg mb-2">¡Todo Listo!</h3>
+                <p className="text-muted-foreground">
+                  Servicios aprobados y planilla de seguridad social subida exitosamente. El área administrativa procesará tu cuenta de cobro.
+                </p>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                  Estado: Pendiente de Pago
+                </Badge>
+              </div>
+
+              <Button 
+                className="w-full bg-blue-600 hover:bg-blue-700"
+                onClick={() => setShowSuccessModal(false)}
+              >
+                Cerrar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Modal de E-mail Proveedor */}
+      {showEmailModal && (
+        <Dialog open={showEmailModal} onOpenChange={setShowEmailModal}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Vista Previa - Notificación por Correo</DialogTitle>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="absolute right-4 top-4"
+                onClick={() => setShowEmailModal(false)}
+              >
+                Cerrar
+              </Button>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              {/* Header del email */}
+              <div className="border-l-4 border-blue-500 pl-4">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Mail className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">Vista Previa - Correo Automático</span>
+                      <Badge className="bg-blue-100 text-blue-700">Aprobado</Badge>
+                    </div>
+                    
+                    <div className="space-y-1 text-sm">
+                      <p><strong>Para:</strong> transportesrapidos.sas@ejemplo.com</p>
+                      <p><strong>De:</strong> noreply@estarter.co</p>
+                      <p><strong>Asunto:</strong> ✅ Servicios Aprobados - Agosto 2024</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Contenido del email */}
+                <div className="bg-white border rounded-lg p-6 space-y-6">
+                  <div className="text-center">
+                    <div className="bg-green-50 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4">
+                      <CheckCircle className="h-8 w-8 text-green-600" />
+                    </div>
+                    <h2 className="text-xl font-bold mb-2">¡Servicios Aprobados!</h2>
+                  </div>
+
+                  <div>
+                    <p className="mb-4"><strong>Estimado/a {selectedProveedor?.nombre}</strong></p>
+                    <p className="mb-4">
+                      Te informamos que has <span className="font-medium text-green-600">aprobado</span> los servicios correspondientes al mes de <strong>Agosto 2024</strong>.
+                    </p>
+                  </div>
+
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Calculator className="h-4 w-4 text-green-600" />
+                      <span className="font-medium">Resumen de Liquidación:</span>
+                    </div>
+                    <div className="space-y-1">
+                      <p><strong>Valor Total:</strong> {selectedProveedor?.valorLiquidado}</p>
+                      <p className="text-sm text-muted-foreground"><strong>Período:</strong> Agosto 2024</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="font-medium mb-2">Próximos pasos:</p>
+                    <ul className="list-disc list-inside space-y-1 text-sm">
+                      <li>Se generará <strong>automáticamente</strong> tu cuenta de cobro en PDF</li>
+                      <li>Debes <strong>subir la planilla</strong> de seguridad social correspondiente</li>
+                      <li>Una vez validada, procederemos con el pago según calendario</li>
+                    </ul>
+                  </div>
+
+                  <div className="border-t pt-4">
+                    <p className="text-sm">Puedes acceder a tu portal en: <span className="text-blue-600">portal.estarter.co</span></p>
+                    
+                    <div className="mt-4 text-sm text-muted-foreground">
+                      <p>Saludos cordiales,</p>
+                      <p><strong>Equipo Estarter.co</strong></p>
+                      <p>📧 soporte@estarter.co</p>
+                      <p>📞 +57 300 123 4567</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4">
+                <Button variant="outline" onClick={() => setShowEmailModal(false)}>
+                  Cancelar
+                </Button>
+                <Button className="bg-blue-600 hover:bg-blue-700" onClick={enviarEmail}>
+                  <Mail className="h-4 w-4 mr-2" />
+                  Enviar Email
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }
