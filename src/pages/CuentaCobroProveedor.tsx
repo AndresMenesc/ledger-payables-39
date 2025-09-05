@@ -200,7 +200,7 @@ export default function CuentaCobroProveedor() {
   const [showRejectModal, setShowRejectModal] = useState(false)
   const [showRejectConfirmModal, setShowRejectConfirmModal] = useState(false)
   const [showFileProcessModal, setShowFileProcessModal] = useState(false)
-  const [showAdvancedActions, setShowAdvancedActions] = useState(false)
+  const [showAdvancedActions, setShowAdvancedActions] = useState(true)
   const [rejectReason, setRejectReason] = useState("")
 
   const getEstadoBadge = (estado: string) => {
@@ -357,7 +357,7 @@ export default function CuentaCobroProveedor() {
           id="advanced-actions"
         />
         <Label htmlFor="advanced-actions" className="text-sm font-medium">
-          Mostrar acciones avanzadas
+          Vista proveedor
         </Label>
       </div>
 
@@ -631,7 +631,8 @@ export default function CuentaCobroProveedor() {
           </DialogHeader>
 
           {selectedProveedor && (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <div>
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="vehiculo">Por Vehículo</TabsTrigger>
                 <TabsTrigger value="cliente">Por Cliente</TabsTrigger>
@@ -750,7 +751,9 @@ export default function CuentaCobroProveedor() {
                   ))}
                 </div>
                 
-                {/* Descuentos Unificados */}
+                {/* Descuentos Unificados - now moved to bottom of main tab */}
+                
+                 {/* Descuentos Aplicados Summary for Por Cliente tab */}
                 {selectedProveedor?.detalleFacturacion?.vehiculos && (
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-medium mb-3">Descuentos Aplicados</h4>
@@ -774,8 +777,8 @@ export default function CuentaCobroProveedor() {
                     </div>
                   </div>
                 )}
-                
-                {/* Total General para el tab Por Cliente */}
+
+                 {/* Total General para el tab Por Cliente */}
                 <div className="border-t pt-4 mt-4">
                   <div className="bg-blue-50 p-4 rounded-lg">
                     <div className="flex justify-between items-center">
@@ -785,7 +788,8 @@ export default function CuentaCobroProveedor() {
                   </div>
                 </div>
               </TabsContent>
-            </Tabs>
+              </Tabs>
+            </div>
           )}
         </DialogContent>
       </Dialog>

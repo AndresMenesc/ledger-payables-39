@@ -246,7 +246,7 @@ const lotesAprobados = [
     valor_bruto: 8200000,
     descuentos_totales: 410000,
     valor_neto: 7790000,
-    estado: "aprobado",
+    estado: "creando",
     aprobado_por: "Director Financiero",
     proveedores: ["TRANSPORTES REGIONALES DEL SUR", "LOGÍSTICA EMPRESARIAL LTDA", "FLOTA EJECUTIVA PREMIUM", "SERVICIOS ESPECIALIZADOS 4X4"],
     cuentas: [
@@ -435,8 +435,8 @@ export default function LotesAprobados() {
   const renderCell = (key: string, value: any, row: any) => {
     if (key === 'estado') {
       return (
-        <Badge variant={value === 'pagado' ? 'success' : 'success-light'}>
-          {value === 'pagado' ? 'Pagado' : 'Aprobado'}
+        <Badge variant={value === 'pagado' ? 'success' : value === 'creando' ? 'secondary' : 'success-light'}>
+          {value === 'pagado' ? 'Pagado' : value === 'creando' ? 'Creando' : 'Aprobado'}
         </Badge>
       )
     }
@@ -553,6 +553,7 @@ export default function LotesAprobados() {
                 <SelectContent>
                   <SelectItem value="todos">Todos los estados</SelectItem>
                   <SelectItem value="aprobado">Aprobado</SelectItem>
+                  <SelectItem value="creando">Creando</SelectItem>
                   <SelectItem value="pagado">Pagado</SelectItem>
                 </SelectContent>
               </Select>
