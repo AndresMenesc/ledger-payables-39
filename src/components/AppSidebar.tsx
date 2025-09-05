@@ -82,14 +82,14 @@ const navigationItems = [
     ]
   },
   {
-    title: "Estados de Lotes",
+    title: "Gestión de Lotes",
     icon: Package,
     subItems: [
       {
         title: "Lotes",
         url: "/lotes-aprobados",
         icon: CheckCircle
-      },
+      }/*,
       {
         title: "Pagados",
         url: "/pagados",
@@ -99,7 +99,7 @@ const navigationItems = [
         title: "Sin Lote",
         url: "/sin-lote",
         icon: AlertTriangle
-      }
+      }*/
     ]
   },
   {
