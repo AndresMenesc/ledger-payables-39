@@ -152,7 +152,7 @@ export default function RevisionAdmin() {
 
   const cuentasFiltradas = cuentasCobro.filter(cuenta => {
     if (filtros.proveedor && !cuenta.proveedor.toLowerCase().includes(filtros.proveedor.toLowerCase())) return false
-    if (filtros.estado && cuenta.estado !== filtros.estado) return false
+    if (filtros.estado && filtros.estado !== "todos" && cuenta.estado !== filtros.estado) return false
     return true
   })
 
@@ -194,7 +194,7 @@ export default function RevisionAdmin() {
                     <SelectValue placeholder="Todos los estados" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos los estados</SelectItem>
+                    <SelectItem value="todos">Todos los estados</SelectItem>
                     <SelectItem value="Pendiente Revisión">Pendiente Revisión</SelectItem>
                     <SelectItem value="Aprobado para Pago">Aprobado para Pago</SelectItem>
                     <SelectItem value="Rechazado">Rechazado</SelectItem>
