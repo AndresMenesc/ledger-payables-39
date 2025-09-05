@@ -47,7 +47,7 @@ const navigationItems = [
     title: "Anticipos",
     url: "/anticipos",
     icon: Banknote
-  },
+  },/*
   {
     title: "Facturación",
     icon: Receipt,
@@ -100,7 +100,7 @@ const navigationItems = [
     title: "Préstamos",
     url: "/prestamos",
     icon: CreditCard
-  },
+  },*/
   {
     title: "Proveedores",
     url: "/proveedores",
@@ -115,7 +115,7 @@ const navigationItems = [
     title: "Vehículos",
     url: "/vehiculos",
     icon: Truck
-  },
+  }/*,
   {
     title: "Validación de documentos",
     url: "/validacion-proveedores",
@@ -162,7 +162,7 @@ const navigationItems = [
         icon: FileText
       }
     ]
-  }
+  }*/
 ]
 
 export function AppSidebar() {
