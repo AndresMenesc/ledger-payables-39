@@ -22,7 +22,14 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 // Estructura de navegación
-const navigationItems = [
+interface NavigationItem {
+  title: string;
+  url?: string;
+  icon: any;
+  subItems?: NavigationItem[];
+}
+
+const navigationItems: NavigationItem[] = [
   {
     title: "Dashboard",
     url: "/",
@@ -172,8 +179,8 @@ export function AppSidebar() {
   const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Facturación", "Cuentas de Cobro", "Usuarios proveedores", "Gestión de Pagos", "Estados de Lotes", "Comercial"])
 
   const isActive = (path: string) => currentPath === path
-  const hasActiveChild = (subItems?: any[]) => 
-    subItems?.some(item => isActive(item.url)) ?? false
+  const hasActiveChild = (subItems?: NavigationItem[]) => 
+    subItems?.some(item => item.url && isActive(item.url)) ?? false
 
   const toggleGroup = (groupTitle: string) => {
     setOpenGroups(prev => 
@@ -209,7 +216,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                 <SidebarMenuItem key={item.title}>
                   {item.subItems ? (
                     // Grupo con submódulos
                     <Collapsible
@@ -217,7 +224,7 @@ export function AppSidebar() {
                       onOpenChange={() => toggleGroup(item.title)}
                     >
                       <CollapsibleTrigger asChild>
-                        <SidebarMenuButton 
+                         <SidebarMenuButton 
                           className={`w-full justify-between ${hasActiveChild(item.subItems) ? 'bg-accent' : ''}`}
                         >
                           <div className="flex items-center">
@@ -234,21 +241,21 @@ export function AppSidebar() {
                       
                       {open && (
                         <CollapsibleContent>
-                          <SidebarMenuSub>
+                           <SidebarMenuSub>
                             {item.subItems.map((subItem) => (
                               <SidebarMenuSubItem key={subItem.title}>
                                 <SidebarMenuSubButton asChild>
-                                  <NavLink 
-                                    to={subItem.url} 
-                                    className={getNavClasses(isActive(subItem.url))}
-                                  >
-                                    <subItem.icon className="h-4 w-4" />
-                                    <span className="ml-3">{subItem.title}</span>
-                                  </NavLink>
-                                </SidebarMenuSubButton>
-                              </SidebarMenuSubItem>
-                            ))}
-                          </SidebarMenuSub>
+                                   <NavLink 
+                                     to={subItem.url!} 
+                                     className={getNavClasses(isActive(subItem.url!))}
+                                   >
+                                     <subItem.icon className="h-4 w-4" />
+                                     <span className="ml-3">{subItem.title}</span>
+                                   </NavLink>
+                                 </SidebarMenuSubButton>
+                               </SidebarMenuSubItem>
+                             ))}
+                           </SidebarMenuSub>
                         </CollapsibleContent>
                       )}
                     </Collapsible>

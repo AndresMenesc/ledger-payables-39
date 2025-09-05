@@ -202,6 +202,10 @@ export default function CuentaCobroProveedor() {
   const [showFileProcessModal, setShowFileProcessModal] = useState(false)
   const [showAdvancedActions, setShowAdvancedActions] = useState(true)
   const [rejectReason, setRejectReason] = useState("")
+  const [serviceApprovals, setServiceApprovals] = useState<{[key: string]: string}>({}) // 'approved', 'rejected', 'pending'
+  const [showServiceRejectModal, setShowServiceRejectModal] = useState(false)
+  const [selectedServiceIndex, setSelectedServiceIndex] = useState<number | null>(null)
+  const [serviceRejectReason, setServiceRejectReason] = useState("")
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -286,6 +290,64 @@ export default function CuentaCobroProveedor() {
 
   const subirSegSocial = (proveedorId: number) => {
     console.log(`Subir seguridad social para proveedor ${proveedorId}`)
+  }
+
+  const approveService = (index: number) => {
+    setServiceApprovals(prev => ({
+      ...prev,
+      [`service_${index}`]: 'approved'
+    }))
+  }
+
+  const rejectService = (index: number) => {
+    setSelectedServiceIndex(index)
+    setShowServiceRejectModal(true)
+  }
+
+  const confirmServiceReject = () => {
+    if (selectedServiceIndex !== null) {
+      setServiceApprovals(prev => ({
+        ...prev,
+        [`service_${selectedServiceIndex}`]: 'rejected'
+      }))
+    }
+    setShowServiceRejectModal(false)
+    setServiceRejectReason("")
+    setSelectedServiceIndex(null)
+  }
+
+  const approveAllServices = () => {
+    const newApprovals: {[key: string]: string} = {}
+    selectedProveedor?.serviciosDetalle.forEach((_: any, index: number) => {
+      newApprovals[`service_${index}`] = 'approved'
+    })
+    setServiceApprovals(prev => ({
+      ...prev,
+      ...newApprovals
+    }))
+    toast({
+      title: "Todos los servicios aprobados",
+      description: "Se han aprobado todos los servicios del cliente.",
+    })
+  }
+
+  const getServiceStatus = (index: number) => {
+    return serviceApprovals[`service_${index}`] || 'pending'
+  }
+
+  const getClientApprovalStatus = (cliente: any) => {
+    // Check if all services for this client are approved
+    const clientServices = selectedProveedor?.serviciosDetalle || []
+    const approvedCount = clientServices.filter((_: any, index: number) => 
+      getServiceStatus(index) === 'approved'
+    ).length
+    const rejectedCount = clientServices.filter((_: any, index: number) => 
+      getServiceStatus(index) === 'rejected'
+    ).length
+    
+    if (rejectedCount > 0) return 'rejected'
+    if (approvedCount === clientServices.length) return 'approved'
+    return 'pending'
   }
 
   // Función para agrupar clientes por nombre y sumar sus valores
@@ -445,7 +507,7 @@ export default function CuentaCobroProveedor() {
                     </>
                   )}
                   
-                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
+                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && proveedor.nombre !== "Cargo Express Ltda" && (
                     <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
                       <FileText className="h-4 w-4 mr-2" />
                       Subir Seg. Social
@@ -530,7 +592,7 @@ export default function CuentaCobroProveedor() {
                     </>
                   )}
                   
-                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
+                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && proveedor.nombre !== "Cargo Express Ltda" && (
                     <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
                       <FileText className="h-4 w-4 mr-2" />
                       Subir Seg. Social
@@ -607,7 +669,7 @@ export default function CuentaCobroProveedor() {
                     </>
                   )}
                   
-                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
+                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && proveedor.nombre !== "Cargo Express Ltda" && (
                     <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
                       <FileText className="h-4 w-4 mr-2" />
                       Subir Seg. Social
@@ -844,10 +906,21 @@ export default function CuentaCobroProveedor() {
               {/* Tabla de servicios detallados */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
-                    Registro Detallado de Servicios
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      Registro Detallado de Servicios
+                    </CardTitle>
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      onClick={approveAllServices}
+                      className="bg-green-600 hover:bg-green-700"
+                    >
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Aprobar Todos
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="overflow-x-auto">
@@ -860,6 +933,7 @@ export default function CuentaCobroProveedor() {
                           <th className="text-left p-3">Usuarios</th>
                           <th className="text-left p-3">Valor</th>
                           <th className="text-left p-3">Estado</th>
+                          <th className="text-left p-3">Aprobación</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -897,6 +971,40 @@ export default function CuentaCobroProveedor() {
                               <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
                                 {servicio.estado}
                               </Badge>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                {getServiceStatus(index) === 'pending' && (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => approveService(index)}
+                                      className="text-green-600 border-green-600 hover:bg-green-50"
+                                    >
+                                      <CheckCircle className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => rejectService(index)}
+                                      className="text-red-600 border-red-600 hover:bg-red-50"
+                                    >
+                                      <X className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                                {getServiceStatus(index) === 'approved' && (
+                                  <Badge variant="outline" className="bg-green-50 text-green-600 border-green-200">
+                                    Aprobado
+                                  </Badge>
+                                )}
+                                {getServiceStatus(index) === 'rejected' && (
+                                  <Badge variant="outline" className="bg-red-50 text-red-600 border-red-200">
+                                    Rechazado
+                                  </Badge>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         ))}
@@ -1291,6 +1399,55 @@ export default function CuentaCobroProveedor() {
           </DialogContent>
         </Dialog>
       )}
+
+      {/* Modal de Motivo de Rechazo de Servicio */}
+      <Dialog open={showServiceRejectModal} onOpenChange={setShowServiceRejectModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-600" />
+              Motivo del Rechazo
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground">
+              Por favor, especifique el motivo por el cual está rechazando este servicio.
+            </p>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="serviceRejectReason">Motivo del rechazo</Label>
+              <Textarea
+                id="serviceRejectReason"
+                placeholder="Describa el motivo del rechazo..."
+                value={serviceRejectReason}
+                onChange={(e) => setServiceRejectReason(e.target.value)}
+                className="min-h-[100px]"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowServiceRejectModal(false)
+                setServiceRejectReason("")
+                setSelectedServiceIndex(null)
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmServiceReject}
+              disabled={!serviceRejectReason.trim()}
+            >
+              Confirmar Rechazo
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }
