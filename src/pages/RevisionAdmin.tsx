@@ -121,6 +121,8 @@ export default function RevisionAdmin() {
   const [modalSeleccionarLote, setModalSeleccionarLote] = useState(false)
   const [modalCuentaAprobada, setModalCuentaAprobada] = useState(false)
   const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null)
+  const [showTemplateAprobado, setShowTemplateAprobado] = useState(false)
+  const [showTemplateRechazado, setShowTemplateRechazado] = useState(false)
   const [filtros, setFiltros] = useState({
     proveedor: "",
     estado: "",
@@ -225,9 +227,21 @@ export default function RevisionAdmin() {
             <h1 className="text-3xl font-bold tracking-tight">Revisión de Cuentas de Cobro</h1>
             <p className="text-muted-foreground">Revisar y aprobar las cuentas de cobro enviadas por los proveedores</p>
           </div>
-          <div className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-warning" />
-            <span className="text-sm font-medium">{cuentasFiltradas.filter(c => c.estado === "Pendiente Revisión").length} pendientes de revisión</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              <span className="text-sm font-medium">{cuentasFiltradas.filter(c => c.estado === "Pendiente Revisión").length} pendientes de revisión</span>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => setShowTemplateAprobado(true)}>
+                <FileCheck className="h-4 w-4 mr-2" />
+                Plantilla Aprobado
+              </Button>
+              <Button variant="outline" onClick={() => setShowTemplateRechazado(true)}>
+                <XCircle className="h-4 w-4 mr-2" />
+                Plantilla Rechazado
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -816,6 +830,324 @@ export default function RevisionAdmin() {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal Plantilla Aprobado */}
+      <Dialog open={showTemplateAprobado} onOpenChange={setShowTemplateAprobado}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-success" />
+              Plantilla de Aprobación de Cuenta de Cobro
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Header del documento */}
+            <div className="text-center border-b pb-4">
+              <h2 className="text-xl font-bold mb-2">COMUNICADO DE APROBACIÓN</h2>
+              <h3 className="text-lg font-semibold">CUENTA DE COBRO</h3>
+              <p className="text-sm text-muted-foreground mt-2">Fecha: {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+            </div>
+
+            {/* Información del proveedor */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">INFORMACIÓN DEL PROVEEDOR</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Nombre/Razón Social:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_________________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">NIT/CC:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Período Facturado:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Número de Factura:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Información de la cuenta */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">INFORMACIÓN DE LA CUENTA</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Valor Total:</span>
+                  <p className="border-b border-dotted border-muted-foreground">$ _____________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Fecha de Envío:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mensaje de aprobación */}
+            <div className="bg-success/10 border border-success/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-success font-medium mb-3">
+                <CheckCircle className="h-5 w-5" />
+                CUENTA DE COBRO APROBADA
+              </div>
+              <p className="text-sm mb-4">
+                Nos complace informarle que su cuenta de cobro ha sido <strong>APROBADA</strong> para proceso de pago, 
+                después de haber cumplido satisfactoriamente con todos los requisitos establecidos por nuestra organización.
+              </p>
+              
+              <div className="space-y-3">
+                <h5 className="font-medium">DOCUMENTOS VERIFICADOS:</h5>
+                <ul className="text-sm space-y-1">
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    Cuenta de cobro debidamente diligenciada
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    Planilla de seguridad social al día
+                  </li>
+                  <li className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-success" />
+                    Documentación de soporte completa
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Información del pago */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">INFORMACIÓN DEL PAGO</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Lote de Pago:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Fecha Programada de Pago:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+              </div>
+              <div className="text-sm">
+                <p className="font-medium mb-2">Instrucciones:</p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li>El pago se realizará en la fecha programada según el cronograma establecido</li>
+                  <li>Recibirá notificación cuando el pago sea procesado</li>
+                  <li>Mantenga actualizada su información bancaria</li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Firmas */}
+            <div className="grid grid-cols-2 gap-8 pt-6 border-t">
+              <div className="text-center">
+                <div className="border-b border-muted-foreground w-full mb-2"></div>
+                <p className="text-sm font-medium">Revisado por:</p>
+                <p className="text-xs text-muted-foreground">Área Financiera</p>
+              </div>
+              <div className="text-center">
+                <div className="border-b border-muted-foreground w-full mb-2"></div>
+                <p className="text-sm font-medium">Aprobado por:</p>
+                <p className="text-xs text-muted-foreground">Director Financiero</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal Plantilla Rechazado */}
+      <Dialog open={showTemplateRechazado} onOpenChange={setShowTemplateRechazado}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-destructive" />
+              Plantilla de Rechazo de Cuenta de Cobro
+            </DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Header del documento */}
+            <div className="text-center border-b pb-4">
+              <h2 className="text-xl font-bold mb-2">COMUNICADO DE RECHAZO</h2>
+              <h3 className="text-lg font-semibold">CUENTA DE COBRO</h3>
+              <p className="text-sm text-muted-foreground mt-2">Fecha: {new Date().toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</p>
+            </div>
+
+            {/* Información del proveedor */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">INFORMACIÓN DEL PROVEEDOR</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Nombre/Razón Social:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_________________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">NIT/CC:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Período Facturado:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Número de Factura:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Información de la cuenta */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">INFORMACIÓN DE LA CUENTA</h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium">Valor Total:</span>
+                  <p className="border-b border-dotted border-muted-foreground">$ _____________________________</p>
+                </div>
+                <div>
+                  <span className="font-medium">Fecha de Envío:</span>
+                  <p className="border-b border-dotted border-muted-foreground">_____________________</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Mensaje de rechazo */}
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-destructive font-medium mb-3">
+                <XCircle className="h-5 w-5" />
+                CUENTA DE COBRO RECHAZADA
+              </div>
+              <p className="text-sm mb-4">
+                Lamentamos informarle que su cuenta de cobro ha sido <strong>RECHAZADA</strong> debido a inconsistencias 
+                encontradas durante el proceso de revisión. A continuación, encontrará el detalle de las observaciones:
+              </p>
+            </div>
+
+            {/* Motivos de rechazo */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">MOTIVOS DE RECHAZO</h4>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-destructive/20 text-destructive rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                  <div className="flex-1">
+                    <span className="font-medium">Documentación incompleta:</span>
+                    <div className="mt-2 space-y-1">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Planilla de seguridad social faltante
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Cuenta de cobro sin firma
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Documentos de soporte incompletos
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-destructive/20 text-destructive rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                  <div className="flex-1">
+                    <span className="font-medium">Errores en la información:</span>
+                    <div className="mt-2 space-y-1">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Datos del proveedor incorrectos
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Valores no coinciden con el contrato
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Período facturado incorrecto
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <span className="w-6 h-6 bg-destructive/20 text-destructive rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                  <div className="flex-1">
+                    <span className="font-medium">Incumplimiento de obligaciones:</span>
+                    <div className="mt-2 space-y-1">
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Seguridad social sin pagar
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Documentos vencidos
+                      </label>
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" className="rounded" />
+                        Certificaciones no vigentes
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Observaciones adicionales */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">OBSERVACIONES ADICIONALES</h4>
+              <div className="border rounded-lg p-3">
+                <textarea 
+                  className="w-full h-20 resize-none border-0 focus:outline-none text-sm" 
+                  placeholder="Escriba aquí observaciones específicas o comentarios adicionales..."
+                />
+              </div>
+            </div>
+
+            {/* Plazo para subsanar */}
+            <div className="bg-warning/10 border border-warning/20 rounded-lg p-4">
+              <div className="flex items-center gap-2 text-warning font-medium mb-2">
+                <AlertTriangle className="h-5 w-5" />
+                PLAZO PARA SUBSANAR
+              </div>
+              <p className="text-sm mb-3">
+                Usted tiene un plazo de <strong>CINCO (5) días hábiles</strong> a partir de la fecha de este comunicado 
+                para subsanar las observaciones mencionadas y reenviar la cuenta de cobro corregida.
+              </p>
+              <div className="text-sm">
+                <span className="font-medium">Fecha límite: </span>
+                <span className="border-b border-dotted border-muted-foreground">_____________________</span>
+              </div>
+            </div>
+
+            {/* Instrucciones */}
+            <div className="space-y-4">
+              <h4 className="font-semibold text-primary">INSTRUCCIONES PARA SUBSANAR</h4>
+              <ul className="list-disc list-inside space-y-2 text-sm">
+                <li>Corregir todos los puntos señalados en los motivos de rechazo</li>
+                <li>Adjuntar la documentación faltante o corregida</li>
+                <li>Reenviar la cuenta de cobro por el canal establecido</li>
+                <li>Incluir una carta explicativa de las correcciones realizadas</li>
+              </ul>
+            </div>
+
+            {/* Firmas */}
+            <div className="grid grid-cols-2 gap-8 pt-6 border-t">
+              <div className="text-center">
+                <div className="border-b border-muted-foreground w-full mb-2"></div>
+                <p className="text-sm font-medium">Revisado por:</p>
+                <p className="text-xs text-muted-foreground">Área Financiera</p>
+              </div>
+              <div className="text-center">
+                <div className="border-b border-muted-foreground w-full mb-2"></div>
+                <p className="text-sm font-medium">Fecha:</p>
+                <p className="text-xs text-muted-foreground">_____________</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
