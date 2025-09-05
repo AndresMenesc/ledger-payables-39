@@ -29,6 +29,37 @@ const navigationItems = [
     icon: BarChart3
   },
   {
+        title: "Cuenta de Cobro - Proveedor",
+        url: "/cuenta-cobro-proveedor",
+        icon: Building2
+      },
+  {
+    title: "Gestión de Lotes",
+    icon: Package,
+    subItems: [
+      {
+        title: "Lotes",
+        url: "/lotes-aprobados",
+        icon: CheckCircle
+      }/*,
+      {
+        title: "Pagados",
+        url: "/pagados",
+        icon: DollarSign
+      },
+      {
+        title: "Sin Lote",
+        url: "/sin-lote",
+        icon: AlertTriangle
+      }*/
+    ]
+  },
+  {
+    title: "Revisión Admin",
+    url: "/revision-admin",
+    icon: ClipboardCheck
+  },
+  {
     title: "Facturación",
     icon: Receipt,
     subItems: [
@@ -52,12 +83,7 @@ const navigationItems = [
         title: "Cuentas de Cobro",
         url: "/cuenta-cobro",
         icon: Receipt
-      },
-      {
-        title: "Cuenta de Cobro - Proveedor",
-        url: "/cuenta-cobro-proveedor",
-        icon: Building2
-      }
+      }      
     ]
   },
   {
@@ -79,27 +105,6 @@ const navigationItems = [
         url: "/pagos-aprobar",
         icon: Clock
       }
-    ]
-  },
-  {
-    title: "Gestión de Lotes",
-    icon: Package,
-    subItems: [
-      {
-        title: "Lotes",
-        url: "/lotes-aprobados",
-        icon: CheckCircle
-      }/*,
-      {
-        title: "Pagados",
-        url: "/pagados",
-        icon: DollarSign
-      },
-      {
-        title: "Sin Lote",
-        url: "/sin-lote",
-        icon: AlertTriangle
-      }*/
     ]
   },
   {
@@ -152,11 +157,6 @@ const navigationItems = [
     title: "Gestión PQR",
     url: "/pqr",
     icon: MessageSquare
-  },
-  {
-    title: "Revisión Admin",
-    url: "/revision-admin",
-    icon: ClipboardCheck
   },
   {
     title: "Usuarios proveedores",
