@@ -324,7 +324,80 @@ export default function CuentaCobroProveedor() {
         <TabsContent value="pendientes" className="space-y-4">
           {proveedoresData.filter(p => p.estado === "Pendiente Aceptación").map((proveedor) => (
             <Card key={proveedor.id} className="w-full">
-              {/* Mismo contenido que en "todos" */}
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">{proveedor.nombre}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Código: {proveedor.codigo} • {proveedor.vehiculos} vehículos • Prefactura: {proveedor.prefactura}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {getEstadoBadge(proveedor.estado)}
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Valor Liquidado:</p>
+                    <p className="text-2xl font-bold text-primary">{proveedor.valorLiquidado}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Documentos:</p>
+                  <div className="flex gap-2">
+                    {proveedor.documentos.rut && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">✓ RUT</Badge>
+                    )}
+                    {proveedor.documentos.certBancaria && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">✓ Cert. Bancaria</Badge>
+                    )}
+                    {proveedor.documentos.segSocial ? (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">✓ Seg. Social</Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">✗ Seg. Social</Badge>
+                    )}
+                  </div>
+                </div>
+
+                {proveedor.motivoRechazo && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-sm text-red-700">
+                      <strong>Motivo de rechazo:</strong> {proveedor.motivoRechazo}
+                    </p>
+                  </div>
+                )}
+
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => verDetalle(proveedor)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Detalle
+                  </Button>
+                  
+                  <Button variant="outline" size="sm">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Revisar Servicios
+                  </Button>
+                  
+                  <Button variant="outline" size="sm" onClick={() => notificarProveedor(proveedor.id)}>
+                    <Users className="h-4 w-4 mr-2" />
+                    Notificar Proveedor
+                  </Button>
+                  
+                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
+                    <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Subir Seg. Social
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
             </Card>
           ))}
         </TabsContent>
@@ -332,7 +405,72 @@ export default function CuentaCobroProveedor() {
         <TabsContent value="aceptadas" className="space-y-4">
           {proveedoresData.filter(p => p.estado === "Aceptada").map((proveedor) => (
             <Card key={proveedor.id} className="w-full">
-              {/* Mismo contenido que en "todos" */}
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Building2 className="h-5 w-5 text-primary" />
+                    <div>
+                      <CardTitle className="text-lg">{proveedor.nombre}</CardTitle>
+                      <p className="text-sm text-muted-foreground">
+                        Código: {proveedor.codigo} • {proveedor.vehiculos} vehículos • Prefactura: {proveedor.prefactura}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {getEstadoBadge(proveedor.estado)}
+                  </div>
+                </div>
+              </CardHeader>
+
+              <CardContent className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="text-right">
+                    <p className="text-sm text-muted-foreground">Valor Liquidado:</p>
+                    <p className="text-2xl font-bold text-primary">{proveedor.valorLiquidado}</p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm font-medium mb-2">Documentos:</p>
+                  <div className="flex gap-2">
+                    {proveedor.documentos.rut && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">✓ RUT</Badge>
+                    )}
+                    {proveedor.documentos.certBancaria && (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">✓ Cert. Bancaria</Badge>
+                    )}
+                    {proveedor.documentos.segSocial ? (
+                      <Badge variant="outline" className="bg-blue-50 text-blue-600 border-blue-200">✓ Seg. Social</Badge>
+                    ) : (
+                      <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-200">✗ Seg. Social</Badge>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <Button variant="outline" size="sm" onClick={() => verDetalle(proveedor)}>
+                    <Eye className="h-4 w-4 mr-2" />
+                    Ver Detalle
+                  </Button>
+                  
+                  <Button variant="outline" size="sm">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Revisar Servicios
+                  </Button>
+                  
+                  <Button variant="outline" size="sm" onClick={() => notificarProveedor(proveedor.id)}>
+                    <Users className="h-4 w-4 mr-2" />
+                    Notificar Proveedor
+                  </Button>
+                  
+                  {proveedor.nombre !== "Transportes Rápidos S.A.S" && (
+                    <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Subir Seg. Social
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
             </Card>
           ))}
         </TabsContent>
@@ -356,14 +494,14 @@ export default function CuentaCobroProveedor() {
               </TabsList>
 
               <TabsContent value="vehiculo" className="space-y-6">
-                {selectedProveedor.detalleFacturacion.vehiculos.map((vehiculo: any, index: number) => (
+                {selectedProveedor?.detalleFacturacion?.vehiculos?.map((vehiculo: any, index: number) => (
                   <div key={index} className="space-y-4">
                     <div className="flex items-center gap-2 pb-2 border-b">
                       <Truck className="h-5 w-5 text-primary" />
                       <h3 className="text-lg font-semibold">Vehículo {vehiculo.placa}</h3>
                     </div>
                     
-                    {vehiculo.clientes.map((cliente: any, clienteIndex: number) => (
+                    {vehiculo?.clientes?.map((cliente: any, clienteIndex: number) => (
                       <Card key={clienteIndex} className="border-l-4 border-l-primary">
                         <CardHeader className="pb-3">
                           <div className="flex justify-between items-center">
@@ -414,16 +552,16 @@ export default function CuentaCobroProveedor() {
                           </div>
                         </CardContent>
                       </Card>
-                    ))}
-                  </div>
-                ))}
+                     ))}
+                   </div>
+                )) || []}
 
                 <div className="flex justify-between items-center pt-4 border-t-2 border-primary">
                   <div>
                     <p className="text-lg font-semibold">Total General</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-primary">{selectedProveedor.detalleFacturacion.totalGeneral}</p>
+                    <p className="text-2xl font-bold text-primary">{selectedProveedor?.detalleFacturacion?.totalGeneral}</p>
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
@@ -436,9 +574,9 @@ export default function CuentaCobroProveedor() {
               </TabsContent>
 
               <TabsContent value="cliente" className="space-y-6">
-                {selectedProveedor.detalleFacturacion.vehiculos.map((vehiculo: any, index: number) => (
+                {selectedProveedor?.detalleFacturacion?.vehiculos?.map((vehiculo: any, index: number) => (
                   <div key={index} className="space-y-4">
-                    {vehiculo.clientes.map((cliente: any, clienteIndex: number) => (
+                    {vehiculo?.clientes?.map((cliente: any, clienteIndex: number) => (
                       <Card key={clienteIndex} className="border-l-4 border-l-primary">
                         <CardHeader>
                           <div className="flex items-center gap-2">
@@ -473,7 +611,7 @@ export default function CuentaCobroProveedor() {
                       </Card>
                     ))}
                   </div>
-                ))}
+                )) || []}
               </TabsContent>
             </Tabs>
           )}
