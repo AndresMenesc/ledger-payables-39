@@ -1,6 +1,6 @@
 
 import { useState } from "react"
-import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign, AlertCircle, CreditCard, Receipt } from "lucide-react"
+import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign, AlertCircle, CreditCard, Receipt, CheckCircle } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,6 +9,8 @@ import { Separator } from "@/components/ui/separator"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { addDays, format } from "date-fns"
 import { DateRange } from "react-day-picker"
 
@@ -400,6 +402,8 @@ export default function LotesAprobados() {
     from: new Date(2024, 0, 1),
     to: addDays(new Date(), 30),
   })
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [loteToProcess, setLoteToProcess] = useState<any>(null)
 
   // Obtener lista única de proveedores para el filtro
   const proveedoresUnicos = Array.from(new Set(
@@ -430,6 +434,13 @@ export default function LotesAprobados() {
   const handleVerCuentaDetalle = (cuenta: any) => {
     setSelectedCuenta(cuenta)
     setCurrentView('cuenta-detail')
+  }
+
+  const handlePagar = (lote: any) => {
+    setLoteToProcess(lote)
+    setShowSuccessModal(true)
+    // Aquí iría la lógica real para procesar el pago
+    console.log(`Procesando pago para lote ${lote.numero}`)
   }
 
   const renderCell = (key: string, value: any, row: any) => {
@@ -479,6 +490,33 @@ export default function LotesAprobados() {
         <Eye className="h-4 w-4 mr-2" />
         Ver Detalle
       </Button>
+      
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <Button 
+            size="sm"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+          >
+            <CreditCard className="h-4 w-4 mr-2" />
+            Pagar
+          </Button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Pago</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Está seguro que desea procesar el pago del lote {row.numero}? 
+              Esta acción registrará el lote como pagado y enviará una notificación al proveedor.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => handlePagar(row)}>
+              Confirmar Pago
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       
       <Button 
         size="sm"
@@ -627,6 +665,33 @@ export default function LotesAprobados() {
           filterable={false}
           exportable={true}
         />
+
+        {/* Modal de Éxito */}
+        <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader className="text-center">
+              <div className="mx-auto w-12 h-12 bg-success/10 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="h-6 w-6 text-success" />
+              </div>
+              <DialogTitle className="text-xl">¡Pago Registrado Exitosamente!</DialogTitle>
+              <DialogDescription className="text-center space-y-2">
+                <p>El lote <span className="font-medium">{loteToProcess?.numero}</span> ha sido registrado como pagado.</p>
+                <p>Se ha enviado una notificación automática al proveedor informando sobre el procesamiento del pago.</p>
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-center mt-6">
+              <Button 
+                onClick={() => {
+                  setShowSuccessModal(false)
+                  setLoteToProcess(null)
+                }}
+                className="w-full"
+              >
+                Continuar
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
