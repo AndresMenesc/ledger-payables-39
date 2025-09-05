@@ -28,6 +28,7 @@ import GenerarCuentaCobro from "./pages/GenerarCuentaCobro";
 import Documentacion from "./pages/Documentacion";
 import CuentaCobroProveedor from "./pages/CuentaCobroProveedor";
 import RevisionAdmin from "./pages/RevisionAdmin";
+import Anticipos from "./pages/Anticipos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -81,6 +82,7 @@ const App = () => (
                    <Route path="cotizaciones" element={<Cotizaciones />} />
                    <Route path="portafolios" element={<Portafolios />} />
                    <Route path="revision-admin" element={<RevisionAdmin />} />
+                   <Route path="anticipos" element={<Anticipos />} />
                    <Route path="*" element={<NotFound />} />
                 </Routes>
                 </div>

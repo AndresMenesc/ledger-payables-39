@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   BarChart3, FileText, Clock, Package, CheckCircle, 
   DollarSign, AlertTriangle, CreditCard, Truck, Building2,
-  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator, ClipboardCheck
+  ChevronDown, ChevronRight, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator, ClipboardCheck, Banknote
 } from "lucide-react"
 import {
   Sidebar,
@@ -43,6 +43,11 @@ const navigationItems = [
         url: "/lotes-aprobados",
         icon: CheckCircle
       },
+  {
+    title: "Anticipos",
+    url: "/anticipos",
+    icon: Banknote
+  },
   {
     title: "Facturación",
     icon: Receipt,
