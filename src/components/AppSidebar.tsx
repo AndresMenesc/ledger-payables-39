@@ -34,31 +34,15 @@ const navigationItems = [
         icon: Building2
       },
   {
-    title: "Gestión de Lotes",
-    icon: Package,
-    subItems: [
-      {
-        title: "Lotes",
-        url: "/lotes-aprobados",
-        icon: CheckCircle
-      }/*,
-      {
-        title: "Pagados",
-        url: "/pagados",
-        icon: DollarSign
-      },
-      {
-        title: "Sin Lote",
-        url: "/sin-lote",
-        icon: AlertTriangle
-      }*/
-    ]
-  },
-  {
     title: "Revisión Admin",
     url: "/revision-admin",
     icon: ClipboardCheck
   },
+  {
+        title: "Lotes",
+        url: "/lotes-aprobados",
+        icon: CheckCircle
+      },
   {
     title: "Facturación",
     icon: Receipt,
