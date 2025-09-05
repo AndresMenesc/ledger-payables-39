@@ -86,7 +86,7 @@ const navigationItems = [
     icon: Package,
     subItems: [
       {
-        title: "Lotes Aprobados",
+        title: "Lotes",
         url: "/lotes-aprobados",
         icon: CheckCircle
       },
