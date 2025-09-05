@@ -46,8 +46,19 @@ const navigationItems = [
   },
   {
     title: "Cuentas de Cobro",
-    url: "/cuenta-cobro",
-    icon: Receipt
+    icon: Receipt,
+    subItems: [
+      {
+        title: "Cuentas de Cobro",
+        url: "/cuenta-cobro",
+        icon: Receipt
+      },
+      {
+        title: "Cuenta de Cobro - Proveedor",
+        url: "/cuenta-cobro-proveedor",
+        icon: Building2
+      }
+    ]
   },
   {
     title: "Gestión de Pagos",
@@ -164,7 +175,7 @@ export function AppSidebar() {
   const { open, setOpen } = useSidebar()
   const location = useLocation()
   const currentPath = location.pathname
-  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Facturación", "Usuarios proveedores", "Gestión de Pagos", "Estados de Lotes", "Comercial"])
+  const [openGroups, setOpenGroups] = useState<string[]>(["Dashboard", "Facturación", "Cuentas de Cobro", "Usuarios proveedores", "Gestión de Pagos", "Estados de Lotes", "Comercial"])
 
   const isActive = (path: string) => currentPath === path
   const hasActiveChild = (subItems?: any[]) => 

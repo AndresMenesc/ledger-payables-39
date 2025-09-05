@@ -26,6 +26,7 @@ import Liquidaciones from "./pages/Liquidaciones";
 import Facturas from "./pages/Facturas";
 import GenerarCuentaCobro from "./pages/GenerarCuentaCobro";
 import Documentacion from "./pages/Documentacion";
+import CuentaCobroProveedor from "./pages/CuentaCobroProveedor";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,7 +64,8 @@ const App = () => (
                   <Route path="pagados" element={<Pagados />} />
                   <Route path="sin-lote" element={<SinLote />} />
                   <Route path="lotes-aprobados" element={<LotesAprobados />} />
-                  <Route path="cuenta-cobro" element={<CuentaCobro />} />
+                   <Route path="cuenta-cobro" element={<CuentaCobro />} />
+                  <Route path="cuenta-cobro-proveedor" element={<CuentaCobroProveedor />} />
                   <Route path="pqr" element={<PQR />} />
                   <Route path="proveedores" element={<Proveedores />} />
                   <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
