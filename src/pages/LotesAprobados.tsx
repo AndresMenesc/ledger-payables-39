@@ -1,6 +1,6 @@
 
 import { useState } from "react"
-import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign, AlertCircle, CreditCard, Receipt, CheckCircle } from "lucide-react"
+import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign, AlertCircle, CreditCard, Receipt, CheckCircle, Plus } from "lucide-react"
 import { DataTable } from "@/components/DataTable"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -517,24 +517,6 @@ export default function LotesAprobados() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      
-      <Button 
-        size="sm"
-        className="bg-yellow-500 hover:bg-yellow-600 text-white"
-        onClick={() => handleExportBCOL(row.id)}
-      >
-        <Download className="h-4 w-4 mr-2" />
-        BCOL
-      </Button>
-
-      <Button 
-        size="sm"
-        className="bg-red-500 hover:bg-red-600 text-white"
-        onClick={() => handleExportBDAV(row.id)}
-      >
-        <Download className="h-4 w-4 mr-2" />
-        BDAV
-      </Button>
     </div>
   )
 
@@ -649,9 +631,15 @@ export default function LotesAprobados() {
   if (currentView === 'list') {
     return (
       <div className="p-6 space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Lotes Aprobados</h1>
-          <p className="text-muted-foreground">Consulta consolidada de todos los lotes aprobados con filtros avanzados</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Lotes Aprobados</h1>
+            <p className="text-muted-foreground">Consulta consolidada de todos los lotes aprobados con filtros avanzados</p>
+          </div>
+          <Button>
+            <Plus className="h-4 w-4 mr-2" />
+            Crear Nuevo Lote
+          </Button>
         </div>
 
         <DataTable
@@ -663,7 +651,7 @@ export default function LotesAprobados() {
           summary={summary}
           searchable={false}
           filterable={false}
-          exportable={true}
+          exportable={false}
         />
 
         {/* Modal de Éxito */}
