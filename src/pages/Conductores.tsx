@@ -9,8 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { Search, MoreHorizontal, Plus, Edit, Trash2, History, Eye, User } from "lucide-react";
+import { Search, MoreHorizontal, Plus, Edit, Trash2, History, Eye, User, Grid3X3, List, Car } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface Conductor {
   id: string;
@@ -19,6 +21,16 @@ interface Conductor {
   estado: "activo" | "inactivo";
   fechaCreacion: string;
   fechaActualizacion: string;
+  foto?: string;
+  telefono?: string;
+  cedula?: string;
+  vehiculo?: {
+    placa: string;
+    marca: string;
+    modelo: string;
+    año: string;
+    tipo: "camión" | "camioneta" | "automóvil";
+  };
   usuarioBloqueo?: {
     bloqueado: boolean;
     fechaBloqueo?: string;
@@ -49,6 +61,16 @@ const mockConductores: Conductor[] = [
     estado: "activo",
     fechaCreacion: "2024-01-15",
     fechaActualizacion: "2024-01-15",
+    foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    telefono: "+57 300 123 4567",
+    cedula: "12345678",
+    vehiculo: {
+      placa: "ABC-123",
+      marca: "Mercedes-Benz",
+      modelo: "Actros",
+      año: "2022",
+      tipo: "camión"
+    },
     usuarioBloqueo: {
       bloqueado: false,
       ultimoLogin: "2024-01-14 10:30:00"
@@ -66,6 +88,16 @@ const mockConductores: Conductor[] = [
     estado: "inactivo",
     fechaCreacion: "2024-01-10",
     fechaActualizacion: "2024-01-20",
+    foto: "https://images.unsplash.com/photo-1494790108755-2616b332c449?w=150&h=150&fit=crop&crop=face",
+    telefono: "+57 315 987 6543",
+    cedula: "87654321",
+    vehiculo: {
+      placa: "XYZ-789",
+      marca: "Volvo",
+      modelo: "FH16",
+      año: "2021",
+      tipo: "camión"
+    },
     usuarioBloqueo: {
       bloqueado: true,
       fechaBloqueo: "2024-01-20 15:45:00",
@@ -75,6 +107,33 @@ const mockConductores: Conductor[] = [
       seguridadSocial: "2024-11-20",
       licenciaConduccion: "2026-06-15",
       examenesPsicosensometricos: "2024-09-10"
+    }
+  },
+  {
+    id: "3",
+    nombreCompleto: "Carlos Andrés Rodríguez",
+    proveedor: "Rápido Express",
+    estado: "activo",
+    fechaCreacion: "2024-01-08",
+    fechaActualizacion: "2024-01-08",
+    foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    telefono: "+57 301 555 7890",
+    cedula: "11223344",
+    vehiculo: {
+      placa: "DEF-456",
+      marca: "Chevrolet",
+      modelo: "NPR",
+      año: "2020",
+      tipo: "camioneta"
+    },
+    usuarioBloqueo: {
+      bloqueado: false,
+      ultimoLogin: "2024-01-13 16:20:00"
+    },
+    documentos: {
+      seguridadSocial: "2025-03-15",
+      licenciaConduccion: "2025-09-30",
+      examenesPsicosensometricos: "2024-08-22"
     }
   }
 ];
@@ -94,6 +153,7 @@ export default function Conductores() {
   const [selectedDocument, setSelectedDocument] = useState<{ conductor: Conductor; tipo: keyof Conductor['documentos'] } | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
   const [statusFilter, setStatusFilter] = useState("")
+  const [viewMode, setViewMode] = useState<"list" | "cards">("list");
   const { toast } = useToast();
 
   const form = useForm({
@@ -321,6 +381,150 @@ export default function Conductores() {
     setShowHistorialDialog(true);
   };
 
+  const ConductorCard = ({ conductor }: { conductor: Conductor }) => {
+    const getDocumentStatus = (fecha: string) => {
+      if (!fecha) return { color: "bg-gray-500", text: "Sin fecha" };
+      const badge = getStatusBadge(fecha);
+      return {
+        color: badge.status === 'vencido' ? 'bg-red-500' : 
+               badge.status === 'por-vencer' ? 'bg-yellow-500' : 'bg-green-500',
+        text: badge.text
+      };
+    };
+
+    return (
+      <Card className="hover:shadow-lg transition-shadow">
+        <CardHeader className="pb-4">
+          <div className="flex items-start space-x-4">
+            <Avatar className="h-16 w-16">
+              <AvatarImage src={conductor.foto} alt={conductor.nombreCompleto} />
+              <AvatarFallback className="text-lg">
+                {conductor.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg truncate">{conductor.nombreCompleto}</CardTitle>
+              <p className="text-sm text-muted-foreground">{conductor.proveedor}</p>
+              <div className="flex items-center space-x-2 mt-2">
+                <Badge variant={conductor.estado === "activo" ? "default" : "destructive"}>
+                  {conductor.estado === "activo" ? "Activo" : "Inactivo"}
+                </Badge>
+                <Badge variant={conductor.usuarioBloqueo?.bloqueado ? "destructive" : "secondary"}>
+                  {conductor.usuarioBloqueo?.bloqueado ? "Bloqueado" : "Desbloqueado"}
+                </Badge>
+              </div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {/* Información del conductor */}
+          <div>
+            <h4 className="font-semibold text-sm mb-2">Información Personal</h4>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <span className="text-muted-foreground">Cédula:</span>
+                <p className="font-medium">{conductor.cedula || "No registrada"}</p>
+              </div>
+              <div>
+                <span className="text-muted-foreground">Teléfono:</span>
+                <p className="font-medium">{conductor.telefono || "No registrado"}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Información del vehículo */}
+          {conductor.vehiculo && (
+            <div>
+              <h4 className="font-semibold text-sm mb-2 flex items-center">
+                <Car className="h-4 w-4 mr-1" />
+                Vehículo Asignado
+              </h4>
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="font-semibold text-lg">{conductor.vehiculo.placa}</span>
+                  <Badge variant="outline">{conductor.vehiculo.tipo}</Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Marca:</span>
+                    <p className="font-medium">{conductor.vehiculo.marca}</p>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Modelo:</span>
+                    <p className="font-medium">{conductor.vehiculo.modelo}</p>
+                  </div>
+                </div>
+                <div className="text-sm">
+                  <span className="text-muted-foreground">Año:</span>
+                  <span className="font-medium ml-1">{conductor.vehiculo.año}</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Estado de documentos */}
+          <div>
+            <h4 className="font-semibold text-sm mb-2">Estado de Documentos</h4>
+            <div className="space-y-2">
+              {Object.entries(conductor.documentos).map(([key, fecha]) => {
+                const status = getDocumentStatus(fecha);
+                const labels = {
+                  seguridadSocial: "Seguridad Social",
+                  licenciaConduccion: "Licencia de Conducción",
+                  examenesPsicosensometricos: "Exámenes Psicosensométricos"
+                };
+                return (
+                  <div key={key} className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">{labels[key as keyof typeof labels]}:</span>
+                    <div className="flex items-center space-x-2">
+                      {fecha && <span className="text-xs">{new Date(fecha).toLocaleDateString()}</span>}
+                      <div className={`w-2 h-2 rounded-full ${status.color}`} title={status.text}></div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Acciones */}
+          <div className="flex justify-end pt-2 border-t">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  <MoreHorizontal className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => {
+                  setSelectedConductor(conductor);
+                  form.reset(conductor);
+                  setShowEditDialog(true);
+                }}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleVerHistorial(conductor)}>
+                  <History className="mr-2 h-4 w-4" />
+                  Ver Historial
+                </DropdownMenuItem>
+                <DropdownMenuItem 
+                  onClick={() => {
+                    setSelectedConductor(conductor);
+                    setShowDeleteDialog(true);
+                  }}
+                  className="text-red-600"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Eliminar
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   const renderCell = (key: string, value: any, conductor: Conductor) => {
     switch (key) {
       case "nombreCompleto":
@@ -493,17 +697,42 @@ export default function Conductores() {
         </Dialog>
       </div>
 
-      <DataTable
-        title="Lista de Conductores"
-        columns={columns}
-        data={statusFilter ? conductores.filter(c => c.estado === statusFilter) : conductores}
-        searchable
-        filterable
-        exportable
-        renderCell={renderCell}
-        statusFilter={true}
-        onStatusFilterChange={setStatusFilter}
-      />
+      {viewMode === "list" ? (
+        <DataTable
+          title="Lista de Conductores"
+          columns={columns}
+          data={statusFilter ? conductores.filter(c => c.estado === statusFilter) : conductores}
+          searchable
+          filterable
+          exportable
+          renderCell={renderCell}
+          statusFilter={true}
+          onStatusFilterChange={setStatusFilter}
+        />
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Vista de Tarjetas</h2>
+            <div className="flex items-center space-x-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-48">
+                  <SelectValue placeholder="Filtrar por estado" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">Todos los estados</SelectItem>
+                  <SelectItem value="activo">Activo</SelectItem>
+                  <SelectItem value="inactivo">Inactivo</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {(statusFilter ? conductores.filter(c => c.estado === statusFilter) : conductores).map((conductor) => (
+              <ConductorCard key={conductor.id} conductor={conductor} />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Edit Dialog */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
