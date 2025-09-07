@@ -637,64 +637,86 @@ export default function Conductores() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Gestión de Conductores</h1>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Conductor
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center border rounded-lg p-1">
+            <Button 
+              variant={viewMode === "list" ? "default" : "ghost"} 
+              size="sm"
+              onClick={() => setViewMode("list")}
+              className="h-8 px-3"
+            >
+              <List className="h-4 w-4 mr-1" />
+              Lista
             </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Creación de Nuevo Conductor</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="nombreCompleto"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre Completo</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="proveedor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Proveedor</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Button 
+              variant={viewMode === "cards" ? "default" : "ghost"} 
+              size="sm"
+              onClick={() => setViewMode("cards")}
+              className="h-8 px-3"
+            >
+              <Grid3X3 className="h-4 w-4 mr-1" />
+              Tarjetas
+            </Button>
+          </div>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo Conductor
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Creación de Nuevo Conductor</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="nombreCompleto"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Nombre Completo</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar proveedor" />
-                          </SelectTrigger>
+                          <Input {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
-                          <SelectItem value="Logística Andina">Logística Andina</SelectItem>
-                          <SelectItem value="Rápido Express">Rápido Express</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">Crear Conductor</Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="proveedor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Proveedor</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar proveedor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
+                            <SelectItem value="Logística Andina">Logística Andina</SelectItem>
+                            <SelectItem value="Rápido Express">Rápido Express</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">Crear Conductor</Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {viewMode === "list" ? (
