@@ -152,7 +152,7 @@ export default function Conductores() {
   const [pendingBlockChange, setPendingBlockChange] = useState<{ conductor: Conductor; block: boolean } | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<{ conductor: Conductor; tipo: keyof Conductor['documentos'] } | null>(null);
   const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
-  const [statusFilter, setStatusFilter] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
   const [viewMode, setViewMode] = useState<"list" | "cards">("list");
   const { toast } = useToast();
 
@@ -723,7 +723,7 @@ export default function Conductores() {
         <DataTable
           title="Lista de Conductores"
           columns={columns}
-          data={statusFilter ? conductores.filter(c => c.estado === statusFilter) : conductores}
+          data={statusFilter && statusFilter !== "all" ? conductores.filter(c => c.estado === statusFilter) : conductores}
           searchable
           filterable
           exportable
@@ -741,7 +741,7 @@ export default function Conductores() {
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los estados</SelectItem>
+                  <SelectItem value="all">Todos los estados</SelectItem>
                   <SelectItem value="activo">Activo</SelectItem>
                   <SelectItem value="inactivo">Inactivo</SelectItem>
                 </SelectContent>
@@ -749,7 +749,7 @@ export default function Conductores() {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(statusFilter ? conductores.filter(c => c.estado === statusFilter) : conductores).map((conductor) => (
+            {(statusFilter && statusFilter !== "all" ? conductores.filter(c => c.estado === statusFilter) : conductores).map((conductor) => (
               <ConductorCard key={conductor.id} conductor={conductor} />
             ))}
           </div>
