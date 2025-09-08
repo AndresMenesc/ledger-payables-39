@@ -560,7 +560,7 @@ export default function Vehiculos() {
                     <TableRow>
                       <TableHead>Vehículo</TableHead>
                       <TableHead>Revisión Preventiva</TableHead>
-                      <TableHead>Tecnomecánica</TableHead>
+                      <TableHead>Tecno</TableHead>
                       <TableHead>Tarjeta de Operación</TableHead>
                       <TableHead>SOAT</TableHead>
                       <TableHead>Póliza Contractual</TableHead>
@@ -572,16 +572,8 @@ export default function Vehiculos() {
                     {vehiculos.map((v) => (
                       <TableRow key={v.id}>
                         <TableCell>
-                          <div className="space-y-1">
-                            <Badge className={`rounded-md text-xs ${v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
-                              {v.estado === "activo" ? "Activo" : "Inactivo"}
-                            </Badge>
-                            <div className="font-medium">{v.placa}</div>
-                            <div className="text-xs text-muted-foreground">{v.proveedor}</div>
-                            <div className="text-[11px] text-muted-foreground">
-                              Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
-                            </div>
-                          </div>
+                          <div className="font-medium">{v.placa}</div>
+                          <div className="text-xs text-muted-foreground">{v.proveedor}</div>
                         </TableCell>
                         {["revisionPreventiva", "tecnomecanica", "tarjetaOperacion", "soat", "polizaContractual", "polizaExtraContractual"].map((docType) => {
                           const fecha = v.documentos[docType as keyof typeof v.documentos];
@@ -600,44 +592,52 @@ export default function Vehiculos() {
                           );
                         })}
                         <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="rounded-xl">
-                              {v.estado === "activo" ? (
-                                <DropdownMenuItem onClick={() => handleStatusChange(v, "inactivo")}>
-                                  Desbloquear
-                                </DropdownMenuItem>
-                              ) : (
-                                <DropdownMenuItem onClick={() => handleStatusChange(v, "activo")}>
-                                  Bloquear
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuItem onClick={() => {
-                                setSelectedVehiculo(v);
-                                form.reset(v);
-                                setShowEditDialog(true);
-                              }}>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleVerHistorial(v)}>
-                                <History className="mr-2 h-4 w-4" />
-                                Ver Historial
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={() => {
+                          <div className="flex items-center gap-2">
+                            <Badge className={`rounded-md text-xs ${v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
+                              {v.estado === "activo" ? "Activo" : "Inactivo"}
+                            </Badge>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-xl">
+                                <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
+                                  Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                                </div>
+                                {v.estado === "activo" ? (
+                                  <DropdownMenuItem onClick={() => handleStatusChange(v, "inactivo")}>
+                                    Desbloquear
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem onClick={() => handleStatusChange(v, "activo")}>
+                                    Bloquear
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => {
                                   setSelectedVehiculo(v);
-                                  setShowDeleteDialog(true);
-                                }}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                  form.reset(v);
+                                  setShowEditDialog(true);
+                                }}>
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleVerHistorial(v)}>
+                                  <History className="mr-2 h-4 w-4" />
+                                  Ver Historial
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => {
+                                    setSelectedVehiculo(v);
+                                    setShowDeleteDialog(true);
+                                  }}
+                                  className="text-destructive"
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Eliminar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
