@@ -1,16 +1,30 @@
 import { useState } from "react";
-import { DataTable } from "@/components/DataTable";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useForm } from "react-hook-form";
 import { useToast } from "@/hooks/use-toast";
-import { Search, MoreHorizontal, Plus, Edit, Trash2, History, Eye, Truck } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  Download,
+  Filter,
+  MoreHorizontal,
+  Plus,
+  Search,
+  List,
+  LayoutGrid,
+  Edit,
+  Trash2,
+  History
+} from "lucide-react";
 
 interface Vehiculo {
   id: string;
@@ -49,6 +63,21 @@ interface HistorialCambio {
   fecha: string;
   tipo: "creacion" | "actualizacion";
 }
+
+// ---------------- Helpers ----------------
+const toneFromStatus = (status: string): "success" | "danger" | "warning" => {
+  const s = status.toLowerCase();
+  if (s.includes("vigente") || s.includes("ok")) return "success";
+  if (s.includes("por vencer")) return "warning";
+  return "danger";
+};
+
+const statusBadge = (s: string) =>
+  toneFromStatus(s) === "success"
+    ? "bg-green-600 text-white"
+    : toneFromStatus(s) === "warning"
+    ? "bg-amber-500 text-white"
+    : "bg-red-600 text-white";
 
 const mockVehiculos: Vehiculo[] = [
   {
@@ -96,6 +125,7 @@ const mockVehiculos: Vehiculo[] = [
 
 export default function Vehiculos() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>(mockVehiculos);
+  const [view, setView] = useState<"list" | "cards">("list");
   const [selectedVehiculo, setSelectedVehiculo] = useState<Vehiculo | null>(null);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -125,49 +155,6 @@ export default function Vehiculos() {
     }
   });
 
-  const columns = [
-    {
-      key: "placa",
-      label: "Placa",
-      sortable: true
-    },
-    {
-      key: "revisionPreventiva",
-      label: "Revisión Preventiva"
-    },
-    {
-      key: "tecnomecanica",
-      label: "Tecnomecanica"
-    },
-    {
-      key: "tarjetaOperacion",
-      label: "Tarjeta de Operación"
-    },
-    {
-      key: "soat",
-      label: "SOAT"
-    },
-    {
-      key: "polizaContractual",
-      label: "Póliza Contractual"
-    },
-    {
-      key: "polizaExtraContractual",
-      label: "Póliza Extra Contractual"
-    },
-    {
-      key: "estado",
-      label: "Estado"
-    },
-    {
-      key: "usuarioBloqueo",
-      label: "Usuario"
-    },
-    {
-      key: "acciones",
-      label: "Acciones"
-    }
-  ];
 
   const getStatusBadge = (fecha: string) => {
     const today = new Date();
@@ -176,11 +163,11 @@ export default function Vehiculos() {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) {
-      return { status: "vencido", variant: "destructive" as const, text: "Vencido" };
+      return { status: "Vencido", variant: "destructive" as const };
     } else if (diffDays <= 7) {
-      return { status: "por-vencer", variant: "secondary" as const, text: "Por vencer" };
+      return { status: "Por vencer", variant: "warning" as const };
     } else {
-      return { status: "vigente", variant: "default" as const, text: "Vigente" };
+      return { status: "Vigente", variant: "success" as const };
     }
   };
 
@@ -390,7 +377,7 @@ export default function Vehiculos() {
                 'bg-green-600 hover:bg-green-700'}`}
               onClick={() => handleDocumentClick(vehiculo, key as keyof Vehiculo['documentos'])}
             >
-              {badge.text}
+              {badge.status}
             </Button>
           </div>
         );
@@ -463,265 +450,272 @@ export default function Vehiculos() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestión de Vehículos</h1>
-        <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Vehículo
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>Creación de Nuevo Vehículo</DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="placa"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Placa</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="proveedor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Proveedor</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header + CTAs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6 pb-0">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Gestión de Vehículos</h1>
+          <p className="text-sm text-muted-foreground">Administra vehículos, documentos y estado</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant={view === "list" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("list")}>
+            <List className="h-4 w-4 mr-1"/> Lista
+          </Button>
+          <Button variant={view === "cards" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("cards")}>
+            <LayoutGrid className="h-4 w-4 mr-1"/> Tarjetas
+          </Button>
+          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+            <DialogTrigger asChild>
+              <Button className="rounded-xl">
+                <Plus className="h-4 w-4 mr-2" />
+                Nuevo Vehículo
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-md">
+              <DialogHeader>
+                <DialogTitle>Creación de Nuevo Vehículo</DialogTitle>
+              </DialogHeader>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="placa"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Placa</FormLabel>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar proveedor" />
-                          </SelectTrigger>
+                          <Input {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
-                          <SelectItem value="Logística Andina">Logística Andina</SelectItem>
-                          <SelectItem value="Rápido Express">Rápido Express</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
-                    Cancelar
-                  </Button>
-                  <Button type="submit">Crear Vehículo</Button>
-                </div>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="proveedor"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Proveedor</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Seleccionar proveedor" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
+                            <SelectItem value="Logística Andina">Logística Andina</SelectItem>
+                            <SelectItem value="Rápido Express">Rápido Express</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
+                      Cancelar
+                    </Button>
+                    <Button type="submit">Crear Vehículo</Button>
+                  </div>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
-      <DataTable
-        title="Lista de Vehículos"
-        columns={columns}
-        data={statusFilter ? vehiculos.filter(v => v.estado === statusFilter) : vehiculos}
-        searchable
-        filterable
-        exportable
-        renderCell={renderCell}
-        statusFilter={true}
-        onStatusFilterChange={setStatusFilter}
-      />
-
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Editar Vehículo</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="placa"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Placa</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="proveedor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Proveedor</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar proveedor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
-                        <SelectItem value="Logística Andina">Logística Andina</SelectItem>
-                        <SelectItem value="Rápido Express">Rápido Express</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Actualizar</Button>
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        {view === "list" ? (
+          <Card className="rounded-2xl border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Lista de Vehículos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Toolbar */}
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="relative w-full md:max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Buscar..." className="pl-9 rounded-xl" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <Tabs defaultValue="all" className="hidden sm:block">
+                    <TabsList className="rounded-xl">
+                      <TabsTrigger value="all">Todos los estados</TabsTrigger>
+                      <TabsTrigger value="activo">Activos</TabsTrigger>
+                      <TabsTrigger value="inactivo">Inactivos</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button variant="outline" className="rounded-xl"><Filter className="h-4 w-4 mr-2"/>Filtros</Button>
+                  <Button variant="outline" className="rounded-xl"><Download className="h-4 w-4 mr-2"/>Exportar</Button>
+                </div>
               </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
 
-      {/* Historial Dialog */}
-      <Dialog open={showHistorialDialog} onOpenChange={setShowHistorialDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Historial de Cambios - {selectedVehiculo?.placa}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {historialCambios.map((cambio) => (
-              <div key={cambio.id} className="border-l-2 border-primary pl-4 pb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <Badge variant={cambio.tipo === "creacion" ? "default" : "secondary"}>
-                      {cambio.tipo === "creacion" ? "Creación" : "Actualización"}
-                    </Badge>
-                    <p className="font-medium mt-1">{cambio.campo}</p>
+              <Separator className="my-4" />
+
+              {/* Table */}
+              <div className="rounded-xl border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Vehículo</TableHead>
+                      <TableHead>Revisión Preventiva</TableHead>
+                      <TableHead>Tecnomecánica</TableHead>
+                      <TableHead>Tarjeta de Operación</TableHead>
+                      <TableHead>SOAT</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {vehiculos.map((v) => (
+                      <TableRow key={v.id}>
+                        <TableCell>
+                          <div className="font-medium">{v.placa}</div>
+                          <div className="text-xs text-muted-foreground">{v.proveedor}</div>
+                          <div className="text-[11px] text-muted-foreground">
+                            Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                          </div>
+                        </TableCell>
+                        {["revisionPreventiva", "tecnomecanica", "tarjetaOperacion", "soat"].map((docType) => {
+                          const fecha = v.documentos[docType as keyof typeof v.documentos];
+                          const badge = fecha ? getStatusBadge(fecha) : null;
+                          return (
+                            <TableCell key={docType}>
+                              <div className="flex flex-col text-xs items-start">
+                                <span>{fecha ? new Date(fecha).toLocaleDateString() : "Sin fecha"}</span>
+                                {badge && (
+                                  <Badge className={`rounded-md mt-1 ${statusBadge(badge.status)}`}>
+                                    {badge.status}
+                                  </Badge>
+                                )}
+                              </div>
+                            </TableCell>
+                          );
+                        })}
+                        <TableCell>
+                          <Badge className={`rounded-md ${v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
+                            {v.estado === "activo" ? "Activo" : "Inactivo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="rounded-xl">
+                              <DropdownMenuItem onClick={() => {
+                                setSelectedVehiculo(v);
+                                form.reset(v);
+                                setShowEditDialog(true);
+                              }}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleVerHistorial(v)}>
+                                <History className="mr-2 h-4 w-4" />
+                                Ver Historial
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setSelectedVehiculo(v);
+                                  setShowDeleteDialog(true);
+                                }}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {vehiculos.map((v) => (
+              <Card key={v.id} className="rounded-2xl border">
+                {/* Header bar */}
+                <div className="bg-muted/60 rounded-t-2xl p-3 flex items-center justify-between">
+                  <div className="min-w-0">
+                    <div className="font-semibold truncate">{v.placa}</div>
+                    <div className="text-xs text-muted-foreground truncate">{v.proveedor}</div>
+                    <div className="text-[11px] text-muted-foreground">
+                      Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                    </div>
                   </div>
-                  <div className="text-right text-sm text-muted-foreground">
-                    <p>{cambio.usuario}</p>
-                    <p>{new Date(cambio.fecha).toLocaleString()}</p>
+                  <div className="flex items-center gap-2">
+                    <Badge className={v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}>
+                      {v.estado === "activo" ? "Activo" : "Inactivo"}
+                    </Badge>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="rounded-xl">
+                        <DropdownMenuItem onClick={() => {
+                          setSelectedVehiculo(v);
+                          form.reset(v);
+                          setShowEditDialog(true);
+                        }}>
+                          <Edit className="mr-2 h-4 w-4" />
+                          Editar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleVerHistorial(v)}>
+                          <History className="mr-2 h-4 w-4" />
+                          Ver Historial
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          onClick={() => {
+                            setSelectedVehiculo(v);
+                            setShowDeleteDialog(true);
+                          }}
+                          className="text-destructive"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Eliminar
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
                 </div>
-                {cambio.tipo !== "creacion" && (
-                  <div className="text-sm">
-                    <p><span className="text-red-600">Anterior:</span> {cambio.valorAnterior}</p>
-                    <p><span className="text-green-600">Nuevo:</span> {cambio.valorNuevo}</p>
+
+                <CardContent className="p-4">
+                  {/* Documents grid */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(v.documentos).slice(0, 4).map(([key, fecha]) => {
+                      const badge = fecha ? getStatusBadge(fecha) : null;
+                      const docLabels: Record<string, string> = {
+                        revisionPreventiva: "Revisión Preventiva",
+                        tecnomecanica: "Tecnomecánica", 
+                        tarjetaOperacion: "Tarjeta Operación",
+                        soat: "SOAT"
+                      };
+                      return (
+                        <div key={key} className="rounded-lg border p-2 bg-background">
+                          <div className={`text-sm font-medium ${badge ? (
+                            toneFromStatus(badge.status) === "success" ? "text-emerald-600" : 
+                            toneFromStatus(badge.status) === "warning" ? "text-amber-600" : "text-rose-600"
+                          ) : "text-muted-foreground"}`}>
+                            {docLabels[key] || key}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {fecha ? new Date(fecha).toLocaleDateString() : "Sin fecha"}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-                )}
-                {cambio.tipo === "creacion" && (
-                  <p className="text-sm text-muted-foreground">{cambio.valorNuevo}</p>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Status Change Confirmation */}
-      <AlertDialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar cambio de estado</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea {pendingStatusChange?.newStatus === "activo" ? "activar" : "desactivar"} el vehículo {pendingStatusChange?.vehiculo.placa}?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingStatusChange(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStatusChange}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Block User Confirmation */}
-      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar {pendingBlockChange?.block ? "bloqueo" : "desbloqueo"}</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea {pendingBlockChange?.block ? "bloquear" : "desbloquear"} el acceso del vehículo {pendingBlockChange?.vehiculo.placa}?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingBlockChange(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmBlockChange}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea eliminar el vehículo {selectedVehiculo?.placa}? Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSelectedVehiculo(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Document Update Dialog */}
-      <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Actualizar Documento</DialogTitle>
-          </DialogHeader>
-          <Form {...documentForm}>
-            <form onSubmit={documentForm.handleSubmit(handleDocumentUpdate)} className="space-y-4">
-              <FormField
-                control={documentForm.control}
-                name="fecha"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de Vencimiento</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={documentForm.control}
-                name="archivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Documento PDF</FormLabel>
-                    <FormControl>
-                      <Input type="file" accept=".pdf" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setShowDocumentDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Actualizar</Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+        )}
     </div>
   );
 }
