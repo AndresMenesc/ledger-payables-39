@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   BarChart3, FileText, Clock, Package, CheckCircle, 
   DollarSign, AlertTriangle, CreditCard, Truck, Building2,
-  ChevronDown, ChevronRight, ChevronLeft, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator, ClipboardCheck, Banknote
+  ChevronDown, ChevronRight, ChevronLeft, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator, ClipboardCheck, Banknote, Settings
 } from "lucide-react"
 import {
   Sidebar,
@@ -123,6 +123,11 @@ const navigationItems: NavigationItem[] = [
     title: "Vehículos",
     url: "/vehiculos",
     icon: Truck
+  },
+  {
+    title: "Configuración",
+    url: "/configuracion",
+    icon: Settings
   }/*,
   {
     title: "Validación de documentos",

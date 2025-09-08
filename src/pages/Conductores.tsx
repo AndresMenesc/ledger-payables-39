@@ -13,16 +13,6 @@ import {
   MoreHorizontal,
   Plus,
   Search,
-  LayoutDashboard,
-  FileText,
-  ClipboardList,
-  Layers,
-  CreditCard,
-  Truck,
-  User,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
   List,
   LayoutGrid,
 } from "lucide-react";
@@ -47,54 +37,6 @@ const statusBadge = (s: string) =>
     ? "bg-amber-500 text-white"
     : "bg-red-600 text-white";
 
-// --------------- Sidebar (with toggle, DS aligned) ---------------
-const Sidebar: React.FC<{ active: string }> = ({ active }) => {
-  const [collapsed, setCollapsed] = useState(false);
-  const menu = [
-    { label: "Dashboard", icon: LayoutDashboard },
-    { label: "Cuenta de Cobro", icon: FileText },
-    { label: "Revisión Admin", icon: ClipboardList },
-    { label: "Lotes", icon: Layers },
-    { label: "Anticipos", icon: CreditCard },
-    { label: "Proveedores", icon: Truck },
-    { label: "Conductores", icon: User },
-    { label: "Vehículos", icon: Truck },
-    { label: "Configuración", icon: Settings },
-  ];
-
-  return (
-    <aside className={`hidden md:flex ${collapsed ? "md:w-20" : "md:w-64"} shrink-0 border-r bg-card/30 transition-all`}>
-      <div className="w-full p-4 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-blue-600 grid place-content-center text-white font-bold">⛟</div>
-            {!collapsed && (
-              <div>
-                <div className="text-sm font-semibold leading-none">Sistema Transportes</div>
-                <div className="text-xs text-muted-foreground">Gestión v1.0</div>
-              </div>
-            )}
-          </div>
-          <Button size="icon" variant="ghost" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <ChevronRight className="h-4 w-4"/> : <ChevronLeft className="h-4 w-4"/>}
-          </Button>
-        </div>
-        <nav className="space-y-2">
-          {menu.map(({ label, icon: Icon }) => (
-            <Button
-              key={label}
-              variant={label === active ? "secondary" : "ghost"}
-              className={`w-full justify-start rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${label === active ? "bg-blue-600 text-white" : ""}`}
-            >
-              <Icon className="h-4 w-4 mr-2" />
-              {!collapsed && label}
-            </Button>
-          ))}
-        </nav>
-      </div>
-    </aside>
-  );
-};
 
 // ---------------- Data ----------------
 interface Documento { label: string; fecha: string; status: string }
@@ -160,33 +102,25 @@ export default function ConductoresPage() {
   const conductores = conductoresSeed;
 
   return (
-    <div className="flex h-screen w-full bg-muted/30">
-      <Sidebar active="Conductores" />
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header + CTAs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6 pb-0">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Gestión de Conductores</h1>
+          <p className="text-sm text-muted-foreground">Administra perfiles, documentos y estado</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant={view === "list" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("list")}>
+            <List className="h-4 w-4 mr-1"/> Lista
+          </Button>
+          <Button variant={view === "cards" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("cards")}>
+            <LayoutGrid className="h-4 w-4 mr-1"/> Tarjetas
+          </Button>
+          <Button className="rounded-xl"><Plus className="h-4 w-4 mr-2"/>Nuevo Conductor</Button>
+        </div>
+      </div>
 
-      {/* Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Topbar minimal */}
-        <header className="flex items-center justify-end px-6 py-3 border-b bg-background/60 backdrop-blur">
-          <Badge variant="secondary" className="rounded-xl">Sistema Activo</Badge>
-        </header>
-
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
-          {/* Header + CTAs */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-semibold tracking-tight">Gestión de Conductores</h1>
-              <p className="text-sm text-muted-foreground">Administra perfiles, documentos y estado</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant={view === "list" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("list")}>
-                <List className="h-4 w-4 mr-1"/> Lista
-              </Button>
-              <Button variant={view === "cards" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("cards")}>
-                <LayoutGrid className="h-4 w-4 mr-1"/> Tarjetas
-              </Button>
-              <Button className="rounded-xl"><Plus className="h-4 w-4 mr-2"/>Nuevo Conductor</Button>
-            </div>
-          </div>
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
 
           {view === "list" ? (
             <Card className="rounded-2xl border">
@@ -317,8 +251,7 @@ export default function ConductoresPage() {
               ))}
             </div>
           )}
-        </main>
-      </div>
+      </main>
     </div>
   );
 }
