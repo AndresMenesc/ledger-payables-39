@@ -637,84 +637,122 @@ export default function Vehiculos() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {vehiculos.map((v) => (
-              <Card key={v.id} className="rounded-2xl border">
-                {/* Header bar */}
-                <div className="bg-muted/60 rounded-t-2xl p-3 flex items-center justify-between">
-                  <div className="min-w-0">
-                    <div className="font-semibold truncate">{v.placa}</div>
-                    <div className="text-xs text-muted-foreground truncate">{v.proveedor}</div>
-                    <div className="text-[11px] text-muted-foreground">
-                      Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge className={v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}>
-                      {v.estado === "activo" ? "Activo" : "Inactivo"}
-                    </Badge>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="rounded-xl">
-                        <DropdownMenuItem onClick={() => {
-                          setSelectedVehiculo(v);
-                          form.reset(v);
-                          setShowEditDialog(true);
-                        }}>
-                          <Edit className="mr-2 h-4 w-4" />
-                          Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleVerHistorial(v)}>
-                          <History className="mr-2 h-4 w-4" />
-                          Ver Historial
-                        </DropdownMenuItem>
-                        <DropdownMenuItem 
-                          onClick={() => {
-                            setSelectedVehiculo(v);
-                            setShowDeleteDialog(true);
-                          }}
-                          className="text-destructive"
-                        >
-                          <Trash2 className="mr-2 h-4 w-4" />
-                          Eliminar
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
+          <Card className="rounded-2xl border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Lista de Vehículos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {/* Toolbar */}
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="relative w-full md:max-w-md">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Buscar..." className="pl-9 rounded-xl" />
                 </div>
+                <div className="flex items-center gap-2">
+                  <Tabs defaultValue="all" className="hidden sm:block">
+                    <TabsList className="rounded-xl">
+                      <TabsTrigger value="all">Todos los estados</TabsTrigger>
+                      <TabsTrigger value="activo">Activos</TabsTrigger>
+                      <TabsTrigger value="inactivo">Inactivos</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button variant="outline" className="rounded-xl"><Filter className="h-4 w-4 mr-2"/>Filtros</Button>
+                  <Button variant="outline" className="rounded-xl"><Download className="h-4 w-4 mr-2"/>Exportar</Button>
+                </div>
+              </div>
 
-                <CardContent className="p-4">
-                  {/* Documents grid */}
-                  <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(v.documentos).slice(0, 4).map(([key, fecha]) => {
-                      const badge = fecha ? getStatusBadge(fecha) : null;
-                      const docLabels: Record<string, string> = {
-                        revisionPreventiva: "Revisión Preventiva",
-                        tecnomecanica: "Tecnomecánica", 
-                        tarjetaOperacion: "Tarjeta Operación",
-                        soat: "SOAT"
-                      };
-                      return (
-                        <div key={key} className="rounded-lg border p-2 bg-background">
-                          <div className={`text-sm font-medium ${badge ? (
-                            toneFromStatus(badge.status) === "success" ? "text-emerald-600" : 
-                            toneFromStatus(badge.status) === "warning" ? "text-amber-600" : "text-rose-600"
-                          ) : "text-muted-foreground"}`}>
-                            {docLabels[key] || key}
-                          </div>
-                          <div className="text-[11px] text-muted-foreground">
-                            {fecha ? new Date(fecha).toLocaleDateString() : "Sin fecha"}
+              <Separator className="my-4" />
+
+              {/* Minimal rows */}
+              <div className="rounded-xl border overflow-hidden divide-y">
+                {vehiculos.map((v) => {
+                  const docs = [
+                    { label: "Revisión Preventiva", date: v.documentos.revisionPreventiva, status: v.documentos.revisionPreventiva ? getStatusBadge(v.documentos.revisionPreventiva).status : "Sin fecha" },
+                    { label: "Tecnomecánica", date: v.documentos.tecnomecanica, status: v.documentos.tecnomecanica ? getStatusBadge(v.documentos.tecnomecanica).status : "Sin fecha" },
+                    { label: "Tarjeta de Operación", date: v.documentos.tarjetaOperacion, status: v.documentos.tarjetaOperacion ? getStatusBadge(v.documentos.tarjetaOperacion).status : "Sin fecha" },
+                    { label: "SOAT", date: v.documentos.soat, status: v.documentos.soat ? getStatusBadge(v.documentos.soat).status : "Sin fecha" },
+                    { label: "Póliza Contractual", date: v.documentos.polizaContractual, status: v.documentos.polizaContractual ? getStatusBadge(v.documentos.polizaContractual).status : "Sin fecha" },
+                    { label: "Póliza Extra Contractual", date: v.documentos.polizaExtraContractual, status: v.documentos.polizaExtraContractual ? getStatusBadge(v.documentos.polizaExtraContractual).status : "Sin fecha" }
+                  ];
+                  const docsTop = docs.slice(0, 3);
+                  const docsBottom = docs.slice(3, 6);
+                  
+                  return (
+                    <div key={v.id} className="p-3 hover:bg-muted/40">
+                      {/* Row head inside gray bar with 3-dot menu */}
+                      <div className="bg-muted/60 rounded-lg p-3 flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${v.estado === "activo" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"}`}>
+                            {v.estado === "activo" ? "Activo" : "Inactivo"}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="font-semibold leading-tight truncate">{v.placa}</div>
+                            <div className="text-xs text-muted-foreground truncate">{v.proveedor}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                            </div>
                           </div>
                         </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            {v.usuarioBloqueo?.bloqueado ? (
+                              <DropdownMenuItem>Desbloquear</DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem>Bloquear</DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => {
+                              setSelectedVehiculo(v);
+                              form.reset(v);
+                              setShowEditDialog(true);
+                            }}>Editar</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleVerHistorial(v)}>Ver Historial</DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                setSelectedVehiculo(v);
+                                setShowDeleteDialog(true);
+                              }}
+                              className="text-destructive"
+                            >Eliminar</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+
+                      {/* Documents */}
+                      <div className="mt-3 grid grid-cols-1 gap-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {docsTop.map((d, i) => {
+                            const tone = toneFromStatus(d.status);
+                            const color = tone === "success" ? "text-emerald-600" : tone === "warning" ? "text-amber-600" : "text-rose-600";
+                            return (
+                              <div key={i} className="min-w-[160px]">
+                                <div className={`text-sm font-medium ${color}`}>{d.label}</div>
+                                {d.date && <div className="text-[11px] text-muted-foreground">{new Date(d.date).toLocaleDateString()}</div>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          {docsBottom.map((d, i) => {
+                            const tone = toneFromStatus(d.status);
+                            const color = tone === "success" ? "text-emerald-600" : tone === "warning" ? "text-amber-600" : "text-rose-600";
+                            return (
+                              <div key={i} className="min-w-[160px]">
+                                <div className={`text-sm font-medium ${color}`}>{d.label}</div>
+                                {d.date && <div className="text-[11px] text-muted-foreground">{new Date(d.date).toLocaleDateString()}</div>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
         )}
       </main>
     </div>
