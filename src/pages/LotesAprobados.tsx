@@ -1,16 +1,44 @@
 
-import { useState } from "react"
-import { Eye, Download, Calendar, Search, Building2, ArrowLeft, Truck, MapPin, Clock, Package, DollarSign, AlertCircle, CreditCard, Receipt, CheckCircle, Plus } from "lucide-react"
-import { DataTable } from "@/components/DataTable"
+import React, { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import { DatePickerWithRange } from "@/components/ui/date-range-picker"
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { DatePickerWithRange } from "@/components/ui/date-range-picker"
+import {
+  Eye,
+  Download,
+  Calendar,
+  Search,
+  Building2,
+  ArrowLeft,
+  Truck,
+  MapPin,
+  Clock,
+  Package,
+  DollarSign,
+  AlertCircle,
+  CreditCard,
+  Receipt,
+  CheckCircle,
+  Plus,
+  MoreHorizontal,
+  FileText,
+  TrendingUp,
+  Filter,
+  List,
+  Grid3X3,
+  Upload
+} from "lucide-react"
+import { DataTable } from "@/components/DataTable"
 import { addDays, format } from "date-fns"
 import { DateRange } from "react-day-picker"
 
@@ -395,6 +423,7 @@ export default function LotesAprobados() {
   const [selectedLote, setSelectedLote] = useState<any>(null)
   const [selectedCuenta, setSelectedCuenta] = useState<any>(null)
   const [currentView, setCurrentView] = useState<'list' | 'lote-detail' | 'cuenta-detail'>('list')
+  const [viewMode, setViewMode] = useState<"list" | "cards">("list")
   const [filtroProveedor, setFiltroProveedor] = useState("todos")
   const [filtroEstado, setFiltroEstado] = useState("todos")
   const [busqueda, setBusqueda] = useState("")
@@ -404,6 +433,21 @@ export default function LotesAprobados() {
   })
   const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [loteToProcess, setLoteToProcess] = useState<any>(null)
+
+  const Metric = ({ icon: Icon, label, value, sub }: any) => (
+    <Card className="rounded-2xl border">
+      <CardContent className="p-5 flex items-center gap-4">
+        <div className="h-10 w-10 rounded-xl bg-blue-600/10 text-blue-700 grid place-content-center">
+          <Icon className="h-5 w-5" />
+        </div>
+        <div className="min-w-0">
+          <div className="text-2xl font-semibold leading-none tracking-tight">{value}</div>
+          <div className="text-xs text-muted-foreground">{label}</div>
+          {sub && <div className="text-[11px] mt-1 text-muted-foreground">{sub}</div>}
+        </div>
+      </CardContent>
+    </Card>
+  );
 
   // Obtener lista única de proveedores para el filtro
   const proveedoresUnicos = Array.from(new Set(
@@ -478,188 +522,280 @@ export default function LotesAprobados() {
   }
 
   const actions = (row: any) => (
-    <div className="flex gap-2">
-      <Button 
-        variant="outline" 
-        size="sm"
-        onClick={() => {
-          setSelectedLote(row)
-          setCurrentView('lote-detail')
-        }}
-      >
-        <Eye className="h-4 w-4 mr-2" />
-        Ver Detalle
-      </Button>
-      
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button 
-            size="sm"
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-          >
-            <CreditCard className="h-4 w-4 mr-2" />
-            Pagar
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar Pago</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea procesar el pago del lote {row.numero}? 
-              Esta acción registrará el lote como pagado y enviará una notificación al proveedor.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={() => handlePagar(row)}>
-              Confirmar Pago
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+    <div className="flex items-center justify-end gap-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="rounded-xl">
+          <DropdownMenuItem onClick={() => {
+            setSelectedLote(row)
+            setCurrentView('lote-detail')
+          }}>
+            <Eye className="h-4 w-4 mr-2"/>Ver Detalle
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleDownloadReport(row.id)}>
+            <Download className="h-4 w-4 mr-2"/>Descargar Reporte
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExportBCOL(row.id)}>
+            <FileText className="h-4 w-4 mr-2"/>Exportar BCOL
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => handleExportBDAV(row.id)}>
+            <FileText className="h-4 w-4 mr-2"/>Exportar BDAV
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-red-600" onClick={() => setLoteToProcess(row)}>
+            <CreditCard className="h-4 w-4 mr-2"/>Registrar Pago
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
-
   const totalBruto = filteredData.reduce((sum, lote) => sum + lote.valor_bruto, 0)
   const totalDescuentos = filteredData.reduce((sum, lote) => sum + lote.descuentos_totales, 0)
   const totalNeto = filteredData.reduce((sum, lote) => sum + lote.valor_neto, 0)
   const lotesPagados = filteredData.filter(l => l.estado === 'pagado').length
 
-  const summary = (
-    <div className="space-y-4">
-      {/* Filtros */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filtros de Búsqueda</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-2 block">Buscar</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="No. lote o proveedor..."
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block">Proveedor</label>
-              <Select value={filtroProveedor} onValueChange={setFiltroProveedor}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos los proveedores" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los proveedores</SelectItem>
-                  {proveedoresUnicos.map((proveedor) => (
-                    <SelectItem key={proveedor} value={proveedor}>
-                      {proveedor}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block">Estado</label>
-              <Select value={filtroEstado} onValueChange={setFiltroEstado}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Todos los estados" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los estados</SelectItem>
-                  <SelectItem value="aprobado">Aprobado</SelectItem>
-                  <SelectItem value="creando">Creando</SelectItem>
-                  <SelectItem value="pagado">Pagado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div>
-              <label className="text-sm font-medium mb-2 block">Rango de Fechas</label>
-              <DatePickerWithRange
-                date={fechaRange}
-                onDateChange={setFechaRange}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Lotes Encontrados</p>
-            <p className="text-2xl font-semibold">{filteredData.length}</p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Valor Bruto</p>
-            <p className="text-xl font-semibold">
-              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalBruto)}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Valor Neto</p>
-            <p className="text-xl font-semibold text-success">
-              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalNeto)}
-            </p>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">Lotes Pagados</p>
-            <p className="text-2xl font-semibold text-success">{lotesPagados}</p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  )
-
   // Lista principal
   if (currentView === 'list') {
     return (
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Lotes Aprobados</h1>
-            <p className="text-muted-foreground">Consulta consolidada de todos los lotes aprobados con filtros avanzados</p>
+      <div className="min-h-screen bg-muted/30">
+        <div className="flex-1">
+          {/* Topbar */}
+          <div className="sticky top-0 z-10 border-b bg-background/70 backdrop-blur">
+            <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-blue-600 grid place-content-center text-white font-bold">⛟</div>
+              </div>
+            </div>
           </div>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Crear Nuevo Lote
-          </Button>
+
+          <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
+            {/* Actions */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <h2 className="text-xl font-semibold tracking-tight">Lotes Aprobados</h2>
+                <p className="text-sm text-muted-foreground">Consulta consolidada de todos los lotes aprobados con filtros avanzados</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" className="rounded-xl"><Upload className="h-4 w-4 mr-2"/>Importar</Button>
+                <Button className="rounded-xl">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Crear Nuevo Lote
+                </Button>
+              </div>
+            </div>
+
+            {/* Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Metric icon={Package} label="Lotes Encontrados" value={filteredData.length} sub={`De ${lotesAprobados.length} lotes totales`} />
+              <Metric icon={DollarSign} label="Valor Bruto" value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(totalBruto)} sub="Valor antes de descuentos" />
+              <Metric icon={TrendingUp} label="Valor Neto" value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(totalNeto)} sub="Valor final a pagar" />
+              <Metric icon={CheckCircle} label="Lotes Pagados" value={lotesPagados} sub={`${((lotesPagados/filteredData.length)*100).toFixed(1)}% completados`} />
+            </div>
+
+            {/* List section */}
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Lista de Lotes</CardTitle>
+                <p className="text-sm text-muted-foreground">Gestiona y visualiza todos los lotes aprobados en el sistema</p>
+              </CardHeader>
+              <CardContent>
+                {/* Toolbar */}
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="flex items-center gap-2 w-full md:max-w-md">
+                    <div className="relative w-full">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        placeholder="Buscar por número de lote o proveedor" 
+                        className="pl-9 rounded-xl" 
+                        value={busqueda}
+                        onChange={(e) => setBusqueda(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "list" | "cards")} className="hidden sm:block">
+                      <TabsList className="rounded-xl">
+                        <TabsTrigger value="list"><List className="h-4 w-4 mr-1"/>Lista</TabsTrigger>
+                        <TabsTrigger value="cards"><Grid3X3 className="h-4 w-4 mr-1"/>Tarjetas</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                    <Select value={filtroProveedor} onValueChange={setFiltroProveedor}>
+                      <SelectTrigger className="w-48 rounded-xl">
+                        <Filter className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Proveedor" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="todos">Todos los proveedores</SelectItem>
+                        {proveedoresUnicos.map((proveedor) => (
+                          <SelectItem key={proveedor} value={proveedor}>
+                            {proveedor}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+                      <SelectTrigger className="w-40 rounded-xl">
+                        <Filter className="h-4 w-4 mr-2" />
+                        <SelectValue placeholder="Estado" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="todos">Todos los estados</SelectItem>
+                        <SelectItem value="aprobado">Aprobado</SelectItem>
+                        <SelectItem value="creando">Creando</SelectItem>
+                        <SelectItem value="pagado">Pagado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button variant="outline" className="rounded-xl"><Download className="h-4 w-4 mr-2"/>Exportar</Button>
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                {/* Table View */}
+                {viewMode === "list" && (
+                  <div className="rounded-xl border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="whitespace-nowrap">No. Lote</TableHead>
+                          <TableHead className="whitespace-nowrap">Proveedores</TableHead>
+                          <TableHead className="whitespace-nowrap">Fecha Aprobación</TableHead>
+                          <TableHead className="whitespace-nowrap">Cuentas</TableHead>
+                          <TableHead className="whitespace-nowrap">Valor Total</TableHead>
+                          <TableHead className="whitespace-nowrap">Estado</TableHead>
+                          <TableHead className="whitespace-nowrap text-right">Acciones</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredData.map((lote) => (
+                          <TableRow key={lote.id} className="hover:bg-muted/50">
+                            <TableCell className="font-medium">{lote.numero}</TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
+                                  <AvatarFallback>{lote.proveedores[0]?.slice(0,2).toUpperCase()}</AvatarFallback>
+                                </Avatar>
+                                <div className="min-w-0">
+                                  <div className="truncate font-medium">{lote.proveedores[0]}</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {lote.proveedores.length > 1 ? `+${lote.proveedores.length - 1} más` : "Único proveedor"}
+                                  </div>
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>{new Date(lote.fecha_aprobacion).toLocaleDateString('es-CO')}</TableCell>
+                            <TableCell className="font-medium">{lote.total_cuentas}</TableCell>
+                            <TableCell className="font-medium">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(lote.valor_neto)}</TableCell>
+                            <TableCell>
+                              <Badge variant={lote.estado === 'pagado' ? 'default' : lote.estado === 'creando' ? 'secondary' : 'outline'} className="rounded-md">
+                                {lote.estado === 'pagado' ? 'Pagado' : lote.estado === 'creando' ? 'Creando' : 'Aprobado'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>{actions(lote)}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+
+                {/* Cards View */}
+                {viewMode === "cards" && (
+                  <div className="grid gap-4">
+                    {filteredData.map((lote) => (
+                      <Card key={lote.id} className="rounded-2xl">
+                        <CardHeader className="pb-3">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <CardTitle className="text-lg">{lote.numero}</CardTitle>
+                              <p className="text-sm text-muted-foreground">{lote.proveedores[0]}</p>
+                              {lote.proveedores.length > 1 && (
+                                <p className="text-xs text-muted-foreground">+{lote.proveedores.length - 1} proveedores más</p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge variant={lote.estado === 'pagado' ? 'default' : lote.estado === 'creando' ? 'secondary' : 'outline'} className="rounded-md">
+                                {lote.estado === 'pagado' ? 'Pagado' : lote.estado === 'creando' ? 'Creando' : 'Aprobado'}
+                              </Badge>
+                              {actions(lote)}
+                            </div>
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                              <p className="text-sm font-medium">Fecha Aprobación</p>
+                              <p className="text-sm text-muted-foreground">{new Date(lote.fecha_aprobacion).toLocaleDateString('es-CO')}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Total Cuentas</p>
+                              <p className="text-sm font-semibold">{lote.total_cuentas}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Valor Neto</p>
+                              <p className="text-sm font-semibold">{new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(lote.valor_neto)}</p>
+                            </div>
+                            <div>
+                              <p className="text-sm font-medium">Aprobado Por</p>
+                              <p className="text-sm text-muted-foreground">{lote.aprobado_por}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+
+                {filteredData.length === 0 && (
+                  <div className="py-8 text-center">
+                    <p className="text-muted-foreground">No se encontraron lotes</p>
+                  </div>
+                )}
+
+                {/* Pagination */}
+                <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                  <div>Mostrando 1–{filteredData.length} de {lotesAprobados.length}</div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="rounded-lg">Anterior</Button>
+                    <Button variant="outline" size="sm" className="rounded-lg">Siguiente</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
-        <DataTable
-          title="Todos los Lotes Aprobados"
-          columns={columns}
-          data={filteredData}
-          actions={actions}
-          renderCell={renderCell}
-          summary={summary}
-          searchable={false}
-          filterable={false}
-          exportable={false}
-        />
-
-        {/* Modal de Éxito */}
+        {/* Payment Confirmation Dialog */}
+        <AlertDialog open={!!loteToProcess && !showSuccessModal} onOpenChange={() => setLoteToProcess(null)}>
+          <AlertDialogContent className="rounded-2xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmar Pago</AlertDialogTitle>
+              <AlertDialogDescription>
+                ¿Está seguro que desea procesar el pago del lote {loteToProcess?.numero}? 
+                Esta acción registrará el lote como pagado y enviará una notificación al proveedor.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel className="rounded-xl">Cancelar</AlertDialogCancel>
+              <AlertDialogAction 
+                className="rounded-xl"
+                onClick={() => {
+                  setShowSuccessModal(true)
+                  // Aquí iría la lógica real para procesar el pago
+                  console.log(`Procesando pago para lote ${loteToProcess?.numero}`)
+                }}
+              >
+                Confirmar Pago
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md rounded-2xl">
             <DialogHeader className="text-center">
-              <div className="mx-auto w-12 h-12 bg-success/10 rounded-full flex items-center justify-center mb-4">
-                <CheckCircle className="h-6 w-6 text-success" />
+              <div className="mx-auto w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                <CheckCircle className="h-6 w-6 text-green-600" />
               </div>
               <DialogTitle className="text-xl">¡Pago Registrado Exitosamente!</DialogTitle>
               <DialogDescription className="text-center space-y-2">
@@ -673,7 +809,7 @@ export default function LotesAprobados() {
                   setShowSuccessModal(false)
                   setLoteToProcess(null)
                 }}
-                className="w-full"
+                className="w-full rounded-xl"
               >
                 Continuar
               </Button>
