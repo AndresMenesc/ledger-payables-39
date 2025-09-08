@@ -716,6 +716,7 @@ export default function Vehiculos() {
             ))}
           </div>
         )}
+      </main>
     </div>
   );
 }
