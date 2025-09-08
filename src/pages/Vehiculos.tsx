@@ -678,7 +678,7 @@ export default function Vehiculos() {
                 {vehiculos.map((v) => {
                   const docs = [
                     { label: "Revisión Preventiva", date: v.documentos.revisionPreventiva, status: v.documentos.revisionPreventiva ? getStatusBadge(v.documentos.revisionPreventiva).status : "Sin fecha" },
-                    { label: "Tecnomecánica", date: v.documentos.tecnomecanica, status: v.documentos.tecnomecanica ? getStatusBadge(v.documentos.tecnomecanica).status : "Sin fecha" },
+                    { label: "Tecno", date: v.documentos.tecnomecanica, status: v.documentos.tecnomecanica ? getStatusBadge(v.documentos.tecnomecanica).status : "Sin fecha" },
                     { label: "Tarjeta de Operación", date: v.documentos.tarjetaOperacion, status: v.documentos.tarjetaOperacion ? getStatusBadge(v.documentos.tarjetaOperacion).status : "Sin fecha" },
                     { label: "SOAT", date: v.documentos.soat, status: v.documentos.soat ? getStatusBadge(v.documentos.soat).status : "Sin fecha" },
                     { label: "Póliza Contractual", date: v.documentos.polizaContractual, status: v.documentos.polizaContractual ? getStatusBadge(v.documentos.polizaContractual).status : "Sin fecha" },
@@ -693,45 +693,47 @@ export default function Vehiculos() {
                       <div className="bg-muted/60 rounded-lg p-3 flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="min-w-0">
-                            <Badge className={`text-xs font-medium px-2 py-0.5 rounded-md mb-1 ${v.estado === "activo" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"}`}>
-                              {v.estado === "activo" ? "Activo" : "Inactivo"}
-                            </Badge>
                             <div className="font-semibold leading-tight truncate">{v.placa}</div>
                             <div className="text-xs text-muted-foreground truncate">{v.proveedor}</div>
-                            <div className="text-[11px] text-muted-foreground">
-                              Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
-                            </div>
                           </div>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-xl">
-                            {v.estado === "activo" ? (
-                              <DropdownMenuItem onClick={() => handleStatusChange(v, "inactivo")}>
-                                Desbloquear
-                              </DropdownMenuItem>
-                            ) : (
-                              <DropdownMenuItem onClick={() => handleStatusChange(v, "activo")}>
-                                Bloquear
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedVehiculo(v);
-                              form.reset(v);
-                              setShowEditDialog(true);
-                            }}>Editar</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleVerHistorial(v)}>Ver Historial</DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => {
+                        <div className="flex items-center gap-2">
+                          <Badge className={`text-xs font-medium px-2 py-0.5 rounded-md ${v.estado === "activo" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"}`}>
+                            {v.estado === "activo" ? "Activo" : "Inactivo"}
+                          </Badge>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="rounded-xl">
+                              <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
+                                Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                              </div>
+                              {v.estado === "activo" ? (
+                                <DropdownMenuItem onClick={() => handleStatusChange(v, "inactivo")}>
+                                  Desbloquear
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleStatusChange(v, "activo")}>
+                                  Bloquear
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem onClick={() => {
                                 setSelectedVehiculo(v);
-                                setShowDeleteDialog(true);
-                              }}
-                              className="text-destructive"
-                            >Eliminar</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                                form.reset(v);
+                                setShowEditDialog(true);
+                              }}>Editar</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleVerHistorial(v)}>Ver Historial</DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => {
+                                  setSelectedVehiculo(v);
+                                  setShowDeleteDialog(true);
+                                }}
+                                className="text-destructive"
+                              >Eliminar</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
 
                       {/* Documents */}
