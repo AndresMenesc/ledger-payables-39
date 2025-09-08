@@ -3,7 +3,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   BarChart3, FileText, Clock, Package, CheckCircle, 
   DollarSign, AlertTriangle, CreditCard, Truck, Building2,
-  ChevronDown, ChevronRight, ChevronLeft, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator, ClipboardCheck, Banknote
+  ChevronDown, ChevronRight, ChevronLeft, Home, Receipt, MessageSquare, Users, User, FileCheck, FolderOpen, Target, Calculator, ClipboardCheck, Banknote, Settings
 } from "lucide-react"
 import {
   Sidebar,
@@ -37,78 +37,25 @@ const navigationItems: NavigationItem[] = [
     icon: BarChart3
   },
   {
-        title: "Cuenta de Cobro - Proveedor",
-        url: "/cuenta-cobro-proveedor",
-        icon: Building2
-      },
+    title: "Cuenta de Cobro - Proveedor",
+    url: "/cuenta-cobro-proveedor",
+    icon: Building2
+  },
   {
     title: "Revisión Admin",
     url: "/revision-admin",
     icon: ClipboardCheck
   },
   {
-        title: "Lotes",
-        url: "/lotes-aprobados",
-        icon: CheckCircle
-      },
+    title: "Lotes",
+    url: "/lotes-aprobados",
+    icon: CheckCircle
+  },
   {
     title: "Anticipos",
     url: "/anticipos",
     icon: Banknote
-  },/*
-  {
-    title: "Facturación",
-    icon: Receipt,
-    subItems: [
-      {
-        title: "Liquidaciones",
-        url: "/liquidaciones",
-        icon: Calculator
-      },
-      {
-        title: "Facturas",
-        url: "/facturas",
-        icon: FileText
-      }
-    ]
   },
-  {
-    title: "Cuentas de Cobro",
-    icon: Receipt,
-    subItems: [
-      {
-        title: "Cuentas de Cobro",
-        url: "/cuenta-cobro",
-        icon: Receipt
-      }      
-    ]
-  },
-  {
-    title: "Gestión de Pagos",
-    icon: DollarSign,
-    subItems: [
-      {
-        title: "Por Preparar",
-        url: "/pagos-preparar",
-        icon: FileText
-      },
-      {
-        title: "Por Procesar", 
-        url: "/pagos-procesar",
-        icon: Package
-      },
-      {
-        title: "Por Aprobar",
-        url: "/pagos-aprobar",
-        icon: Clock
-      }
-    ]
-  },
-  {
-    title: "Préstamos",
-    url: "/prestamos",
-    icon: CreditCard
-  },*/
   {
     title: "Proveedores",
     url: "/proveedores",
@@ -123,54 +70,12 @@ const navigationItems: NavigationItem[] = [
     title: "Vehículos",
     url: "/vehiculos",
     icon: Truck
-  }/*,
-  {
-    title: "Validación de documentos",
-    url: "/validacion-proveedores",
-    icon: CheckCircle
   },
   {
-    title: "FUEC",
-    url: "/fuec",
-    icon: FileCheck
-  },
-  {
-    title: "Comercial",
-    icon: Target,
-    subItems: [
-      {
-        title: "Cotizaciones",
-        url: "/cotizaciones",
-        icon: FileText
-      },
-      {
-        title: "Portafolios",
-        url: "/portafolios",
-        icon: FolderOpen
-      }
-    ]
-  },
-  {
-    title: "Gestión PQR",
-    url: "/pqr",
-    icon: MessageSquare
-  },
-  {
-    title: "Usuarios proveedores",
-    icon: Users,
-    subItems: [
-      {
-        title: "Generar cuenta de cobro",
-        url: "/generar-cuenta-cobro",
-        icon: Receipt
-      },
-      {
-        title: "Documentación",
-        url: "/documentacion",
-        icon: FileText
-      }
-    ]
-  }*/
+    title: "Configuración",
+    url: "/configuracion",
+    icon: Settings
+  }
 ]
 
 export function AppSidebar() {
