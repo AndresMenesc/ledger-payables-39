@@ -168,9 +168,7 @@ export default function Proveedores() {
     { key: 'nit', label: 'Identificación', sortable: true },
     { key: 'telefono', label: 'Teléfono' },
     { key: 'email', label: 'Correo', sortable: true },
-    { key: 'usuarioBloqueo', label: 'Usuario', sortable: false },
-    { key: 'estado', label: 'Estado', sortable: true },
-    { key: 'acciones', label: 'Acciones' }
+    { key: 'acciones', label: 'Usuario', sortable: false }
   ]
 
   const getEstadoBadge = (estado: string, proveedorId: string) => {
@@ -363,62 +361,67 @@ export default function Proveedores() {
 
   const renderCell = (columnKey: string, value: any, item: Proveedor) => {
     switch (columnKey) {
-      case 'estado':
-        return getEstadoBadge(item.estado, item.id)
-      case 'usuarioBloqueo':
-        return (
-          <div className="space-y-1">
-            <Button
-              variant={item.usuarioBloqueado ? "destructive" : "outline"}
-              size="sm"
-              onClick={() => handleBloquearUsuario(item)}
-              className="h-6 text-xs w-full"
-            >
-              {item.usuarioBloqueado ? 'Desbloq. Usuario' : 'Bloq. Usuario'}
-            </Button>
-            <p className="text-xs text-muted-foreground">
-              Último login: {item.ultimoLogin || '2024-08-30 15:30'}
-            </p>
-          </div>
-        )
       case 'acciones':
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => { setSelectedProveedor(item); setIsDetailDialogOpen(true) }}>
-                <Eye className="mr-2 h-4 w-4" />
-                Ver detalles
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleVerConductores(item)}>
-                <User className="mr-2 h-4 w-4" />
-                Ver conductores
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleVerVehiculos(item)}>
-                <Building2 className="mr-2 h-4 w-4" />
-                Ver vehículos
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleVerHistorial(item)}>
-                <FileText className="mr-2 h-4 w-4" />
-                Ver historial
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleEditProveedor(item)}>
-                <Edit className="mr-2 h-4 w-4" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => handleDeleteProveedor(item.id)}
-                className="text-destructive"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="text-right">
+            <div className="flex items-center justify-end gap-2">
+              <Badge variant={item.estado === 'activo' ? 'default' : 'secondary'} className="rounded-md">
+                {item.estado === 'activo' ? 'Activo' : 'Inactivo'}
+              </Badge>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => { setSelectedProveedor(item); setIsDetailDialogOpen(true) }}>
+                    <Eye className="mr-2 h-4 w-4" />
+                    Ver detalles
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleVerConductores(item)}>
+                    <User className="mr-2 h-4 w-4" />
+                    Ver conductores
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleVerVehiculos(item)}>
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Ver vehículos
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleVerHistorial(item)}>
+                    <FileText className="mr-2 h-4 w-4" />
+                    Ver historial
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleEditProveedor(item)}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Editar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => {
+                    setConfirmDialog({
+                      open: true,
+                      title: `${item.estado === 'activo' ? 'Inactivar' : 'Activar'} Proveedor`,
+                      description: `¿Estás seguro de que deseas ${item.estado === 'activo' ? 'inactivar' : 'activar'} este proveedor?`,
+                      onConfirm: () => handleEstadoChange(item.id, item.estado === 'activo' ? 'inactivo' : 'activo')
+                    })
+                  }}>
+                    {item.estado === 'activo' ? 'Inactivar' : 'Activar'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleBloquearUsuario(item)}>
+                    {item.usuarioBloqueado ? 'Desbloq. Usuario' : 'Bloq. Usuario'}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => handleDeleteProveedor(item.id)}
+                    className="text-destructive"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Eliminar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              Último login: {item.ultimoLogin || '2024-08-30 15:30'}
+            </div>
+          </div>
         )
       default:
         return item[columnKey as keyof Proveedor]
