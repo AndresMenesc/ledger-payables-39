@@ -20,16 +20,11 @@ import {
   CalendarDays,
   Star,
   Search,
-  LayoutDashboard,
+  List,
+  LayoutGrid,
+  Edit,
+  Trash2,
   FileText,
-  ClipboardList,
-  Layers,
-  CreditCard,
-  Truck,
-  User,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -48,85 +43,42 @@ const Metric = ({ icon: Icon, label, value, sub }: any) => (
   </Card>
 );
 
-const columns = ["Código", "Nombre Completo", "Identificación", "Teléfono", "Correo", "Usuario"];
-
 const rows = [
   {
+    id: "1",
     code: "PROV-001",
     name: "Transportes Andinos S.A.S",
     nit: "900123456-1",
     phone: "+57 310 1234567",
     email: "contacto@transportesandinos.com",
-    user: { blocked: true, lastLogin: "2024-08-30 15:30" },
+    estado: "activo",
+    user: { blocked: false, lastLogin: "2024-08-30 15:30" },
   },
   {
+    id: "2",
     code: "PROV-002",
     name: "Logística del Pacífico Ltda",
     nit: "800987654-2",
     phone: "+57 320 9876543",
     email: "maria.gonzalez@logpacifica.com",
+    estado: "activo",
     user: { blocked: true, lastLogin: "2024-08-30 15:30" },
   },
   {
+    id: "3",
     code: "PROV-003",
     name: "Flota Norte S.A.S",
     nit: "900555888-3",
     phone: "+57 315 5558888",
     email: "roberto@flotanorte.com",
+    estado: "inactivo",
     user: { blocked: false, lastLogin: "2024-09-02 09:20" },
   },
 ];
 
-const Sidebar = () => {
-  const [collapsed, setCollapsed] = useState(false);
-  const menuItems = [
-    { label: "Dashboard", icon: LayoutDashboard },
-    { label: "Cuenta de Cobro", icon: FileText },
-    { label: "Revisión Admin", icon: ClipboardList },
-    { label: "Lotes", icon: Layers },
-    { label: "Anticipos", icon: CreditCard },
-    { label: "Proveedores", icon: Truck, active: true },
-    { label: "Conductores", icon: User },
-    { label: "Vehículos", icon: Truck },
-    { label: "Configuración", icon: Settings },
-  ];
-
-  return (
-    <div className={`hidden md:flex ${collapsed ? "md:w-20" : "md:w-64"} shrink-0 border-r bg-card/30 transition-all`}>
-      <div className="w-full p-4 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-blue-600 grid place-content-center text-white font-bold">⛟</div>
-            {!collapsed && (
-              <div>
-                <div className="text-sm font-semibold leading-none">Sistema Transportes</div>
-                <div className="text-xs text-muted-foreground">Gestión v1.0</div>
-              </div>
-            )}
-          </div>
-          <Button size="icon" variant="ghost" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <ChevronRight className="h-4 w-4"/> : <ChevronLeft className="h-4 w-4"/>}
-          </Button>
-        </div>
-        <nav className="space-y-2">
-          {menuItems.map(({ label, icon: Icon, active }) => (
-            <Button
-              key={label}
-              variant={active ? "secondary" : "ghost"}
-              className={`w-full justify-start rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${active ? "bg-blue-600 text-white" : ""}`}
-            >
-              <Icon className="h-4 w-4 mr-2" />
-              {!collapsed && label}
-            </Button>
-          ))}
-        </nav>
-      </div>
-    </div>
-  );
-};
-
-export default function ProvidersManagementPage() {
+export default function Proveedores() {
   const { toast } = useToast();
+  const [view, setView] = useState<"list" | "cards">("list");
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean
     title: string
@@ -149,15 +101,31 @@ export default function ProvidersManagementPage() {
     });
   };
 
-  const handleBloquearUsuario = (provider: any) => {
+  const handleActivar = (provider: any) => {
     setConfirmDialog({
       open: true,
-      title: "Bloquear Usuario",
-      description: "¿Estás seguro de que deseas bloquear el usuario de este proveedor?",
+      title: "Activar Proveedor",
+      description: "¿Estás seguro de que deseas activar este proveedor?",
       onConfirm: () => {
         toast({
-          title: "Usuario bloqueado",
-          description: "El usuario del proveedor ha sido bloqueado exitosamente.",
+          title: "Proveedor activado",
+          description: "El proveedor ha sido activado exitosamente.",
+        });
+        setConfirmDialog({ ...confirmDialog, open: false });
+      }
+    });
+  };
+
+  const handleBloquearUsuario = (provider: any) => {
+    const isBlocked = provider.user.blocked;
+    setConfirmDialog({
+      open: true,
+      title: isBlocked ? "Desbloquear Usuario" : "Bloquear Usuario",
+      description: `¿Estás seguro de que deseas ${isBlocked ? 'desbloquear' : 'bloquear'} el usuario de este proveedor?`,
+      onConfirm: () => {
+        toast({
+          title: isBlocked ? "Usuario desbloqueado" : "Usuario bloqueado",
+          description: `El usuario del proveedor ha sido ${isBlocked ? 'desbloqueado' : 'bloqueado'} exitosamente.`,
         });
         setConfirmDialog({ ...confirmDialog, open: false });
       }
@@ -181,40 +149,39 @@ export default function ProvidersManagementPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 flex">
-      <Sidebar />
-      <div className="flex-1">
-        {/* Topbar */}
-        <div className="sticky top-0 z-10 border-b bg-background/70 backdrop-blur">
-          <div className="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-lg bg-blue-600 grid place-content-center text-white font-bold">⛟</div>
-            </div>
-          </div>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header + CTAs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6 pb-0">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Gestión de Proveedores</h1>
+          <p className="text-sm text-muted-foreground">Administra y gestiona todos los proveedores del sistema</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant={view === "list" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("list")}>
+            <List className="h-4 w-4 mr-1"/> Lista
+          </Button>
+          <Button variant={view === "cards" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("cards")}>
+            <LayoutGrid className="h-4 w-4 mr-1"/> Tarjetas
+          </Button>
+          <Button variant="outline" className="rounded-xl bg-green-600 text-white hover:bg-green-700">
+            <Upload className="h-4 w-4 mr-2"/>Importar Masivo
+          </Button>
+          <Button className="rounded-xl">
+            <Plus className="h-4 w-4 mr-2"/>Nuevo Proveedor
+          </Button>
+        </div>
+      </div>
+
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Metric icon={Users2} label="Total Proveedores" value={245} sub={"+12% desde el mes pasado"} />
+          <Metric icon={CheckCircle2} label="Activos" value={198} sub={"80.8% del total"} />
+          <Metric icon={CalendarDays} label="Nuevos este mes" value={23} sub={"+18% vs mes anterior"} />
+          <Metric icon={Star} label="Calificación Promedio" value={"4.2"} sub={"+0.2 vs mes anterior"} />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-6 space-y-6">
-          {/* Actions */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="space-y-1">
-              <h2 className="text-xl font-semibold tracking-tight">Gestión de Proveedores</h2>
-              <p className="text-sm text-muted-foreground">Administra y gestiona todos los proveedores del sistema</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" className="rounded-xl bg-green-600 text-white hover:bg-green-700"><Upload className="h-4 w-4 mr-2"/>Importar Masivo</Button>
-              <Button className="rounded-xl"><Plus className="h-4 w-4 mr-2"/>Nuevo Proveedor</Button>
-            </div>
-          </div>
-
-          {/* Metrics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Metric icon={Users2} label="Total Proveedores" value={245} sub={"+12% desde el mes pasado"} />
-            <Metric icon={CheckCircle2} label="Activos" value={198} sub={"80.8% del total"} />
-            <Metric icon={CalendarDays} label="Nuevos este mes" value={23} sub={"+18% vs mes anterior"} />
-            <Metric icon={Star} label="Calificación Promedio" value={"4.2"} sub={"+0.2 vs mes anterior"} />
-          </div>
-
-          {/* List section */}
+        {view === "list" ? (
           <Card className="rounded-2xl border">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Lista de Proveedores</CardTitle>
@@ -250,9 +217,13 @@ export default function ProvidersManagementPage() {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      {columns.map((c) => (
-                        <TableHead key={c} className="whitespace-nowrap">{c}</TableHead>
-                      ))}
+                      <TableHead>Código</TableHead>
+                      <TableHead>Nombre Completo</TableHead>
+                      <TableHead>Identificación</TableHead>
+                      <TableHead>Teléfono</TableHead>
+                      <TableHead>Correo</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -272,35 +243,46 @@ export default function ProvidersManagementPage() {
                         <TableCell>{r.phone}</TableCell>
                         <TableCell className="truncate max-w-[240px]">{r.email}</TableCell>
                         <TableCell>
-                          <div className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {r.user.blocked ? (
-                                <Badge variant="secondary" className="rounded-md">Bloq. Usuario</Badge>
+                          <Badge className={`rounded-md text-xs ${r.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
+                            {r.estado === "activo" ? "Activo" : "Inactivo"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="rounded-xl">
+                              <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
+                                Último login: {r.user.lastLogin}
+                              </div>
+                              <DropdownMenuItem>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Ver Detalle
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Editar
+                              </DropdownMenuItem>
+                              <DropdownMenuItem>Gestionar Documentos</DropdownMenuItem>
+                              {r.estado === "activo" ? (
+                                <DropdownMenuItem onClick={() => handleInactivar(r)}>
+                                  Inactivar
+                                </DropdownMenuItem>
                               ) : (
-                                <Badge className="rounded-md">Activo</Badge>
+                                <DropdownMenuItem onClick={() => handleActivar(r)}>
+                                  Activar
+                                </DropdownMenuItem>
                               )}
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="rounded-xl">
-                                  <DropdownMenuItem>Ver Detalle</DropdownMenuItem>
-                                  <DropdownMenuItem>Editar</DropdownMenuItem>
-                                  <DropdownMenuItem>Gestionar Documentos</DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleInactivar(r)}>
-                                    Inactivar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleBloquearUsuario(r)}>
-                                    Bloq. Usuario
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive" onClick={() => handleEliminar(r)}>
-                                    Eliminar
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                            <div className="mt-1 text-[11px] text-muted-foreground">Último login: {r.user.lastLogin}</div>
-                          </div>
+                              <DropdownMenuItem onClick={() => handleBloquearUsuario(r)}>
+                                {r.user.blocked ? "Desbloq. Usuario" : "Bloq. Usuario"}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive" onClick={() => handleEliminar(r)}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -318,8 +300,121 @@ export default function ProvidersManagementPage() {
               </div>
             </CardContent>
           </Card>
-        </div>
-      </div>
+        ) : (
+          <Card className="rounded-2xl border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Lista de Proveedores</CardTitle>
+              <p className="text-sm text-muted-foreground">Gestiona y visualiza todos los proveedores registrados en el sistema</p>
+            </CardHeader>
+            <CardContent>
+              {/* Toolbar */}
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="flex items-center gap-2 w-full md:max-w-md">
+                  <div className="relative w-full">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Buscar por código, nombre o NIT" className="pl-9 rounded-xl" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Tabs defaultValue="all" className="hidden sm:block">
+                    <TabsList className="rounded-xl">
+                      <TabsTrigger value="all">Todos</TabsTrigger>
+                      <TabsTrigger value="active">Activos</TabsTrigger>
+                      <TabsTrigger value="inactive">Inactivos</TabsTrigger>
+                      <TabsTrigger value="blocked">Bloqueados</TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                  <Button variant="outline" className="rounded-xl"><Filter className="h-4 w-4 mr-2"/>Filtros</Button>
+                  <Button variant="outline" className="rounded-xl"><Download className="h-4 w-4 mr-2"/>Exportar</Button>
+                </div>
+              </div>
+
+              <Separator className="my-4" />
+
+              {/* Cards View */}
+              <div className="rounded-xl border overflow-hidden divide-y">
+                {rows.map((r) => (
+                  <div key={r.id} className="p-3 hover:bg-muted/40">
+                    {/* Row head inside gray bar with 3-dot menu */}
+                    <div className="bg-muted/60 rounded-lg p-3 flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback>{r.name.slice(0,2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <div className="font-semibold leading-tight truncate">{r.name}</div>
+                          <div className="text-xs text-muted-foreground truncate">{r.code}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge className={`text-xs font-medium px-2 py-0.5 rounded-md ${r.estado === "activo" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"}`}>
+                          {r.estado === "activo" ? "Activo" : "Inactivo"}
+                        </Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="rounded-xl">
+                            <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
+                              Último login: {r.user.lastLogin}
+                            </div>
+                            <DropdownMenuItem>Ver Detalle</DropdownMenuItem>
+                            <DropdownMenuItem>Editar</DropdownMenuItem>
+                            <DropdownMenuItem>Gestionar Documentos</DropdownMenuItem>
+                            {r.estado === "activo" ? (
+                              <DropdownMenuItem onClick={() => handleInactivar(r)}>
+                                Inactivar
+                              </DropdownMenuItem>
+                            ) : (
+                              <DropdownMenuItem onClick={() => handleActivar(r)}>
+                                Activar
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem onClick={() => handleBloquearUsuario(r)}>
+                              {r.user.blocked ? "Desbloq. Usuario" : "Bloq. Usuario"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleEliminar(r)}
+                              className="text-destructive"
+                            >Eliminar</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+
+                    {/* Provider Details */}
+                    <div className="mt-3 grid grid-cols-1 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div className="min-w-[160px]">
+                          <div className="text-sm font-medium text-muted-foreground">Identificación</div>
+                          <div className="text-sm">{r.nit}</div>
+                        </div>
+                        <div className="min-w-[160px]">
+                          <div className="text-sm font-medium text-muted-foreground">Teléfono</div>
+                          <div className="text-sm">{r.phone}</div>
+                        </div>
+                        <div className="min-w-[160px]">
+                          <div className="text-sm font-medium text-muted-foreground">Correo</div>
+                          <div className="text-sm truncate">{r.email}</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Pagination placeholder */}
+              <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                <div>Mostrando 1–3 de 245</div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="rounded-lg">Anterior</Button>
+                  <Button variant="outline" size="sm" className="rounded-lg">Siguiente</Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </main>
 
       {/* Confirmation Dialog */}
       <AlertDialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
