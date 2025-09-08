@@ -68,6 +68,24 @@ export default {
 					foreground: 'hsl(var(--pending-foreground))',
 					light: 'hsl(var(--pending-light))'
 				},
+				emerald: {
+					600: 'hsl(var(--emerald-600))'
+				},
+				green: {
+					600: 'hsl(var(--green-600))'
+				},
+				amber: {
+					500: 'hsl(var(--amber-500))'
+				},
+				rose: {
+					600: 'hsl(var(--rose-600))'
+				},
+				red: {
+					600: 'hsl(var(--red-600))'
+				},
+				blue: {
+					600: 'hsl(var(--blue-600))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',

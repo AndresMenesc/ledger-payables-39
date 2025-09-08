@@ -1,945 +1,324 @@
-import { useState } from "react";
-import { DataTable } from "@/components/DataTable";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useForm } from "react-hook-form";
-import { useToast } from "@/hooks/use-toast";
-import { Search, MoreHorizontal, Plus, Edit, Trash2, History, Eye, User, Grid3X3, List, Car } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Download,
+  Filter,
+  MoreHorizontal,
+  Plus,
+  Search,
+  LayoutDashboard,
+  FileText,
+  ClipboardList,
+  Layers,
+  CreditCard,
+  Truck,
+  User,
+  Settings,
+  ChevronLeft,
+  ChevronRight,
+  List,
+  LayoutGrid,
+} from "lucide-react";
 
-interface Conductor {
-  id: string;
-  nombreCompleto: string;
-  proveedor: string;
-  estado: "activo" | "inactivo";
-  fechaCreacion: string;
-  fechaActualizacion: string;
-  foto?: string;
-  telefono?: string;
-  cedula?: string;
-  vehiculo?: {
-    placa: string;
-    marca: string;
-    modelo: string;
-    año: string;
-    tipo: "camión" | "camioneta" | "automóvil";
-  };
-  usuarioBloqueo?: {
-    bloqueado: boolean;
-    fechaBloqueo?: string;
-    ultimoLogin?: string;
-  };
-  documentos: {
-    seguridadSocial: string;
-    licenciaConduccion: string;
-    examenesPsicosensometricos: string;
-  };
-}
+// ---------------- Helpers ----------------
+const toneFromStatus = (status: string): "success" | "danger" | "warning" => {
+  const s = status.toLowerCase();
+  if (s.includes("vigente") || s.includes("ok")) return "success";
+  if (s.includes("por vencer")) return "warning";
+  return "danger";
+};
 
-interface HistorialCambio {
-  id: string;
-  campo: string;
-  valorAnterior: string;
-  valorNuevo: string;
-  usuario: string;
-  fecha: string;
-  tipo: "creacion" | "actualizacion";
-}
+const dotClass = (status: string) => {
+  const t = toneFromStatus(status);
+  return t === "success" ? "bg-emerald-600" : t === "warning" ? "bg-amber-500" : "bg-rose-600";
+};
 
-const mockConductores: Conductor[] = [
-  {
-    id: "1",
-    nombreCompleto: "Juan Carlos Pérez",
-    proveedor: "Transportes del Valle",
-    estado: "activo",
-    fechaCreacion: "2024-01-15",
-    fechaActualizacion: "2024-01-15",
-    foto: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-    telefono: "+57 300 123 4567",
-    cedula: "12345678",
-    vehiculo: {
-      placa: "ABC-123",
-      marca: "Mercedes-Benz",
-      modelo: "Actros",
-      año: "2022",
-      tipo: "camión"
-    },
-    usuarioBloqueo: {
-      bloqueado: false,
-      ultimoLogin: "2024-01-14 10:30:00"
-    },
-    documentos: {
-      seguridadSocial: "2025-06-30",
-      licenciaConduccion: "2025-12-31",
-      examenesPsicosensometricos: "2024-12-15"
-    }
-  },
-  {
-    id: "2",
-    nombreCompleto: "María José García",
-    proveedor: "Logística Andina",
-    estado: "inactivo",
-    fechaCreacion: "2024-01-10",
-    fechaActualizacion: "2024-01-20",
-    foto: "https://images.unsplash.com/photo-1494790108755-2616b332c449?w=150&h=150&fit=crop&crop=face",
-    telefono: "+57 315 987 6543",
-    cedula: "87654321",
-    vehiculo: {
-      placa: "XYZ-789",
-      marca: "Volvo",
-      modelo: "FH16",
-      año: "2021",
-      tipo: "camión"
-    },
-    usuarioBloqueo: {
-      bloqueado: true,
-      fechaBloqueo: "2024-01-20 15:45:00",
-      ultimoLogin: "2024-01-19 08:15:00"
-    },
-    documentos: {
-      seguridadSocial: "2024-11-20",
-      licenciaConduccion: "2026-06-15",
-      examenesPsicosensometricos: "2024-09-10"
-    }
-  },
-  {
-    id: "3",
-    nombreCompleto: "Carlos Andrés Rodríguez",
-    proveedor: "Rápido Express",
-    estado: "activo",
-    fechaCreacion: "2024-01-08",
-    fechaActualizacion: "2024-01-08",
-    foto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-    telefono: "+57 301 555 7890",
-    cedula: "11223344",
-    vehiculo: {
-      placa: "DEF-456",
-      marca: "Chevrolet",
-      modelo: "NPR",
-      año: "2020",
-      tipo: "camioneta"
-    },
-    usuarioBloqueo: {
-      bloqueado: false,
-      ultimoLogin: "2024-01-13 16:20:00"
-    },
-    documentos: {
-      seguridadSocial: "2025-03-15",
-      licenciaConduccion: "2025-09-30",
-      examenesPsicosensometricos: "2024-08-22"
-    }
-  }
-];
+const statusBadge = (s: string) =>
+  toneFromStatus(s) === "success"
+    ? "bg-green-600 text-white"
+    : toneFromStatus(s) === "warning"
+    ? "bg-amber-500 text-white"
+    : "bg-red-600 text-white";
 
-export default function Conductores() {
-  const [conductores, setConductores] = useState<Conductor[]>(mockConductores);
-  const [selectedConductor, setSelectedConductor] = useState<Conductor | null>(null);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showHistorialDialog, setShowHistorialDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showStatusDialog, setShowStatusDialog] = useState(false);
-  const [showBlockDialog, setShowBlockDialog] = useState(false);
-  const [showDocumentDialog, setShowDocumentDialog] = useState(false);
-  const [pendingStatusChange, setPendingStatusChange] = useState<{ conductor: Conductor; newStatus: "activo" | "inactivo" } | null>(null);
-  const [pendingBlockChange, setPendingBlockChange] = useState<{ conductor: Conductor; block: boolean } | null>(null);
-  const [selectedDocument, setSelectedDocument] = useState<{ conductor: Conductor; tipo: keyof Conductor['documentos'] } | null>(null);
-  const [historialCambios, setHistorialCambios] = useState<HistorialCambio[]>([]);
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [viewMode, setViewMode] = useState<"list" | "cards">("list");
-  const { toast } = useToast();
-
-  const form = useForm({
-    defaultValues: {
-      nombreCompleto: "",
-      proveedor: ""
-    }
-  });
-
-  const documentForm = useForm({
-    defaultValues: {
-      fecha: "",
-      archivo: null
-    }
-  });
-
-  const columns = [
-    {
-      key: "nombreCompleto",
-      label: "Conductor",
-      sortable: true
-    },
-    {
-      key: "seguridadSocial",
-      label: "Seguridad Social"
-    },
-    {
-      key: "licenciaConduccion",
-      label: "Licencia de Conducción"
-    },
-    {
-      key: "examenesPsicosensometricos",
-      label: "Exámenes Psicosensométricos"
-    },
-    {
-      key: "estado",
-      label: "Estado"
-    },
-    {
-      key: "usuarioBloqueo",
-      label: "Usuario"
-    },
-    {
-      key: "acciones",
-      label: "Acciones"
-    }
+// --------------- Sidebar (with toggle, DS aligned) ---------------
+const Sidebar: React.FC<{ active: string }> = ({ active }) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const menu = [
+    { label: "Dashboard", icon: LayoutDashboard },
+    { label: "Cuenta de Cobro", icon: FileText },
+    { label: "Revisión Admin", icon: ClipboardList },
+    { label: "Lotes", icon: Layers },
+    { label: "Anticipos", icon: CreditCard },
+    { label: "Proveedores", icon: Truck },
+    { label: "Conductores", icon: User },
+    { label: "Vehículos", icon: Truck },
+    { label: "Configuración", icon: Settings },
   ];
 
-  const getStatusBadge = (fecha: string) => {
-    const today = new Date();
-    const expirationDate = new Date(fecha);
-    const diffTime = expirationDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) {
-      return { status: "vencido", variant: "destructive" as const, text: "Vencido" };
-    } else if (diffDays <= 7) {
-      return { status: "por-vencer", variant: "secondary" as const, text: "Por vencer" };
-    } else {
-      return { status: "vigente", variant: "default" as const, text: "Vigente" };
-    }
-  };
-
-  const handleDocumentClick = (conductor: Conductor, tipo: keyof Conductor['documentos']) => {
-    setSelectedDocument({ conductor, tipo });
-    documentForm.setValue("fecha", conductor.documentos[tipo]);
-    setShowDocumentDialog(true);
-  };
-
-  const handleDocumentUpdate = (data: any) => {
-    if (!selectedDocument) return;
-    
-    const updatedConductores = conductores.map(c =>
-      c.id === selectedDocument.conductor.id
-        ? { 
-            ...c, 
-            documentos: {
-              ...c.documentos,
-              [selectedDocument.tipo]: data.fecha
-            },
-            fechaActualizacion: new Date().toISOString().split('T')[0] 
-          }
-        : c
-    );
-    setConductores(updatedConductores);
-    setShowDocumentDialog(false);
-    setSelectedDocument(null);
-    documentForm.reset();
-    toast({
-      title: "Documento actualizado",
-      description: "La fecha del documento ha sido actualizada."
-    });
-  };
-
-  const handleCreate = (data: any) => {
-    const newConductor: Conductor = {
-      id: Date.now().toString(),
-      ...data,
-      estado: "activo",
-      fechaCreacion: new Date().toISOString().split('T')[0],
-      fechaActualizacion: new Date().toISOString().split('T')[0],
-      usuarioBloqueo: {
-        bloqueado: false
-      },
-      documentos: {
-        seguridadSocial: "",
-        licenciaConduccion: "",
-        examenesPsicosensometricos: ""
-      }
-    };
-    setConductores([...conductores, newConductor]);
-    setShowCreateDialog(false);
-    form.reset();
-    toast({
-      title: "Conductor creado",
-      description: "El conductor ha sido creado exitosamente."
-    });
-  };
-
-  const handleEdit = (data: any) => {
-    if (!selectedConductor) return;
-    
-    const updatedConductores = conductores.map(c =>
-      c.id === selectedConductor.id
-        ? { ...c, ...data, fechaActualizacion: new Date().toISOString().split('T')[0] }
-        : c
-    );
-    setConductores(updatedConductores);
-    setShowEditDialog(false);
-    setSelectedConductor(null);
-    form.reset();
-    toast({
-      title: "Conductor actualizado",
-      description: "Los datos del conductor han sido actualizados."
-    });
-  };
-
-  const handleDelete = () => {
-    if (!selectedConductor) return;
-    
-    setConductores(conductores.filter(c => c.id !== selectedConductor.id));
-    setShowDeleteDialog(false);
-    setSelectedConductor(null);
-    toast({
-      title: "Conductor eliminado",
-      description: "El conductor ha sido eliminado del sistema."
-    });
-  };
-
-  const handleStatusChange = (conductor: Conductor, newStatus: "activo" | "inactivo") => {
-    setPendingStatusChange({ conductor, newStatus });
-    setShowStatusDialog(true);
-  };
-
-  const confirmStatusChange = () => {
-    if (!pendingStatusChange) return;
-    
-    const updatedConductores = conductores.map(c =>
-      c.id === pendingStatusChange.conductor.id
-        ? { ...c, estado: pendingStatusChange.newStatus, fechaActualizacion: new Date().toISOString().split('T')[0] }
-        : c
-    );
-    setConductores(updatedConductores);
-    setShowStatusDialog(false);
-    setPendingStatusChange(null);
-    toast({
-      title: "Estado actualizado",
-      description: `El conductor ha sido ${pendingStatusChange.newStatus === "activo" ? "activado" : "desactivado"}.`
-    });
-  };
-
-  const handleBloquearUsuario = (conductor: Conductor, block: boolean) => {
-    setPendingBlockChange({ conductor, block });
-    setShowBlockDialog(true);
-  };
-
-  const confirmBlockChange = () => {
-    if (!pendingBlockChange) return;
-    
-    const updatedConductores = conductores.map(c =>
-      c.id === pendingBlockChange.conductor.id
-        ? { 
-            ...c, 
-            usuarioBloqueo: {
-              ...c.usuarioBloqueo,
-              bloqueado: pendingBlockChange.block,
-              fechaBloqueo: pendingBlockChange.block ? new Date().toISOString() : undefined
-            },
-            fechaActualizacion: new Date().toISOString().split('T')[0] 
-          }
-        : c
-    );
-    setConductores(updatedConductores);
-    setShowBlockDialog(false);
-    setPendingBlockChange(null);
-    toast({
-      title: `Usuario ${pendingBlockChange.block ? "bloqueado" : "desbloqueado"}`,
-      description: `El acceso del conductor ha sido ${pendingBlockChange.block ? "bloqueado" : "desbloqueado"}.`
-    });
-  };
-
-  const handleVerHistorial = (conductor: Conductor) => {
-    const mockHistorial: HistorialCambio[] = [
-      {
-        id: "1",
-        campo: "Sistema",
-        valorAnterior: "",
-        valorNuevo: "Conductor creado",
-        usuario: "admin@sistema.com",
-        fecha: conductor.fechaCreacion + " 09:00:00",
-        tipo: "creacion"
-      },
-      {
-        id: "2",
-        campo: "documentos.seguridadSocial",
-        valorAnterior: "2024-06-30",
-        valorNuevo: conductor.documentos.seguridadSocial,
-        usuario: "admin@sistema.com",
-        fecha: conductor.fechaActualizacion + " 14:30:00",
-        tipo: "actualizacion"
-      }
-    ];
-    setHistorialCambios(mockHistorial);
-    setSelectedConductor(conductor);
-    setShowHistorialDialog(true);
-  };
-
-  const ConductorCard = ({ conductor }: { conductor: Conductor }) => {
-    const getDocumentStatus = (fecha: string) => {
-      if (!fecha) return { color: "bg-gray-500", text: "Sin fecha" };
-      const badge = getStatusBadge(fecha);
-      return {
-        color: badge.status === 'vencido' ? 'bg-red-500' : 
-               badge.status === 'por-vencer' ? 'bg-yellow-500' : 'bg-green-500',
-        text: badge.text
-      };
-    };
-
-    return (
-      <Card className="hover:shadow-lg transition-shadow">
-        <CardHeader className="pb-4">
-          <div className="flex items-start space-x-4">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={conductor.foto} alt={conductor.nombreCompleto} />
-              <AvatarFallback className="text-lg">
-                {conductor.nombreCompleto.split(' ').map(n => n[0]).join('').slice(0, 2)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <CardTitle className="text-lg truncate">{conductor.nombreCompleto}</CardTitle>
-              <p className="text-sm text-muted-foreground">{conductor.proveedor}</p>
-              <div className="flex items-center space-x-2 mt-2">
-                <Badge variant={conductor.estado === "activo" ? "default" : "destructive"}>
-                  {conductor.estado === "activo" ? "Activo" : "Inactivo"}
-                </Badge>
-                <Badge variant={conductor.usuarioBloqueo?.bloqueado ? "destructive" : "secondary"}>
-                  {conductor.usuarioBloqueo?.bloqueado ? "Bloqueado" : "Desbloqueado"}
-                </Badge>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Información del conductor */}
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Información Personal</h4>
-            <div className="grid grid-cols-2 gap-2 text-sm">
+  return (
+    <aside className={`hidden md:flex ${collapsed ? "md:w-20" : "md:w-64"} shrink-0 border-r bg-card/30 transition-all`}>
+      <div className="w-full p-4 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="h-9 w-9 rounded-xl bg-blue-600 grid place-content-center text-white font-bold">⛟</div>
+            {!collapsed && (
               <div>
-                <span className="text-muted-foreground">Cédula:</span>
-                <p className="font-medium">{conductor.cedula || "No registrada"}</p>
-              </div>
-              <div>
-                <span className="text-muted-foreground">Teléfono:</span>
-                <p className="font-medium">{conductor.telefono || "No registrado"}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Información del vehículo */}
-          {conductor.vehiculo && (
-            <div>
-              <h4 className="font-semibold text-sm mb-2 flex items-center">
-                <Car className="h-4 w-4 mr-1" />
-                Vehículo Asignado
-              </h4>
-              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="font-semibold text-lg">{conductor.vehiculo.placa}</span>
-                  <Badge variant="outline">{conductor.vehiculo.tipo}</Badge>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Marca:</span>
-                    <p className="font-medium">{conductor.vehiculo.marca}</p>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Modelo:</span>
-                    <p className="font-medium">{conductor.vehiculo.modelo}</p>
-                  </div>
-                </div>
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Año:</span>
-                  <span className="font-medium ml-1">{conductor.vehiculo.año}</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Estado de documentos */}
-          <div>
-            <h4 className="font-semibold text-sm mb-2">Estado de Documentos</h4>
-            <div className="space-y-2">
-              {Object.entries(conductor.documentos).map(([key, fecha]) => {
-                const status = getDocumentStatus(fecha);
-                const labels = {
-                  seguridadSocial: "Seguridad Social",
-                  licenciaConduccion: "Licencia de Conducción",
-                  examenesPsicosensometricos: "Exámenes Psicosensométricos"
-                };
-                return (
-                  <div key={key} className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground">{labels[key as keyof typeof labels]}:</span>
-                    <div className="flex items-center space-x-2">
-                      {fecha && <span className="text-xs">{new Date(fecha).toLocaleDateString()}</span>}
-                      <div className={`w-2 h-2 rounded-full ${status.color}`} title={status.text}></div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Acciones */}
-          <div className="flex justify-end pt-2 border-t">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => {
-                  setSelectedConductor(conductor);
-                  form.reset(conductor);
-                  setShowEditDialog(true);
-                }}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Editar
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleVerHistorial(conductor)}>
-                  <History className="mr-2 h-4 w-4" />
-                  Ver Historial
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => {
-                    setSelectedConductor(conductor);
-                    setShowDeleteDialog(true);
-                  }}
-                  className="text-red-600"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" />
-                  Eliminar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  };
-
-  const renderCell = (key: string, value: any, conductor: Conductor) => {
-    switch (key) {
-      case "nombreCompleto":
-        return (
-          <div>
-            <div className="font-medium">{conductor.nombreCompleto}</div>
-            <div className="text-sm text-muted-foreground">{conductor.proveedor}</div>
-          </div>
-        );
-      case "seguridadSocial":
-      case "licenciaConduccion":
-      case "examenesPsicosensometricos":
-        const fecha = conductor.documentos[key as keyof Conductor['documentos']];
-        if (!fecha) {
-          return (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => handleDocumentClick(conductor, key as keyof Conductor['documentos'])}
-            >
-              Sin fecha
-            </Button>
-          );
-        }
-        const badge = getStatusBadge(fecha);
-        return (
-          <div className="space-y-1">
-            <div className="text-xs">{new Date(fecha).toLocaleDateString()}</div>
-            <Button
-              variant={badge.variant}
-              size="sm"
-              className={`w-full ${badge.status === 'vencido' ? 'bg-red-600 hover:bg-red-700' : 
-                badge.status === 'por-vencer' ? 'bg-yellow-600 hover:bg-yellow-700' : 
-                'bg-green-600 hover:bg-green-700'}`}
-              onClick={() => handleDocumentClick(conductor, key as keyof Conductor['documentos'])}
-            >
-              {badge.text}
-            </Button>
-          </div>
-        );
-      case "estado":
-        return (
-          <Button
-            variant={conductor.estado === "activo" ? "default" : "destructive"}
-            size="sm"
-            className={conductor.estado === "activo" ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
-            onClick={() => handleStatusChange(conductor, conductor.estado === "activo" ? "inactivo" : "activo")}
-          >
-            {conductor.estado === "activo" ? "Activo" : "Inactivo"}
-          </Button>
-        );
-      case "usuarioBloqueo":
-        return (
-          <div className="space-y-1">
-            <Button
-              variant={conductor.usuarioBloqueo?.bloqueado ? "default" : "destructive"}
-              size="sm"
-              className={conductor.usuarioBloqueo?.bloqueado ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
-              onClick={() => handleBloquearUsuario(conductor, !conductor.usuarioBloqueo?.bloqueado)}
-            >
-              {conductor.usuarioBloqueo?.bloqueado ? "Desbloquear" : "Bloquear"}
-            </Button>
-            {conductor.usuarioBloqueo?.ultimoLogin && (
-              <div className="text-xs text-muted-foreground">
-                Último acceso: {new Date(conductor.usuarioBloqueo.ultimoLogin).toLocaleString()}
+                <div className="text-sm font-semibold leading-none">Sistema Transportes</div>
+                <div className="text-xs text-muted-foreground">Gestión v1.0</div>
               </div>
             )}
           </div>
-        );
-      case "acciones":
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => {
-                setSelectedConductor(conductor);
-                form.reset(conductor);
-                setShowEditDialog(true);
-              }}>
-                <Edit className="mr-2 h-4 w-4" />
-                Editar
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleVerHistorial(conductor)}>
-                <History className="mr-2 h-4 w-4" />
-                Ver Historial
-              </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => {
-                  setSelectedConductor(conductor);
-                  setShowDeleteDialog(true);
-                }}
-                className="text-red-600"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Eliminar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        );
-      default:
-        return String(conductor[key as keyof Conductor] || "");
-    }
-  };
+          <Button size="icon" variant="ghost" onClick={() => setCollapsed(!collapsed)}>
+            {collapsed ? <ChevronRight className="h-4 w-4"/> : <ChevronLeft className="h-4 w-4"/>}
+          </Button>
+        </div>
+        <nav className="space-y-2">
+          {menu.map(({ label, icon: Icon }) => (
+            <Button
+              key={label}
+              variant={label === active ? "secondary" : "ghost"}
+              className={`w-full justify-start rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${label === active ? "bg-blue-600 text-white" : ""}`}
+            >
+              <Icon className="h-4 w-4 mr-2" />
+              {!collapsed && label}
+            </Button>
+          ))}
+        </nav>
+      </div>
+    </aside>
+  );
+};
+
+// ---------------- Data ----------------
+interface Documento { label: string; fecha: string; status: string }
+interface Conductor {
+  nombre: string;
+  proveedor: string;
+  estado: "Activo" | "Inactivo";
+  bloqueado: boolean; // true => presently blocked
+  cedula: string;
+  telefono: string;
+  documentos?: Documento[];
+  lastAccess: string;
+}
+
+const conductoresSeed: Conductor[] = [
+  {
+    nombre: "Juan Carlos Pérez",
+    proveedor: "Transportes del Valle",
+    estado: "Activo",
+    bloqueado: false,
+    cedula: "12345678",
+    telefono: "+57 300 123 4567",
+    documentos: [
+      { label: "Seguridad Social", fecha: "29/06/2025", status: "Vencido" },
+      { label: "Licencia de Conducción", fecha: "30/12/2025", status: "Vigente" },
+      { label: "Exámenes Psicosensométricos", fecha: "14/12/2024", status: "Vencido" },
+    ],
+    lastAccess: "2024-01-14 10:30:00",
+  },
+  {
+    nombre: "María José García",
+    proveedor: "Logística Andina",
+    estado: "Inactivo",
+    bloqueado: true,
+    cedula: "87654321",
+    telefono: "+57 315 987 6543",
+    documentos: [
+      { label: "Seguridad Social", fecha: "19/11/2024", status: "Vencido" },
+      { label: "Licencia de Conducción", fecha: "14/06/2026", status: "Vigente" },
+      { label: "Exámenes Psicosensométricos", fecha: "09/09/2024", status: "Vencido" },
+    ],
+    lastAccess: "2024-01-19 08:15:00",
+  },
+  {
+    nombre: "Carlos Andrés Rodríguez",
+    proveedor: "Rápido Express",
+    estado: "Activo",
+    bloqueado: false,
+    cedula: "11223344",
+    telefono: "+57 301 555 7890",
+    documentos: [
+      { label: "Seguridad Social", fecha: "14/03/2025", status: "Vencido" },
+      { label: "Licencia de Conducción", fecha: "29/09/2025", status: "Vigente" },
+      { label: "Exámenes Psicosensométricos", fecha: "21/08/2024", status: "Vencido" },
+    ],
+    lastAccess: "2024-01-13 16:20:00",
+  },
+];
+
+// ---------------- Page ----------------
+export default function ConductoresPage() {
+  const [view, setView] = useState<"list" | "cards">("list");
+  const conductores = conductoresSeed;
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Gestión de Conductores</h1>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center border rounded-lg p-1">
-            <Button 
-              variant={viewMode === "list" ? "default" : "ghost"} 
-              size="sm"
-              onClick={() => setViewMode("list")}
-              className="h-8 px-3"
-            >
-              <List className="h-4 w-4 mr-1" />
-              Lista
-            </Button>
-            <Button 
-              variant={viewMode === "cards" ? "default" : "ghost"} 
-              size="sm"
-              onClick={() => setViewMode("cards")}
-              className="h-8 px-3"
-            >
-              <Grid3X3 className="h-4 w-4 mr-1" />
-              Tarjetas
-            </Button>
-          </div>
-          <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo Conductor
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Creación de Nuevo Conductor</DialogTitle>
-              </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleCreate)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="nombreCompleto"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nombre Completo</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="proveedor"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Proveedor</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Seleccionar proveedor" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
-                            <SelectItem value="Logística Andina">Logística Andina</SelectItem>
-                            <SelectItem value="Rápido Express">Rápido Express</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end space-x-2">
-                    <Button type="button" variant="outline" onClick={() => setShowCreateDialog(false)}>
-                      Cancelar
-                    </Button>
-                    <Button type="submit">Crear Conductor</Button>
-                  </div>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </div>
+    <div className="flex h-screen w-full bg-muted/30">
+      <Sidebar active="Conductores" />
 
-      {viewMode === "list" ? (
-        <DataTable
-          title="Lista de Conductores"
-          columns={columns}
-          data={statusFilter && statusFilter !== "all" ? conductores.filter(c => c.estado === statusFilter) : conductores}
-          searchable
-          filterable
-          exportable
-          renderCell={renderCell}
-          statusFilter={true}
-          onStatusFilterChange={setStatusFilter}
-        />
-      ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Vista de Tarjetas</h2>
-            <div className="flex items-center space-x-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Filtrar por estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
-                  <SelectItem value="activo">Activo</SelectItem>
-                  <SelectItem value="inactivo">Inactivo</SelectItem>
-                </SelectContent>
-              </Select>
+      {/* Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Topbar minimal */}
+        <header className="flex items-center justify-end px-6 py-3 border-b bg-background/60 backdrop-blur">
+          <Badge variant="secondary" className="rounded-xl">Sistema Activo</Badge>
+        </header>
+
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+          {/* Header + CTAs */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1">
+              <h1 className="text-2xl font-semibold tracking-tight">Gestión de Conductores</h1>
+              <p className="text-sm text-muted-foreground">Administra perfiles, documentos y estado</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button variant={view === "list" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("list")}>
+                <List className="h-4 w-4 mr-1"/> Lista
+              </Button>
+              <Button variant={view === "cards" ? "secondary" : "outline"} size="sm" className="rounded-xl" onClick={() => setView("cards")}>
+                <LayoutGrid className="h-4 w-4 mr-1"/> Tarjetas
+              </Button>
+              <Button className="rounded-xl"><Plus className="h-4 w-4 mr-2"/>Nuevo Conductor</Button>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(statusFilter && statusFilter !== "all" ? conductores.filter(c => c.estado === statusFilter) : conductores).map((conductor) => (
-              <ConductorCard key={conductor.id} conductor={conductor} />
-            ))}
-          </div>
-        </div>
-      )}
 
-      {/* Edit Dialog */}
-      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Editar Conductor</DialogTitle>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleEdit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="nombreCompleto"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Nombre Completo</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="proveedor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Proveedor</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Seleccionar proveedor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Transportes del Valle">Transportes del Valle</SelectItem>
-                        <SelectItem value="Logística Andina">Logística Andina</SelectItem>
-                        <SelectItem value="Rápido Express">Rápido Express</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setShowEditDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Actualizar</Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Historial Dialog */}
-      <Dialog open={showHistorialDialog} onOpenChange={setShowHistorialDialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Historial de Cambios - {selectedConductor?.nombreCompleto}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            {historialCambios.map((cambio) => (
-              <div key={cambio.id} className="border-l-2 border-primary pl-4 pb-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <Badge variant={cambio.tipo === "creacion" ? "default" : "secondary"}>
-                      {cambio.tipo === "creacion" ? "Creación" : "Actualización"}
-                    </Badge>
-                    <p className="font-medium mt-1">{cambio.campo}</p>
+          {view === "list" ? (
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Lista de Conductores</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {/* Toolbar */}
+                <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div className="relative w-full md:max-w-md">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input placeholder="Buscar..." className="pl-9 rounded-xl" />
                   </div>
-                  <div className="text-right text-sm text-muted-foreground">
-                    <p>{cambio.usuario}</p>
-                    <p>{new Date(cambio.fecha).toLocaleString()}</p>
+                  <div className="flex items-center gap-2">
+                    <Tabs defaultValue="all" className="hidden sm:block">
+                      <TabsList className="rounded-xl">
+                        <TabsTrigger value="all">Todos los estados</TabsTrigger>
+                        <TabsTrigger value="active">Activos</TabsTrigger>
+                        <TabsTrigger value="inactive">Inactivos</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
+                    <Button variant="outline" className="rounded-xl"><Filter className="h-4 w-4 mr-2"/>Filtros</Button>
+                    <Button variant="outline" className="rounded-xl"><Download className="h-4 w-4 mr-2"/>Exportar</Button>
                   </div>
                 </div>
-                {cambio.tipo !== "creacion" && (
-                  <div className="text-sm">
-                    <p><span className="text-red-600">Anterior:</span> {cambio.valorAnterior}</p>
-                    <p><span className="text-green-600">Nuevo:</span> {cambio.valorNuevo}</p>
+
+                <Separator className="my-4" />
+
+                {/* Table */}
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Conductor</TableHead>
+                        <TableHead>Seguridad Social</TableHead>
+                        <TableHead>Licencia de Conducción</TableHead>
+                        <TableHead>Exámenes Psicosensométricos</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {conductores.map((c, i) => (
+                        <TableRow key={i}>
+                          <TableCell>
+                            <div className="font-medium">{c.nombre}</div>
+                            <div className="text-xs text-muted-foreground">{c.proveedor}</div>
+                            <div className="text-[11px] text-muted-foreground">Último acceso: {c.lastAccess}</div>
+                          </TableCell>
+                          {(c.documentos ?? []).map((doc, j) => (
+                            <TableCell key={j}>
+                              <div className="flex flex-col text-xs items-start">
+                                <span>{doc.fecha}</span>
+                                <Badge className={`rounded-md mt-1 ${statusBadge(doc.status)}`}>{doc.status}</Badge>
+                              </div>
+                            </TableCell>
+                          ))}
+                          <TableCell>
+                            <Badge className={`rounded-md ${c.estado === "Activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>{c.estado}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-xl">
+                                {c.bloqueado ? (
+                                  <DropdownMenuItem>Desbloquear</DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem>Bloquear</DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem>Editar</DropdownMenuItem>
+                                <DropdownMenuItem>Actualizar Documentos</DropdownMenuItem>
+                                <DropdownMenuItem className="text-destructive">Eliminar</DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {conductores.map((c, i) => (
+                <Card key={i} className="rounded-2xl border">
+                  {/* Header bar like Vehículos */}
+                  <div className="bg-muted/60 rounded-t-2xl p-3 flex items-center justify-between">
+                    <div className="min-w-0">
+                      <div className="font-semibold truncate">{c.nombre}</div>
+                      <div className="text-xs text-muted-foreground truncate">{c.proveedor}</div>
+                      <div className="text-[11px] text-muted-foreground">Último acceso: {c.lastAccess}</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge className={c.estado === "Activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}>{c.estado}</Badge>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="rounded-xl">
+                          {c.bloqueado ? (
+                            <DropdownMenuItem>Desbloquear</DropdownMenuItem>
+                          ) : (
+                            <DropdownMenuItem>Bloquear</DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem>Editar</DropdownMenuItem>
+                          <DropdownMenuItem>Actualizar Documentos</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive">Eliminar</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                )}
-                {cambio.tipo === "creacion" && (
-                  <p className="text-sm text-muted-foreground">{cambio.valorNuevo}</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </DialogContent>
-      </Dialog>
 
-      {/* Status Change Confirmation */}
-      <AlertDialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar cambio de estado</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea {pendingStatusChange?.newStatus === "activo" ? "activar" : "desactivar"} al conductor {pendingStatusChange?.conductor.nombreCompleto}?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingStatusChange(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStatusChange}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Block User Confirmation */}
-      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar {pendingBlockChange?.block ? "bloqueo" : "desbloqueo"}</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea {pendingBlockChange?.block ? "bloquear" : "desbloquear"} el acceso del conductor {pendingBlockChange?.conductor.nombreCompleto}?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setPendingBlockChange(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmBlockChange}>Confirmar</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Delete Confirmation */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar eliminación</AlertDialogTitle>
-            <AlertDialogDescription>
-              ¿Está seguro que desea eliminar al conductor {selectedConductor?.nombreCompleto}? Esta acción no se puede deshacer.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setSelectedConductor(null)}>Cancelar</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Eliminar
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Document Update Dialog */}
-      <Dialog open={showDocumentDialog} onOpenChange={setShowDocumentDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Actualizar Documento</DialogTitle>
-          </DialogHeader>
-          <Form {...documentForm}>
-            <form onSubmit={documentForm.handleSubmit(handleDocumentUpdate)} className="space-y-4">
-              <FormField
-                control={documentForm.control}
-                name="fecha"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de Vencimiento</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={documentForm.control}
-                name="archivo"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Documento PDF</FormLabel>
-                    <FormControl>
-                      <Input type="file" accept=".pdf" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setShowDocumentDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button type="submit">Actualizar</Button>
-              </div>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
+                  <CardContent className="p-4">
+                    {/* Documents grid like vehicle */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {(c.documentos ?? []).map((doc, j) => (
+                        <div key={j} className="rounded-lg border p-2 bg-background">
+                          <div className={`text-sm font-medium ${toneFromStatus(doc.status) === "success" ? "text-emerald-600" : toneFromStatus(doc.status) === "warning" ? "text-amber-600" : "text-rose-600"}`}>{doc.label}</div>
+                          <div className="text-[11px] text-muted-foreground">{doc.fecha}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

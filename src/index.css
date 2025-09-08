@@ -53,6 +53,14 @@ Colores profesionales que transmiten confianza y claridad */
     --pending-foreground: 0 0% 100%;
     --pending-light: 213 100% 96%;
 
+    /* Colores del sistema de conductores */
+    --emerald-600: 160 84% 39%;
+    --green-600: 142 76% 36%;
+    --amber-500: 38 92% 50%;
+    --rose-600: 346 87% 43%;
+    --red-600: 0 84% 60%;
+    --blue-600: 221 83% 53%;
+
     /* Bordes y campos */
     --border: 215 15% 88%;
     --input: 215 15% 88%;
@@ -115,6 +123,14 @@ Colores profesionales que transmiten confianza y claridad */
     --pending: 213 94% 55%;
     --pending-foreground: 0 0% 100%;
     --pending-light: 213 100% 15%;
+
+    /* Colores del sistema de conductores - modo oscuro */
+    --emerald-600: 160 84% 49%;
+    --green-600: 142 76% 46%;
+    --amber-500: 38 92% 60%;
+    --rose-600: 346 87% 53%;
+    --red-600: 0 84% 70%;
+    --blue-600: 221 83% 63%;
 
     --border: 215 20% 20%;
     --input: 215 20% 20%;
