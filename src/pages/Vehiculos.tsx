@@ -563,7 +563,8 @@ export default function Vehiculos() {
                       <TableHead>Tecnomecánica</TableHead>
                       <TableHead>Tarjeta de Operación</TableHead>
                       <TableHead>SOAT</TableHead>
-                      <TableHead>Estado</TableHead>
+                      <TableHead>Póliza Contractual</TableHead>
+                      <TableHead>Póliza Extra Contractual</TableHead>
                       <TableHead>Acciones</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -571,13 +572,18 @@ export default function Vehiculos() {
                     {vehiculos.map((v) => (
                       <TableRow key={v.id}>
                         <TableCell>
-                          <div className="font-medium">{v.placa}</div>
-                          <div className="text-xs text-muted-foreground">{v.proveedor}</div>
-                          <div className="text-[11px] text-muted-foreground">
-                            Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                          <div className="space-y-1">
+                            <Badge className={`rounded-md text-xs ${v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
+                              {v.estado === "activo" ? "Activo" : "Inactivo"}
+                            </Badge>
+                            <div className="font-medium">{v.placa}</div>
+                            <div className="text-xs text-muted-foreground">{v.proveedor}</div>
+                            <div className="text-[11px] text-muted-foreground">
+                              Último acceso: {v.usuarioBloqueo?.ultimoLogin || "N/A"}
+                            </div>
                           </div>
                         </TableCell>
-                        {["revisionPreventiva", "tecnomecanica", "tarjetaOperacion", "soat"].map((docType) => {
+                        {["revisionPreventiva", "tecnomecanica", "tarjetaOperacion", "soat", "polizaContractual", "polizaExtraContractual"].map((docType) => {
                           const fecha = v.documentos[docType as keyof typeof v.documentos];
                           const badge = fecha ? getStatusBadge(fecha) : null;
                           return (
@@ -594,16 +600,20 @@ export default function Vehiculos() {
                           );
                         })}
                         <TableCell>
-                          <Badge className={`rounded-md ${v.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
-                            {v.estado === "activo" ? "Activo" : "Inactivo"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="rounded-xl">
+                              {v.estado === "activo" ? (
+                                <DropdownMenuItem onClick={() => handleStatusChange(v, "inactivo")}>
+                                  Desbloquear
+                                </DropdownMenuItem>
+                              ) : (
+                                <DropdownMenuItem onClick={() => handleStatusChange(v, "activo")}>
+                                  Bloquear
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem onClick={() => {
                                 setSelectedVehiculo(v);
                                 form.reset(v);
@@ -682,10 +692,10 @@ export default function Vehiculos() {
                       {/* Row head inside gray bar with 3-dot menu */}
                       <div className="bg-muted/60 rounded-lg p-3 flex items-center justify-between mb-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className={`text-xs font-medium px-2 py-0.5 rounded-md ${v.estado === "activo" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"}`}>
-                            {v.estado === "activo" ? "Activo" : "Inactivo"}
-                          </span>
                           <div className="min-w-0">
+                            <Badge className={`text-xs font-medium px-2 py-0.5 rounded-md mb-1 ${v.estado === "activo" ? "bg-emerald-600 text-white" : "bg-amber-500 text-white"}`}>
+                              {v.estado === "activo" ? "Activo" : "Inactivo"}
+                            </Badge>
                             <div className="font-semibold leading-tight truncate">{v.placa}</div>
                             <div className="text-xs text-muted-foreground truncate">{v.proveedor}</div>
                             <div className="text-[11px] text-muted-foreground">
@@ -698,10 +708,14 @@ export default function Vehiculos() {
                             <Button size="icon" variant="ghost"><MoreHorizontal className="h-4 w-4"/></Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="rounded-xl">
-                            {v.usuarioBloqueo?.bloqueado ? (
-                              <DropdownMenuItem>Desbloquear</DropdownMenuItem>
+                            {v.estado === "activo" ? (
+                              <DropdownMenuItem onClick={() => handleStatusChange(v, "inactivo")}>
+                                Desbloquear
+                              </DropdownMenuItem>
                             ) : (
-                              <DropdownMenuItem>Bloquear</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(v, "activo")}>
+                                Bloquear
+                              </DropdownMenuItem>
                             )}
                             <DropdownMenuItem onClick={() => {
                               setSelectedVehiculo(v);
