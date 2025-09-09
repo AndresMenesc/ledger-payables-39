@@ -391,39 +391,47 @@ export default function RevisionAdmin() {
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
-                    {/* First row: Name and ID */}
-                    <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                        <User className="h-5 w-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
-                        <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
+                    {/* First row: Name and ID with documents */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>ID: {cuenta.idFactura}</span>
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span>2 documentos</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
 
-                    {/* Second row: Month, date, documents */}
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                        <span>{cuenta.mes}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>Enviado: {cuenta.fechaEnvio}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span>2 documentos</span>
+                    {/* Second row: Month and date */}
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                          <span>{cuenta.mes}</span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>Enviado: {cuenta.fechaEnvio}</span>
+                        </div>
                       </div>
                     </div>
 
                     {/* Third row: Amount and status */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col gap-2">
                       <div className="text-2xl font-bold text-primary">
                         ${cuenta.total.toLocaleString()}
                       </div>
-                      {getEstadoBadge(cuenta.estado)}
+                      <div>
+                        {getEstadoBadge(cuenta.estado)}
+                      </div>
                     </div>
 
                     {cuenta.estado === "Rechazado" && (
