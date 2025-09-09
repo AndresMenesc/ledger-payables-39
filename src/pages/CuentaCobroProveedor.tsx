@@ -435,10 +435,10 @@ export default function CuentaCobroProveedor() {
           <Metric icon={X} label="Rechazadas" value={1} sub={"Requieren revisión"} />
         </div>
 
-        {/* Vista proveedor y filtros en una sola línea */}
+        {/* Vista proveedor y filtros */}
         <Card className="rounded-2xl border">
           <CardContent className="p-6">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Switch 
                   checked={showAdvancedActions} 
@@ -450,7 +450,7 @@ export default function CuentaCobroProveedor() {
                 </Label>
               </div>
               
-              <Tabs defaultValue="todos" className="flex-1">
+              <Tabs defaultValue="todos">
                 <TabsList className="rounded-xl">
                   <TabsTrigger value="todos">Todos los Proveedores</TabsTrigger>
                   <TabsTrigger value="pendientes">Pendientes (1)</TabsTrigger>
