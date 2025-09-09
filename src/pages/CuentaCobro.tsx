@@ -4,8 +4,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Separator } from "@/components/ui/separator"
 import { Search, Filter, Eye, UserX, CheckCircle, XCircle, Clock, ArrowLeft, FileCheck, Plus } from "lucide-react"
 
 // Datos de muestra
@@ -148,6 +149,21 @@ const detalleServicios = [
   }
 ]
 
+const Metric = ({ icon: Icon, label, value, sub }: any) => (
+  <Card className="rounded-2xl border">
+    <CardContent className="p-5 flex items-center gap-4">
+      <div className="h-10 w-10 rounded-xl bg-blue-600/10 text-blue-700 grid place-content-center">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-2xl font-semibold leading-none tracking-tight">{value}</div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+        {sub && <div className="text-[11px] mt-1 text-muted-foreground">{sub}</div>}
+      </div>
+    </CardContent>
+  </Card>
+);
+
 export default function CuentaCobro() {
   const [filtroFecha, setFiltroFecha] = useState("")
   const [filtroContratista, setFiltroContratista] = useState("all")
@@ -161,11 +177,11 @@ export default function CuentaCobro() {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
       case "EN REVISION":
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">EN REVISIÓN ⚠</Badge>
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 rounded-md">EN REVISIÓN ⚠</Badge>
       case "APROBADO":
-        return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">APROBADO ✓</Badge>
+        return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md">APROBADO ✓</Badge>
       case "RECHAZADO":
-        return <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-100">RECHAZADO ✗</Badge>
+        return <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-100 rounded-md">RECHAZADO ✗</Badge>
       default:
         return <Badge variant="outline">{estado}</Badge>
     }
@@ -178,7 +194,6 @@ export default function CuentaCobro() {
 
   const radicarCuenta = () => {
     if (loteSeleccionado) {
-      // Aquí iría la lógica para radicar la cuenta al lote seleccionado
       console.log(`Radicando cuenta ${cuentaSeleccionada?.numero} al lote ${loteSeleccionado}`)
       setMostrarLotes(false)
       setLoteSeleccionado(null)
@@ -188,11 +203,11 @@ export default function CuentaCobro() {
   const getEstadoLoteBadge = (estado: string) => {
     switch (estado) {
       case "EN PREPARACION":
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100">EN PREPARACIÓN</Badge>
+        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md">EN PREPARACIÓN</Badge>
       case "EN REVISION":
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100">EN REVISIÓN</Badge>
+        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 rounded-md">EN REVISIÓN</Badge>
       case "PENDIENTE":
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100">PENDIENTE</Badge>
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-md">PENDIENTE</Badge>
       default:
         return <Badge variant="outline">{estado}</Badge>
     }
@@ -200,412 +215,433 @@ export default function CuentaCobro() {
 
   if (mostrarDetalle && cuentaSeleccionada) {
     return (
-      <div className="space-y-4">
-        {/* Header con botón de regreso */}
-        <div className="flex items-center gap-4">
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setMostrarDetalle(false)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Regresar
-          </Button>
-          <h1 className="text-xl font-bold text-primary">
-            {cuentaSeleccionada.contratista}
-          </h1>
-        </div>
-
-        {/* Información de la cuenta */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-600 font-medium">Valor Liquidación</p>
-            <p className="text-2xl font-bold text-blue-700">$ 1,804,360</p>
-          </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-green-600 font-medium">Cobrado contratista</p>
-            <p className="text-2xl font-bold text-green-700">$ 1,804,360</p>
-          </div>
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <p className="text-sm text-yellow-600 font-medium">Estado</p>
-            <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 mt-2">EN REVISIÓN</Badge>
-          </div>
-          <div className="flex gap-2 items-end">
-            <Button variant="outline" className="flex-1">
-              <CheckCircle className="h-4 w-4 mr-2" />
-              APROBAR SS
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="p-6 space-y-6">
+          {/* Header con botón de regreso */}
+          <div className="flex items-center gap-4">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setMostrarDetalle(false)}
+              className="flex items-center gap-2 rounded-xl"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Regresar
             </Button>
-            <Button variant="destructive" className="flex-1">
-              <XCircle className="h-4 w-4 mr-2" />
-              RECHAZAR SS
-            </Button>
+            <h1 className="text-xl font-bold text-primary">
+              {cuentaSeleccionada.contratista}
+            </h1>
           </div>
-        </div>
 
-        {/* Tabla de servicios */}
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Detalle de Servicios</CardTitle>
-              <div className="flex gap-2">
-                <Input 
-                  placeholder="Búsqueda general"
-                  value={busqueda}
-                  onChange={(e) => setBusqueda(e.target.value)}
-                  className="w-64"
-                />
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>N°</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Origen</TableHead>
-                  <TableHead>Destino</TableHead>
-                  <TableHead>Fecha</TableHead>
-                  <TableHead>Hora</TableHead>
-                  <TableHead>Valor Liquidación</TableHead>
-                  <TableHead>Valor Contratista</TableHead>
-                  <TableHead>Diferencia</TableHead>
-                  <TableHead>Acciones</TableHead>
-                  <TableHead>Histórico</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {detalleServicios.map((servicio, index) => (
-                  <TableRow key={servicio.id}>
-                    <TableCell>{index + 1}</TableCell>
-                    <TableCell className="max-w-xs">{servicio.cliente}</TableCell>
-                    <TableCell>{servicio.origen}</TableCell>
-                    <TableCell>{servicio.destino}</TableCell>
-                    <TableCell>{servicio.fecha}</TableCell>
-                    <TableCell>{servicio.hora}</TableCell>
-                    <TableCell>{servicio.valorLiquidacion}</TableCell>
-                    <TableCell>{servicio.valorContratista}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">
-                        {servicio.diferencia}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <CheckCircle className="h-5 w-5 text-green-500" />
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                        {servicio.historico}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+          {/* Información de la cuenta */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card className="rounded-2xl border">
+              <CardContent className="p-6">
+                <p className="text-sm text-blue-600 font-medium">Valor Liquidación</p>
+                <p className="text-2xl font-bold text-blue-700">$ 1,804,360</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl border">
+              <CardContent className="p-6">
+                <p className="text-sm text-green-600 font-medium">Cobrado contratista</p>
+                <p className="text-2xl font-bold text-green-700">$ 1,804,360</p>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl border">
+              <CardContent className="p-6">
+                <p className="text-sm text-yellow-600 font-medium">Estado</p>
+                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 mt-2 rounded-md">EN REVISIÓN</Badge>
+              </CardContent>
+            </Card>
+            <Card className="rounded-2xl border">
+              <CardContent className="p-6 flex gap-2">
+                <Button variant="outline" className="flex-1 rounded-xl">
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  APROBAR
+                </Button>
+                <Button variant="destructive" className="flex-1 rounded-xl">
+                  <XCircle className="h-4 w-4 mr-2" />
+                  RECHAZAR
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Botón Radicar Cuenta */}
-        <div className="flex justify-center pt-4">
-          <Button 
-            onClick={() => setMostrarLotes(true)}
-            className="bg-primary hover:bg-primary/90 text-white px-8 py-2"
-          >
-            <FileCheck className="h-4 w-4 mr-2" />
-            Radicar Cuenta
-          </Button>
-        </div>
-
-        {/* Modal de Lotes Disponibles */}
-        <Dialog open={mostrarLotes} onOpenChange={setMostrarLotes}>
-          <DialogContent className="max-w-4xl">
-            <DialogHeader>
-              <DialogTitle className="text-primary">
-                Seleccionar Lote para Radicar Cuenta de Cobro
-              </DialogTitle>
-              <p className="text-sm text-muted-foreground">
-                Cuenta: <span className="font-semibold">{cuentaSeleccionada?.numero} - {cuentaSeleccionada?.contratista}</span>
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Valor: <span className="font-semibold text-green-600">{cuentaSeleccionada?.valor}</span>
-              </p>
-            </DialogHeader>
-            <div className="space-y-4">
+          {/* Tabla de servicios */}
+          <Card className="rounded-2xl border">
+            <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Lotes Disponibles</h3>
-                <Input 
-                  placeholder="Buscar lote..."
-                  className="w-64"
-                />
+                <CardTitle className="text-base">Detalle de Servicios</CardTitle>
+                <div className="flex gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      placeholder="Búsqueda general"
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      className="pl-9 w-64 rounded-xl"
+                    />
+                  </div>
+                </div>
               </div>
-              
-              <div className="space-y-3 max-h-96 overflow-y-auto">
-                {lotesDisponibles.map((lote) => (
-                  <div 
-                    key={lote.id} 
-                    className={`border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md ${
-                      loteSeleccionado === lote.numero 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setLoteSeleccionado(lote.numero)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h4 className="font-semibold text-lg">{lote.numero}</h4>
-                          {getEstadoLoteBadge(lote.estado)}
-                          {loteSeleccionado === lote.numero && (
-                            <CheckCircle className="h-5 w-5 text-primary" />
-                          )}
-                        </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="text-muted-foreground">Valor Actual:</span>
-                            <p className="font-semibold text-green-600">
-                              ${lote.valorActual.toLocaleString()}
-                            </p>
+            </CardHeader>
+            <CardContent>
+              <div className="rounded-xl border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>N°</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Origen</TableHead>
+                      <TableHead>Destino</TableHead>
+                      <TableHead>Fecha</TableHead>
+                      <TableHead>Hora</TableHead>
+                      <TableHead>Valor Liquidación</TableHead>
+                      <TableHead>Valor Contratista</TableHead>
+                      <TableHead>Diferencia</TableHead>
+                      <TableHead>Acciones</TableHead>
+                      <TableHead>Histórico</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {detalleServicios.map((servicio, index) => (
+                      <TableRow key={servicio.id} className="hover:bg-muted/50">
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="max-w-xs">{servicio.cliente}</TableCell>
+                        <TableCell>{servicio.origen}</TableCell>
+                        <TableCell>{servicio.destino}</TableCell>
+                        <TableCell>{servicio.fecha}</TableCell>
+                        <TableCell>{servicio.hora}</TableCell>
+                        <TableCell>{servicio.valorLiquidacion}</TableCell>
+                        <TableCell>{servicio.valorContratista}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md">
+                            {servicio.diferencia}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <CheckCircle className="h-5 w-5 text-green-500" />
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm" className="rounded-xl">
+                            <Eye className="h-4 w-4" />
+                            {servicio.historico}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Botón Radicar Cuenta */}
+          <div className="flex justify-center pt-4">
+            <Button 
+              onClick={() => setMostrarLotes(true)}
+              className="bg-primary hover:bg-primary/90 text-white px-8 py-2 rounded-xl"
+            >
+              <FileCheck className="h-4 w-4 mr-2" />
+              Radicar Cuenta
+            </Button>
+          </div>
+
+          {/* Modal de Lotes Disponibles */}
+          <Dialog open={mostrarLotes} onOpenChange={setMostrarLotes}>
+            <DialogContent className="max-w-4xl rounded-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-primary">
+                  Seleccionar Lote para Radicar Cuenta de Cobro
+                </DialogTitle>
+                <p className="text-sm text-muted-foreground">
+                  Cuenta: <span className="font-semibold">{cuentaSeleccionada?.numero} - {cuentaSeleccionada?.contratista}</span>
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Valor: <span className="font-semibold text-green-600">{cuentaSeleccionada?.valor}</span>
+                </p>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold">Lotes Disponibles</h3>
+                  <Input 
+                    placeholder="Buscar lote..."
+                    className="w-64 rounded-xl"
+                  />
+                </div>
+                
+                <div className="space-y-3 max-h-96 overflow-y-auto">
+                  {lotesDisponibles.map((lote) => (
+                    <div 
+                      key={lote.id} 
+                      className={`border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md ${
+                        loteSeleccionado === lote.numero 
+                          ? 'border-primary bg-primary/5' 
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setLoteSeleccionado(lote.numero)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="font-semibold text-lg">{lote.numero}</h4>
+                            {getEstadoLoteBadge(lote.estado)}
+                            {loteSeleccionado === lote.numero && (
+                              <CheckCircle className="h-5 w-5 text-primary" />
+                            )}
                           </div>
-                          <div>
-                            <span className="text-muted-foreground">Cuentas:</span>
-                            <p className="font-semibold">{lote.cantidadCuentas} cuentas</p>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="text-muted-foreground">Valor Actual:</span>
+                              <p className="font-semibold text-green-600">
+                                ${lote.valorActual.toLocaleString()}
+                              </p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Cuentas:</span>
+                              <p className="font-semibold">{lote.cantidadCuentas} cuentas</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Fecha Creación:</span>
+                              <p>{lote.fechaCreacion}</p>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Responsable:</span>
+                              <p>{lote.responsable}</p>
+                            </div>
                           </div>
-                          <div>
-                            <span className="text-muted-foreground">Fecha Creación:</span>
-                            <p>{lote.fechaCreacion}</p>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Responsable:</span>
-                            <p>{lote.responsable}</p>
-                          </div>
-                        </div>
-                        <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                          <p className="text-sm text-blue-700">
-                            <strong>Valor Final si se radica:</strong> 
-                            <span className="ml-2 font-bold">
-                              ${(lote.valorActual + parseFloat(cuentaSeleccionada?.valor?.replace(/[$,]/g, '') || '0')).toLocaleString()}
-                            </span>
-                          </p>
+                          <Card className="mt-3 rounded-xl">
+                            <CardContent className="p-3 bg-blue-50">
+                              <p className="text-sm text-blue-700">
+                                <strong>Valor Final si se radica:</strong> 
+                                <span className="ml-2 font-bold">
+                                  ${(lote.valorActual + parseFloat(cuentaSeleccionada?.valor?.replace(/[$,]/g, '') || '0')).toLocaleString()}
+                                </span>
+                              </p>
+                            </CardContent>
+                          </Card>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setMostrarLotes(false)
-                    setLoteSeleccionado(null)
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button 
-                  onClick={radicarCuenta}
-                  disabled={!loteSeleccionado}
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Radicar a Lote Seleccionado
-                </Button>
+                <div className="flex justify-end gap-2 pt-4 border-t">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => {
+                      setMostrarLotes(false)
+                      setLoteSeleccionado(null)
+                    }}
+                    className="rounded-xl"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={radicarCuenta}
+                    disabled={!loteSeleccionado}
+                    className="bg-primary hover:bg-primary/90 rounded-xl"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Radicar a Lote Seleccionado
+                  </Button>
+                </div>
               </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Está habilitado <span className="text-primary">JULIO</span></h1>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header + CTAs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6 pb-0">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Gestión de Cuentas de Cobro</h1>
+          <p className="text-sm text-muted-foreground">Está habilitado <span className="text-primary">JULIO</span></p>
         </div>
       </div>
 
-      {/* Filtros */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
-              <label className="text-sm font-medium text-primary mb-2 block">Fecha Inicio</label>
-              <Input 
-                type="date"
-                value={filtroFecha}
-                onChange={(e) => setFiltroFecha(e.target.value)}
-              />
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        {/* Metrics */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Metric icon={FileCheck} label="Total Cuentas" value={234} sub={"+8% desde el mes pasado"} />
+          <Metric icon={CheckCircle} label="Aprobadas" value={198} sub={"84.6% del total"} />
+          <Metric icon={Clock} label="En Revisión" value={23} sub={"+12% vs mes anterior"} />
+          <Metric icon={XCircle} label="Rechazadas" value={13} sub={"-5% vs mes anterior"} />
+        </div>
+
+        {/* Filtros */}
+        <Card className="rounded-2xl border">
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div>
+                <label className="text-sm font-medium text-primary mb-2 block">Fecha Inicio</label>
+                <Input 
+                  type="date"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                  className="rounded-xl"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-primary mb-2 block">Contratistas</label>
+                <Select value={filtroContratista} onValueChange={setFiltroContratista}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="yakelinne">YAKELINNE MILLÁN MEJÍA</SelectItem>
+                    <SelectItem value="ebeb">EBEB MELED LUNA PARRA</SelectItem>
+                    <SelectItem value="jhon">JHON FREDY ARTUNDUAGA YAGUE</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-primary mb-2 block">Estado</label>
+                <Select value={filtroEstado} onValueChange={setFiltroEstado}>
+                  <SelectTrigger className="rounded-xl">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="revision">En Revisión</SelectItem>
+                    <SelectItem value="aprobado">Aprobado</SelectItem>
+                    <SelectItem value="rechazado">Rechazado</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex items-center gap-2 rounded-xl">
+                  <Filter className="h-4 w-4" />
+                  Filtrar
+                </Button>
+              </div>
             </div>
-            <div>
-              <label className="text-sm font-medium text-primary mb-2 block">Contratistas</label>
-              <Select value={filtroContratista} onValueChange={setFiltroContratista}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="yakelinne">YAKELINNE MILLÁN MEJÍA</SelectItem>
-                  <SelectItem value="ebeb">EBEB MELED LUNA PARRA</SelectItem>
-                  <SelectItem value="jhon">JHON FREDY ARTUNDUAGA YAGUE</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-primary mb-2 block">Estado</label>
-              <Select value={filtroEstado} onValueChange={setFiltroEstado}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
-                  <SelectItem value="revision">En Revisión</SelectItem>
-                  <SelectItem value="aprobado">Aprobado</SelectItem>
-                  <SelectItem value="rechazado">Rechazado</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex gap-2">
-              <Button className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filtrar
-              </Button>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <UserX className="h-4 w-4" />
-                    Faltantes por enviar
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-4xl">
-                  <DialogHeader>
-                    <DialogTitle className="text-primary">
-                      Listado de Contratistas que no han enviado cuenta de cobro de <span className="text-red-500">Julio</span>
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <div className="flex justify-end">
-                      <Input 
-                        placeholder="Búsqueda general"
-                        className="w-64"
-                      />
-                    </div>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>#</TableHead>
-                          <TableHead>Contratista</TableHead>
-                          <TableHead>Tipo Vinculación</TableHead>
-                          <TableHead>Correo</TableHead>
-                          <TableHead>Celular</TableHead>
-                          <TableHead>Último login</TableHead>
+          </CardContent>
+        </Card>
+
+        {/* Lista de cuentas recibidas */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Lista de Cuentas de Cobro Recibidas</CardTitle>
+                <p className="text-sm text-muted-foreground">Gestiona y revisa las cuentas de cobro recibidas</p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Input
+                      placeholder="Buscar por número, contratista o estado"
+                      value={busqueda}
+                      onChange={(e) => setBusqueda(e.target.value)}
+                      className="pl-10 rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                <Separator className="my-4" />
+
+                <div className="rounded-xl border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Cuenta N°</TableHead>
+                        <TableHead>Contratista</TableHead>
+                        <TableHead>Periodo</TableHead>
+                        <TableHead>Valor</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead>Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {cuentasCobro.map((cuenta) => (
+                        <TableRow key={cuenta.id} className="hover:bg-muted/50">
+                          <TableCell className="font-medium">{cuenta.numero}</TableCell>
+                          <TableCell className="max-w-xs">
+                            <div className="font-medium">{cuenta.contratista}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {cuenta.enviadaEn}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              {cuenta.desde} - {cuenta.hasta}
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium text-green-600">{cuenta.valor}</TableCell>
+                          <TableCell>{getEstadoBadge(cuenta.estado)}</TableCell>
+                          <TableCell>
+                            <Button 
+                              size="sm" 
+                              variant="outline"
+                              onClick={() => verDetalleCuenta(cuenta)}
+                              className="flex items-center gap-2 rounded-xl"
+                            >
+                              <Eye className="h-4 w-4" />
+                              Ver detalle
+                            </Button>
+                          </TableCell>
                         </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {contratistasFaltantes.map((contratista, index) => (
-                          <TableRow key={contratista.id}>
-                            <TableCell>{index + 1}</TableCell>
-                            <TableCell className="font-medium">{contratista.nombre}</TableCell>
-                            <TableCell>
-                              <Badge variant={contratista.tipo === "PROPIO" ? "default" : "secondary"}>
-                                {contratista.tipo}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>{contratista.correo}</TableCell>
-                            <TableCell>{contratista.celular}</TableCell>
-                            <TableCell>{contratista.ultimoLogin}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                    <div className="flex justify-between items-center text-sm text-muted-foreground">
-                      <span>Mostrando 1 de 3 de 3 Registros</span>
-                      <Button className="bg-blue-500 hover:bg-blue-600 text-white">
-                        3 Contratistas por enviar... NOTIFICALOS AQUÍ
-                      </Button>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Pagination placeholder */}
+                <div className="flex items-center justify-between mt-4 text-sm text-muted-foreground">
+                  <div>Mostrando 1–4 de 4</div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="sm" className="rounded-xl">Anterior</Button>
+                    <Button variant="outline" size="sm" className="rounded-xl">Siguiente</Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Panel lateral - Contratistas sin cuenta */}
+          <Card className="rounded-2xl border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base flex items-center gap-2">
+                <UserX className="h-5 w-5 text-orange-500" />
+                Sin cuenta este mes
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">Contratistas que no han enviado cuenta de cobro</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {contratistasFaltantes.map((contratista) => (
+                <div key={contratista.id} className="p-3 border rounded-xl hover:bg-muted/50">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <p className="font-medium text-sm">{contratista.nombre}</p>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className={`rounded-md text-xs ${
+                          contratista.tipo === "PROPIO" 
+                            ? "bg-blue-100 text-blue-800" 
+                            : "bg-purple-100 text-purple-800"
+                        }`}>
+                          {contratista.tipo}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{contratista.correo}</p>
+                      <p className="text-xs text-muted-foreground">{contratista.celular}</p>
+                      <p className="text-xs text-muted-foreground">
+                        Último login: {contratista.ultimoLogin}
+                      </p>
                     </div>
                   </div>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tabla principal */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Cuentas de Cobro</CardTitle>
-            <div className="flex gap-2">
-              <Input 
-                placeholder="Búsqueda general"
-                value={busqueda}
-                onChange={(e) => setBusqueda(e.target.value)}
-                className="w-64"
-              />
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>N°</TableHead>
-                <TableHead># Cuenta</TableHead>
-                <TableHead>Contratista</TableHead>
-                <TableHead>Desde</TableHead>
-                <TableHead>Hasta</TableHead>
-                <TableHead>Valor Cobrado</TableHead>
-                <TableHead>Enviada en:</TableHead>
-                <TableHead>Estado</TableHead>
-                <TableHead>Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {cuentasCobro.map((cuenta, index) => (
-                <TableRow key={cuenta.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium">{cuenta.numero}</TableCell>
-                  <TableCell className="max-w-xs">{cuenta.contratista}</TableCell>
-                  <TableCell>{cuenta.desde}</TableCell>
-                  <TableCell>{cuenta.hasta}</TableCell>
-                  <TableCell className="font-semibold text-green-600">{cuenta.valor}</TableCell>
-                  <TableCell>{cuenta.enviadaEn}</TableCell>
-                  <TableCell>{getEstadoBadge(cuenta.estado)}</TableCell>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => verDetalleCuenta(cuenta)}
-                        className="bg-green-50 hover:bg-green-100 border-green-200"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="bg-blue-50 hover:bg-blue-100 border-blue-200"
-                      >
-                        <Clock className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                </div>
               ))}
-            </TableBody>
-          </Table>
-          <div className="flex justify-between items-center mt-4 text-sm text-muted-foreground">
-            <span>Mostrando 1 de 4 de 4 Registros</span>
-          </div>
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   )
 }
