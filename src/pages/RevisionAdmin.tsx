@@ -391,46 +391,43 @@ export default function RevisionAdmin() {
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
-                    {/* First row: Name and ID with documents */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {/* 3-column layout */}
+                    <div className="grid grid-cols-3 gap-6">
+                      {/* Column 1: Provider info */}
+                      <div className="flex items-start gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <User className="h-5 w-5 text-primary" />
                         </div>
-                        <div>
+                        <div className="space-y-1">
                           <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>ID: {cuenta.idFactura}</span>
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              <span>2 documentos</span>
-                            </div>
+                          <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <FileText className="h-4 w-4" />
+                            <span>2 documentos</span>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Second row: Month and date */}
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="flex items-center gap-2">
+                      {/* Column 2: Date info */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
                           <CalendarDays className="h-4 w-4 text-muted-foreground" />
                           <span>{cuenta.mes}</span>
                         </div>
-                        <div className="flex items-center gap-2 mt-1">
+                        <div className="flex items-center gap-2 text-sm">
                           <Clock className="h-4 w-4 text-muted-foreground" />
                           <span>Enviado: {cuenta.fechaEnvio}</span>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Third row: Amount and status */}
-                    <div className="flex flex-col gap-2">
-                      <div className="text-2xl font-bold text-primary">
-                        ${cuenta.total.toLocaleString()}
-                      </div>
-                      <div>
-                        {getEstadoBadge(cuenta.estado)}
+                      {/* Column 3: Amount and status */}
+                      <div className="space-y-2">
+                        <div className="text-2xl font-bold text-primary">
+                          ${cuenta.total.toLocaleString()}
+                        </div>
+                        <div className="flex">
+                          {getEstadoBadge(cuenta.estado)}
+                        </div>
                       </div>
                     </div>
 
