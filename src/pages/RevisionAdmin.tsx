@@ -124,7 +124,6 @@ export default function RevisionAdmin() {
   const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null)
   const [showTemplateAprobado, setShowTemplateAprobado] = useState(false)
   const [showTemplateRechazado, setShowTemplateRechazado] = useState(false)
-  const [viewMode, setViewMode] = useState<"list" | "cards">("list")
   const [filtros, setFiltros] = useState({
     proveedor: "",
     estado: "",
@@ -308,7 +307,7 @@ export default function RevisionAdmin() {
           </Card>
         </div>
 
-        {/* Filters and View Toggle */}
+        {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-4">
           <Card className="flex-1">
             <CardHeader>
@@ -360,348 +359,168 @@ export default function RevisionAdmin() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="lg:w-auto">
-            <CardHeader>
-              <CardTitle className="text-lg">Vista</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "list" | "cards")}>
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="list" className="flex items-center gap-2">
-                    <List className="h-4 w-4" />
-                    Lista
-                  </TabsTrigger>
-                  <TabsTrigger value="cards" className="flex items-center gap-2">
-                    <LayoutGrid className="h-4 w-4" />
-                    Tarjetas
-                  </TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </CardContent>
-          </Card>
         </div>
       </div>
 
       {/* Cuentas de Cobro */}
-      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "list" | "cards")}>
-        <TabsContent value="list" className="space-y-4">
-          {cuentasFiltradas.map((cuenta) => (
-            <Card key={cuenta.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex flex-col lg:flex-row gap-6">
-                  <div className="flex-1 space-y-4">
-                    {/* 3-column layout */}
-                    <div className="grid grid-cols-3 gap-6">
-                      {/* Column 1: Provider info */}
-                      <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>ID: {cuenta.idFactura}</span>
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              <span>2 documentos</span>
-                            </div>
+      <div className="space-y-4">
+        {cuentasFiltradas.map((cuenta) => (
+          <Card key={cuenta.id} className="hover:shadow-md transition-shadow">
+            <CardContent className="p-6">
+              <div className="flex flex-col lg:flex-row gap-6">
+                <div className="flex-1 space-y-4">
+                  {/* 3-column layout */}
+                  <div className="grid grid-cols-3 gap-6">
+                    {/* Column 1: Provider info */}
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <User className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <span>ID: {cuenta.idFactura}</span>
+                          <div className="flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            <span>2 documentos</span>
                           </div>
                         </div>
                       </div>
+                    </div>
 
-                      {/* Column 2: Date info */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                          <span>{cuenta.mes}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>Enviado: {cuenta.fechaEnvio}</span>
-                        </div>
+                    {/* Column 2: Date info */}
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <span>{cuenta.mes}</span>
                       </div>
-
-                      {/* Column 3: Amount and status - right aligned */}
-                      <div className="space-y-2 text-right">
-                        <div className="text-2xl font-bold text-primary">
-                          ${cuenta.total.toLocaleString()}
-                        </div>
-                        <div className="flex justify-end">
-                          {getEstadoBadge(cuenta.estado)}
-                        </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>Enviado: {cuenta.fechaEnvio}</span>
                       </div>
                     </div>
 
-                    {cuenta.estado === "Rechazado" && (
-                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-                        <div className="flex items-center gap-2 text-destructive font-medium mb-2">
-                          <XCircle className="h-4 w-4" />
-                          Rechazado
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          <strong>Motivo:</strong> {cuenta.motivo}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          <strong>Fecha de rechazo:</strong> {cuenta.fechaRechazo}
-                        </p>
-                        <div className="flex items-center gap-2 text-warning">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Plazo para subsanar: {cuenta.plazoSubsanar}</span>
-                        </div>
+                    {/* Column 3: Amount and status - right aligned */}
+                    <div className="space-y-2 text-right">
+                      <div className="text-2xl font-bold text-primary">
+                        ${cuenta.total.toLocaleString()}
                       </div>
-                    )}
+                      <div className="flex justify-end">
+                        {getEstadoBadge(cuenta.estado)}
+                      </div>
+                    </div>
                   </div>
 
+                  {cuenta.estado === "Rechazado" && (
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                      <div className="flex items-center gap-2 text-destructive font-medium mb-2">
+                        <XCircle className="h-4 w-4" />
+                        Rechazado
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        <strong>Motivo:</strong> {cuenta.motivo}
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-1">
+                        <strong>Fecha de rechazo:</strong> {cuenta.fechaRechazo}
+                      </p>
+                      <div className="flex items-center gap-2 text-warning">
+                        <AlertTriangle className="h-4 w-4" />
+                        <span className="text-sm font-medium">Plazo para subsanar: {cuenta.plazoSubsanar}</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
-                {/* Full-width horizontal document actions section */}
-                <div className="w-full mt-4">
-                  <div className="grid grid-cols-3 gap-6 p-6 bg-muted/50 rounded-lg border">
-                    {/* Cuenta de Cobro */}
-                    <div className="text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <FileText className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Cuenta de Cobro (PDF)</p>
-                          <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.cuentaCobro}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleVerDocumento("Cuenta de Cobro")}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDescargar("Cuenta de Cobro")}
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            Descargar
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+              </div>
 
-                    {/* Planilla Seguridad Social */}
-                    <div className="text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <FileCheck className="h-5 w-5 text-success" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Planilla Seguridad Social</p>
-                          <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.planillaSeguridad}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleVerDocumento("Planilla de Seguridad Social")}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Ver
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDescargar("Planilla de Seguridad Social")}
-                          >
-                            <Download className="h-4 w-4 mr-1" />
-                            Descargar
-                          </Button>
-                        </div>
+              {/* Full-width horizontal document actions section */}
+              <div className="w-full mt-4">
+                <div className="grid grid-cols-3 gap-6 p-6 bg-muted/50 rounded-lg border">
+                  {/* Cuenta de Cobro */}
+                  <div className="text-center">
+                    <div className="flex flex-col items-center justify-center gap-3 h-full">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <FileText className="h-5 w-5 text-primary" />
                       </div>
-                    </div>
-
-                    {/* Revisar y Aprobar/Rechazar */}
-                    <div className="text-center">
-                      <div className="flex flex-col items-center justify-center gap-3 h-full">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <FileCheck className="h-5 w-5 text-primary" />
-                        </div>
-                        <p className="font-medium">Revisar y Aprobar/Rechazar</p>
+                      <div>
+                        <p className="font-medium">Cuenta de Cobro (PDF)</p>
+                        <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.cuentaCobro}</p>
+                      </div>
+                      <div className="flex gap-2">
                         <Button
-                          onClick={() => handleRevisar(cuenta)}
-                          disabled={cuenta.estado !== "Pendiente Revisión"}
-                          variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleVerDocumento("Cuenta de Cobro")}
                         >
-                          <FileCheck className="h-4 w-4 mr-2" />
-                          Ver Detalles
+                          <Eye className="h-4 w-4 mr-1" />
+                          Ver
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDescargar("Cuenta de Cobro")}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Descargar
                         </Button>
                       </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </TabsContent>
 
-        <TabsContent value="cards">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cuentasFiltradas.map((cuenta) => (
-              <Card key={cuenta.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="space-y-4">
-                    {/* 3-column layout - adapted for card */}
-                    <div className="space-y-3">
-                      {/* Provider info */}
-                      <div className="flex items-start gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div className="space-y-1 flex-1">
-                          <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <span>ID: {cuenta.idFactura}</span>
-                            <div className="flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              <span>2 documentos</span>
-                            </div>
-                          </div>
-                        </div>
+                  {/* Planilla Seguridad Social */}
+                  <div className="text-center">
+                    <div className="flex flex-col items-center justify-center gap-3 h-full">
+                      <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+                        <FileCheck className="h-5 w-5 text-success" />
                       </div>
-
-                      {/* Date info */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                          <span>{cuenta.mes}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span>Enviado: {cuenta.fechaEnvio}</span>
-                        </div>
+                      <div>
+                        <p className="font-medium">Planilla Seguridad Social</p>
+                        <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.planillaSeguridad}</p>
                       </div>
-
-                      {/* Amount and status - right aligned */}
-                      <div className="space-y-2 text-right">
-                        <div className="text-2xl font-bold text-primary">
-                          ${cuenta.total.toLocaleString()}
-                        </div>
-                        <div className="flex justify-end">
-                          {getEstadoBadge(cuenta.estado)}
-                        </div>
-                      </div>
-                    </div>
-
-                    {cuenta.estado === "Rechazado" && (
-                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-                        <div className="flex items-center gap-2 text-destructive font-medium mb-2">
-                          <XCircle className="h-4 w-4" />
-                          Rechazado
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          <strong>Motivo:</strong> {cuenta.motivo}
-                        </p>
-                        <p className="text-sm text-muted-foreground mb-1">
-                          <strong>Fecha de rechazo:</strong> {cuenta.fechaRechazo}
-                        </p>
-                        <div className="flex items-center gap-2 text-warning">
-                          <AlertTriangle className="h-4 w-4" />
-                          <span className="text-sm font-medium">Plazo para subsanar: {cuenta.plazoSubsanar}</span>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Document actions section */}
-                    <div className="w-full">
-                      <div className="grid grid-cols-1 gap-4 p-4 bg-muted/50 rounded-lg border">
-                        {/* Cuenta de Cobro */}
-                        <div className="text-center">
-                          <div className="flex flex-col items-center justify-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                              <FileText className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                              <p className="font-medium">Cuenta de Cobro (PDF)</p>
-                              <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.cuentaCobro}</p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleVerDocumento("Cuenta de Cobro")}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDescargar("Cuenta de Cobro")}
-                              >
-                                <Download className="h-4 w-4 mr-1" />
-                                Descargar
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Planilla Seguridad Social */}
-                        <div className="text-center">
-                          <div className="flex flex-col items-center justify-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
-                              <FileCheck className="h-5 w-5 text-success" />
-                            </div>
-                            <div>
-                              <p className="font-medium">Planilla Seguridad Social</p>
-                              <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.planillaSeguridad}</p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleVerDocumento("Planilla de Seguridad Social")}
-                              >
-                                <Eye className="h-4 w-4 mr-1" />
-                                Ver
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDescargar("Planilla de Seguridad Social")}
-                              >
-                                <Download className="h-4 w-4 mr-1" />
-                                Descargar
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Revisar y Aprobar/Rechazar */}
-                        <div className="text-center">
-                          <div className="flex flex-col items-center justify-center gap-3">
-                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                              <FileCheck className="h-5 w-5 text-primary" />
-                            </div>
-                            <p className="font-medium">Revisar y Aprobar/Rechazar</p>
-                            <Button
-                              onClick={() => handleRevisar(cuenta)}
-                              disabled={cuenta.estado !== "Pendiente Revisión"}
-                              variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
-                            >
-                              <FileCheck className="h-4 w-4 mr-2" />
-                              Ver Detalles
-                            </Button>
-                          </div>
-                        </div>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleVerDocumento("Planilla de Seguridad Social")}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          Ver
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDescargar("Planilla de Seguridad Social")}
+                        >
+                          <Download className="h-4 w-4 mr-1" />
+                          Descargar
+                        </Button>
                       </div>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-      </Tabs>
+
+                  {/* Revisar y Aprobar/Rechazar */}
+                  <div className="text-center">
+                    <div className="flex flex-col items-center justify-center gap-3 h-full">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <FileCheck className="h-5 w-5 text-primary" />
+                      </div>
+                      <p className="font-medium">Revisar y Aprobar/Rechazar</p>
+                      <Button
+                        onClick={() => handleRevisar(cuenta)}
+                        disabled={cuenta.estado !== "Pendiente Revisión"}
+                        variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
+                      >
+                        <FileCheck className="h-4 w-4 mr-2" />
+                        Ver Detalles
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Modal de Revisión Administrativa */}
       <Dialog open={showRevisionModal} onOpenChange={setShowRevisionModal}>
