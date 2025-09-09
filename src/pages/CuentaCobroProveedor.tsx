@@ -466,48 +466,48 @@ export default function CuentaCobroProveedor() {
           <TabsContent value="todos" className="space-y-4">
             {proveedoresData.map((proveedor) => (
               <Card key={proveedor.id} className="rounded-2xl border">
-                <CardHeader className="pb-2">
+                {/* Card Header with Provider Info */}
+                <div className="bg-muted/60 rounded-t-2xl p-4">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Building2 className="h-5 w-5 text-primary" />
-                      <div>
-                        <CardTitle className="text-base">{proveedor.nombre}</CardTitle>
-                        <p className="text-sm text-muted-foreground">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-blue-600/10 text-blue-700 grid place-content-center">
+                        <Building2 className="h-5 w-5" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-semibold leading-tight truncate">{proveedor.nombre}</h3>
+                        <p className="text-xs text-muted-foreground truncate">
                           Código: {proveedor.codigo} • {proveedor.vehiculos} vehículos • Prefactura: {proveedor.prefactura}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="space-y-1">
-                        <p className="text-sm text-muted-foreground">Valor Liquidado:</p>
-                        <p className="text-2xl font-bold text-primary">{proveedor.valorLiquidado}</p>
-                        {getEstadoBadge(proveedor.estado)}
-                      </div>
+                      <p className="text-xs text-muted-foreground">Valor Liquidado:</p>
+                      <p className="text-lg font-bold text-primary">{proveedor.valorLiquidado}</p>
+                      <div className="mt-1">{getEstadoBadge(proveedor.estado)}</div>
                     </div>
                   </div>
-                </CardHeader>
+                </div>
 
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      {/* Documentos */}
-                      <div>
-                        <p className="text-sm font-medium mb-2">Documentos:</p>
-                        <div className="flex gap-2 flex-wrap">
-                          {proveedor.documentos.rut && (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ RUT</Badge>
-                          )}
-                          {proveedor.documentos.certBancaria && (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ Cert. Bancaria</Badge>
-                          )}
-                          {proveedor.documentos.segSocial ? (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ Seg. Social</Badge>
-                          ) : (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-md text-xs">✗ Seg. Social</Badge>
-                          )}
-                        </div>
+                {/* Card Content */}
+                <CardContent className="p-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    {/* Left: Documents Section */}
+                    <div className="lg:col-span-2">
+                      <p className="text-sm font-medium mb-3">Documentos:</p>
+                      <div className="flex gap-2 flex-wrap">
+                        {proveedor.documentos.rut && (
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md text-xs">✓ RUT</Badge>
+                        )}
+                        {proveedor.documentos.certBancaria && (
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md text-xs">✓ Cert. Bancaria</Badge>
+                        )}
+                        {proveedor.documentos.segSocial ? (
+                          <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md text-xs">✓ Seg. Social</Badge>
+                        ) : (
+                          <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-100 rounded-md text-xs">✗ Seg. Social</Badge>
+                        )}
                       </div>
-
+                      
                       {/* Motivo de rechazo si aplica */}
                       {proveedor.motivoRechazo && (
                         <Card className="mt-4 rounded-xl border-red-200 bg-red-50">
@@ -519,31 +519,48 @@ export default function CuentaCobroProveedor() {
                         </Card>
                       )}
                     </div>
-
-                    {/* Botones de acción apilados verticalmente */}
-                    <div className="flex flex-col gap-2 ml-6">
-                      <Button variant="outline" size="sm" onClick={() => verDetalle(proveedor)} className="w-full rounded-xl">
+                    
+                    {/* Right: Action Buttons */}
+                    <div className="flex flex-col gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="rounded-xl justify-start"
+                        onClick={() => verDetalle(proveedor)}
+                      >
                         <Eye className="h-4 w-4 mr-2" />
                         Ver Detalle
                       </Button>
-                      
                       {showAdvancedActions && (
-                        <>
-                          <Button variant="outline" size="sm" onClick={() => revisarServicios(proveedor)} className="w-full rounded-xl">
-                            <FileText className="h-4 w-4 mr-2" />
-                            Revisar Servicios
-                          </Button>
-                          
-                          <Button variant="outline" size="sm" onClick={() => emailProveedor(proveedor)} className="w-full rounded-xl">
-                            <Mail className="h-4 w-4 mr-2" />
-                            E-mail Proveedor
-                          </Button>
-                        </>
-                      )}
-                      
-                      {proveedor.nombre !== "Transportes Rápidos S.A.S" && proveedor.nombre !== "Cargo Express Ltda" && (
-                        <Button variant="outline" size="sm" onClick={() => subirSegSocial(proveedor.id)} className="w-full rounded-xl">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl justify-start"
+                          onClick={() => revisarServicios(proveedor)}
+                        >
                           <FileText className="h-4 w-4 mr-2" />
+                          Revisar Servicios
+                        </Button>
+                      )}
+                      {showAdvancedActions && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl justify-start"
+                          onClick={() => emailProveedor(proveedor)}
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          E-mail Proveedor
+                        </Button>
+                      )}
+                      {showAdvancedActions && proveedor.nombre !== "Transportes Rápidos S.A.S" && proveedor.nombre !== "Cargo Express Ltda" && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="rounded-xl justify-start"
+                          onClick={() => subirSegSocial(proveedor.id)}
+                        >
+                          <Upload className="h-4 w-4 mr-2" />
                           Subir Seg. Social
                         </Button>
                       )}
