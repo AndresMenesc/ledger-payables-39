@@ -444,50 +444,58 @@ export default function RevisionAdmin() {
                     )}
                   </div>
 
-                  <div className="space-y-4 lg:w-80">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 border rounded-lg bg-card">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <div className="flex-1">
-                          <p className="font-medium">Cuenta de Cobro</p>
-                          <p className="text-sm text-muted-foreground">{cuenta.documentos.cuentaCobro}</p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Cuenta de Cobro")}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDescargar("Cuenta de Cobro")}>
-                            <Download className="h-4 w-4" />
-                          </Button>
+                  <div className="lg:w-80">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="text-center">
+                        <div className="flex flex-col items-center gap-2 p-3 border rounded-lg bg-card">
+                          <FileText className="h-5 w-5 text-primary" />
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium">Cuenta de Cobro</p>
+                            <p className="text-xs text-muted-foreground">{cuenta.documentos.cuentaCobro}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Cuenta de Cobro")}>
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleDescargar("Cuenta de Cobro")}>
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 p-3 border rounded-lg bg-card">
-                        <FileCheck className="h-5 w-5 text-success" />
-                        <div className="flex-1">
-                          <p className="font-medium">Planilla Seguridad Social</p>
-                          <p className="text-sm text-muted-foreground">{cuenta.documentos.planillaSeguridad}</p>
+                      <div className="text-center">
+                        <div className="flex flex-col items-center gap-2 p-3 border rounded-lg bg-card">
+                          <FileCheck className="h-5 w-5 text-success" />
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium">Planilla Seguridad Social</p>
+                            <p className="text-xs text-muted-foreground">{cuenta.documentos.planillaSeguridad}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Planilla de Seguridad Social")}>
+                              <Eye className="h-3 w-3" />
+                            </Button>
+                            <Button size="sm" variant="outline" onClick={() => handleDescargar("Planilla de Seguridad Social")}>
+                              <Download className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Planilla de Seguridad Social")}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => handleDescargar("Planilla de Seguridad Social")}>
-                            <Download className="h-4 w-4" />
+                      </div>
+
+                      <div className="text-center">
+                        <div className="flex flex-col items-center justify-center gap-2 p-3 border rounded-lg bg-card h-full">
+                          <Button 
+                            onClick={() => handleRevisar(cuenta)}
+                            className="w-full"
+                            disabled={cuenta.estado !== "Pendiente Revisión"}
+                            variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
+                          >
+                            <FileCheck className="h-4 w-4 mr-2" />
+                            Ver Detalles
                           </Button>
                         </div>
                       </div>
                     </div>
-
-                    <Button 
-                      onClick={() => handleRevisar(cuenta)}
-                      className="w-full"
-                      disabled={cuenta.estado !== "Pendiente Revisión"}
-                      variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
-                    >
-                      <FileCheck className="h-4 w-4 mr-2" />
-                      {cuenta.estado === "Pendiente Revisión" ? "Revisar" : "Ver Detalles"}
-                    </Button>
                   </div>
                 </div>
               </CardContent>
