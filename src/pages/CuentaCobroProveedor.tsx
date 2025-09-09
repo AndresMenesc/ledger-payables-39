@@ -521,7 +521,7 @@ export default function CuentaCobroProveedor() {
                     </div>
                     
                     {/* Right: Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-4 w-full min-w-[320px]">
                       <Button
                         variant="outline"
                         size="sm"
