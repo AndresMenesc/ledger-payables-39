@@ -508,16 +508,16 @@ export default function CuentaCobroProveedor() {
                         )}
                       </div>
                       
-                      {/* Motivo de rechazo si aplica */}
-                      {proveedor.motivoRechazo && (
-                        <Card className="mt-4 rounded-xl border-red-200 bg-red-50">
-                          <CardContent className="p-3">
-                            <p className="text-sm text-red-700">
-                              <strong>Motivo de rechazo:</strong> {proveedor.motivoRechazo}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      )}
+                       {/* Motivo de rechazo si aplica */}
+                       {proveedor.motivoRechazo && (
+                         <Card className="mt-4 rounded-xl border-red-200 bg-red-50 w-fit">
+                           <CardContent className="p-3">
+                             <p className="text-sm text-red-700">
+                               <strong>Motivo de rechazo:</strong> {proveedor.motivoRechazo}
+                             </p>
+                           </CardContent>
+                         </Card>
+                       )}
                     </div>
                     
                     {/* Right: Action Buttons */}
