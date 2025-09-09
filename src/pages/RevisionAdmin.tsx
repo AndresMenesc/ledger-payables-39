@@ -400,10 +400,12 @@ export default function RevisionAdmin() {
                         </div>
                         <div className="space-y-1">
                           <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
-                          <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <FileText className="h-4 w-4" />
-                            <span>2 documentos</span>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>ID: {cuenta.idFactura}</span>
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span>2 documentos</span>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -420,12 +422,12 @@ export default function RevisionAdmin() {
                         </div>
                       </div>
 
-                      {/* Column 3: Amount and status */}
-                      <div className="space-y-2">
+                      {/* Column 3: Amount and status - right aligned */}
+                      <div className="space-y-2 text-right">
                         <div className="text-2xl font-bold text-primary">
                           ${cuenta.total.toLocaleString()}
                         </div>
-                        <div className="flex">
+                        <div className="flex justify-end">
                           {getEstadoBadge(cuenta.estado)}
                         </div>
                       </div>
