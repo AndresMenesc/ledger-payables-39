@@ -391,25 +391,19 @@ export default function RevisionAdmin() {
               <CardContent className="p-6">
                 <div className="flex flex-col lg:flex-row gap-6">
                   <div className="flex-1 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <User className="h-5 w-5 text-primary" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
-                          <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
-                        </div>
+                    {/* First row: Name and ID */}
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <User className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">
-                          ${cuenta.total.toLocaleString()}
-                        </div>
-                        {getEstadoBadge(cuenta.estado)}
+                      <div>
+                        <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
+                        <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                    {/* Second row: Month, date, documents */}
+                    <div className="grid grid-cols-3 gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <CalendarDays className="h-4 w-4 text-muted-foreground" />
                         <span>{cuenta.mes}</span>
@@ -422,6 +416,14 @@ export default function RevisionAdmin() {
                         <FileText className="h-4 w-4 text-muted-foreground" />
                         <span>2 documentos</span>
                       </div>
+                    </div>
+
+                    {/* Third row: Amount and status */}
+                    <div className="flex items-center justify-between">
+                      <div className="text-2xl font-bold text-primary">
+                        ${cuenta.total.toLocaleString()}
+                      </div>
+                      {getEstadoBadge(cuenta.estado)}
                     </div>
 
                     {cuenta.estado === "Rechazado" && (
