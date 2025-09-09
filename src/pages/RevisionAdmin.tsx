@@ -8,7 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Eye, Download, FileCheck, CalendarDays, User, FileText, X, CheckCircle, XCircle, AlertTriangle, Mail } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Eye, Download, FileCheck, CalendarDays, User, FileText, X, CheckCircle, XCircle, AlertTriangle, Mail, DollarSign, Clock, LayoutGrid, List, TrendingUp } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface CuentaCobro {
@@ -123,12 +124,27 @@ export default function RevisionAdmin() {
   const [loteSeleccionado, setLoteSeleccionado] = useState<string | null>(null)
   const [showTemplateAprobado, setShowTemplateAprobado] = useState(false)
   const [showTemplateRechazado, setShowTemplateRechazado] = useState(false)
+  const [viewMode, setViewMode] = useState<"list" | "cards">("list")
   const [filtros, setFiltros] = useState({
     proveedor: "",
     estado: "",
     fechaDesde: "",
     fechaHasta: ""
   })
+
+  const cuentasFiltradas = cuentasCobro.filter(cuenta => {
+    if (filtros.proveedor && !cuenta.proveedor.toLowerCase().includes(filtros.proveedor.toLowerCase())) return false
+    if (filtros.estado && filtros.estado !== "todos" && cuenta.estado !== filtros.estado) return false
+    return true
+  })
+
+  // Calculate metrics
+  const totalPendientes = cuentasFiltradas.filter(c => c.estado === "Pendiente Revisión").length
+  const totalAprobadas = cuentasFiltradas.filter(c => c.estado === "Aprobado para Pago").length
+  const totalRechazadas = cuentasFiltradas.filter(c => c.estado === "Rechazado").length
+  const valorTotalPendiente = cuentasFiltradas
+    .filter(c => c.estado === "Pendiente Revisión")
+    .reduce((sum, c) => sum + c.total, 0)
 
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
@@ -212,197 +228,338 @@ export default function RevisionAdmin() {
     setShowRechazadaModal(true)
   }
 
-  const cuentasFiltradas = cuentasCobro.filter(cuenta => {
-    if (filtros.proveedor && !cuenta.proveedor.toLowerCase().includes(filtros.proveedor.toLowerCase())) return false
-    if (filtros.estado && filtros.estado !== "todos" && cuenta.estado !== filtros.estado) return false
-    return true
-  })
-
   return (
     <div className="space-y-6">
-      {/* Header con filtros */}
-      <div className="flex flex-col gap-4">
+      {/* Header */}
+      <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Revisión de Cuentas de Cobro</h1>
             <p className="text-muted-foreground">Revisar y aprobar las cuentas de cobro enviadas por los proveedores</p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-warning" />
-              <span className="text-sm font-medium">{cuentasFiltradas.filter(c => c.estado === "Pendiente Revisión").length} pendientes de revisión</span>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setShowTemplateAprobado(true)}>
-                <FileCheck className="h-4 w-4 mr-2" />
-                Plantilla Aprobado
-              </Button>
-              <Button variant="outline" onClick={() => setShowTemplateRechazado(true)}>
-                <XCircle className="h-4 w-4 mr-2" />
-                Plantilla Rechazado
-              </Button>
-            </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setShowTemplateAprobado(true)}>
+              <FileCheck className="h-4 w-4 mr-2" />
+              Plantilla Aprobado
+            </Button>
+            <Button variant="outline" onClick={() => setShowTemplateRechazado(true)}>
+              <XCircle className="h-4 w-4 mr-2" />
+              Plantilla Rechazado
+            </Button>
           </div>
         </div>
 
-        {/* Filtros */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Filtros de búsqueda</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="filtro-proveedor">Proveedor</Label>
-                <Input
-                  id="filtro-proveedor"
-                  placeholder="Buscar por proveedor..."
-                  value={filtros.proveedor}
-                  onChange={(e) => setFiltros({...filtros, proveedor: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="filtro-estado">Estado</Label>
-                <Select value={filtros.estado} onValueChange={(value) => setFiltros({...filtros, estado: value})}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Todos los estados" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="todos">Todos los estados</SelectItem>
-                    <SelectItem value="Pendiente Revisión">Pendiente Revisión</SelectItem>
-                    <SelectItem value="Aprobado para Pago">Aprobado para Pago</SelectItem>
-                    <SelectItem value="Rechazado">Rechazado</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="filtro-desde">Fecha desde</Label>
-                <Input
-                  id="filtro-desde"
-                  type="date"
-                  value={filtros.fechaDesde}
-                  onChange={(e) => setFiltros({...filtros, fechaDesde: e.target.value})}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="filtro-hasta">Fecha hasta</Label>
-                <Input
-                  id="filtro-hasta"
-                  type="date"
-                  value={filtros.fechaHasta}
-                  onChange={(e) => setFiltros({...filtros, fechaHasta: e.target.value})}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Lista de cuentas de cobro */}
-      <div className="space-y-4">
-        {cuentasFiltradas.map((cuenta) => (
-          <Card key={cuenta.id} className="p-6">
-            <div className="flex flex-col lg:flex-row gap-6">
-              <div className="flex-1 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <User className="h-5 w-5 text-primary" />
-                    <span className="font-semibold text-lg">{cuenta.proveedor}</span>
-                  </div>
-                  <div className="text-2xl font-bold text-primary">
-                    ${cuenta.total.toLocaleString()}
-                  </div>
+        {/* Metrics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Pendientes</p>
+                  <p className="text-2xl font-bold">{totalPendientes}</p>
                 </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">{cuenta.mes}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-muted-foreground">ID: {cuenta.idFactura}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-muted-foreground">Enviado: {cuenta.fechaEnvio}</span>
-                  </div>
-                  <div>
-                    {getEstadoBadge(cuenta.estado)}
-                  </div>
+                <div className="h-12 w-12 rounded-lg bg-warning/10 flex items-center justify-center">
+                  <Clock className="h-6 w-6 text-warning" />
                 </div>
-
-                {cuenta.estado === "Rechazado" && (
-                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
-                    <div className="flex items-center gap-2 text-destructive font-medium mb-2">
-                      <XCircle className="h-4 w-4" />
-                      Rechazado
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      <strong>Motivo:</strong> {cuenta.motivo}
-                    </p>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      <strong>Fecha de rechazo:</strong> {cuenta.fechaRechazo}
-                    </p>
-                    <div className="flex items-center gap-2 text-warning">
-                      <AlertTriangle className="h-4 w-4" />
-                      <span className="text-sm font-medium">Plazo para subsanar: {cuenta.plazoSubsanar}</span>
-                    </div>
-                  </div>
-                )}
               </div>
-
-              <div className="space-y-4">
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <FileText className="h-5 w-5 text-primary" />
-                    <div className="flex-1">
-                      <p className="font-medium">Cuenta de Cobro (PDF)</p>
-                      <p className="text-sm text-muted-foreground">{cuenta.documentos.cuentaCobro}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Cuenta de Cobro")}>
-                        <Eye className="h-4 w-4" />
-                        Ver
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleDescargar("Cuenta de Cobro")}>
-                        <Download className="h-4 w-4" />
-                        Descargar
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <FileCheck className="h-5 w-5 text-success" />
-                    <div className="flex-1">
-                      <p className="font-medium">Planilla Seguridad Social</p>
-                      <p className="text-sm text-muted-foreground">{cuenta.documentos.planillaSeguridad}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Planilla de Seguridad Social")}>
-                        <Eye className="h-4 w-4" />
-                        Ver
-                      </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleDescargar("Planilla de Seguridad Social")}>
-                        <Download className="h-4 w-4" />
-                        Descargar
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-
-                <Button 
-                  onClick={() => handleRevisar(cuenta)}
-                  className="w-full"
-                  disabled={cuenta.estado !== "Pendiente Revisión"}
-                >
-                  <FileCheck className="h-4 w-4 mr-2" />
-                  Revisar y Aprobar/Rechazar
-                </Button>
-              </div>
-            </div>
+            </CardContent>
           </Card>
-        ))}
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Aprobadas</p>
+                  <p className="text-2xl font-bold">{totalAprobadas}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-success/10 flex items-center justify-center">
+                  <CheckCircle className="h-6 w-6 text-success" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Rechazadas</p>
+                  <p className="text-2xl font-bold">{totalRechazadas}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-destructive/10 flex items-center justify-center">
+                  <XCircle className="h-6 w-6 text-destructive" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Valor Pendiente</p>
+                  <p className="text-2xl font-bold">${valorTotalPendiente.toLocaleString()}</p>
+                </div>
+                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <DollarSign className="h-6 w-6 text-primary" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Filters and View Toggle */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          <Card className="flex-1">
+            <CardHeader>
+              <CardTitle className="text-lg">Filtros</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="filtro-proveedor">Proveedor</Label>
+                  <Input
+                    id="filtro-proveedor"
+                    placeholder="Buscar por proveedor..."
+                    value={filtros.proveedor}
+                    onChange={(e) => setFiltros({...filtros, proveedor: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="filtro-estado">Estado</Label>
+                  <Select value={filtros.estado} onValueChange={(value) => setFiltros({...filtros, estado: value})}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Todos los estados" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="todos">Todos los estados</SelectItem>
+                      <SelectItem value="Pendiente Revisión">Pendiente Revisión</SelectItem>
+                      <SelectItem value="Aprobado para Pago">Aprobado para Pago</SelectItem>
+                      <SelectItem value="Rechazado">Rechazado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="filtro-desde">Fecha desde</Label>
+                  <Input
+                    id="filtro-desde"
+                    type="date"
+                    value={filtros.fechaDesde}
+                    onChange={(e) => setFiltros({...filtros, fechaDesde: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="filtro-hasta">Fecha hasta</Label>
+                  <Input
+                    id="filtro-hasta"
+                    type="date"
+                    value={filtros.fechaHasta}
+                    onChange={(e) => setFiltros({...filtros, fechaHasta: e.target.value})}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:w-auto">
+            <CardHeader>
+              <CardTitle className="text-lg">Vista</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "list" | "cards")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="list" className="flex items-center gap-2">
+                    <List className="h-4 w-4" />
+                    Lista
+                  </TabsTrigger>
+                  <TabsTrigger value="cards" className="flex items-center gap-2">
+                    <LayoutGrid className="h-4 w-4" />
+                    Tarjetas
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </CardContent>
+          </Card>
+        </div>
       </div>
+
+      {/* Cuentas de Cobro */}
+      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as "list" | "cards")}>
+        <TabsContent value="list" className="space-y-4">
+          {cuentasFiltradas.map((cuenta) => (
+            <Card key={cuenta.id} className="hover:shadow-md transition-shadow">
+              <CardContent className="p-6">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  <div className="flex-1 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
+                          <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          ${cuenta.total.toLocaleString()}
+                        </div>
+                        {getEstadoBadge(cuenta.estado)}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+                      <div className="flex items-center gap-2">
+                        <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                        <span>{cuenta.mes}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>Enviado: {cuenta.fechaEnvio}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span>2 documentos</span>
+                      </div>
+                    </div>
+
+                    {cuenta.estado === "Rechazado" && (
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                        <div className="flex items-center gap-2 text-destructive font-medium mb-2">
+                          <XCircle className="h-4 w-4" />
+                          Rechazado
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          <strong>Motivo:</strong> {cuenta.motivo}
+                        </p>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          <strong>Fecha de rechazo:</strong> {cuenta.fechaRechazo}
+                        </p>
+                        <div className="flex items-center gap-2 text-warning">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-sm font-medium">Plazo para subsanar: {cuenta.plazoSubsanar}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="space-y-4 lg:w-80">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 p-3 border rounded-lg bg-card">
+                        <FileText className="h-5 w-5 text-primary" />
+                        <div className="flex-1">
+                          <p className="font-medium">Cuenta de Cobro</p>
+                          <p className="text-sm text-muted-foreground">{cuenta.documentos.cuentaCobro}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Cuenta de Cobro")}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleDescargar("Cuenta de Cobro")}>
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 p-3 border rounded-lg bg-card">
+                        <FileCheck className="h-5 w-5 text-success" />
+                        <div className="flex-1">
+                          <p className="font-medium">Planilla Seguridad Social</p>
+                          <p className="text-sm text-muted-foreground">{cuenta.documentos.planillaSeguridad}</p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="outline" onClick={() => handleVerDocumento("Planilla de Seguridad Social")}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button size="sm" variant="outline" onClick={() => handleDescargar("Planilla de Seguridad Social")}>
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={() => handleRevisar(cuenta)}
+                      className="w-full"
+                      disabled={cuenta.estado !== "Pendiente Revisión"}
+                      variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
+                    >
+                      <FileCheck className="h-4 w-4 mr-2" />
+                      {cuenta.estado === "Pendiente Revisión" ? "Revisar" : "Ver Detalles"}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="cards">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {cuentasFiltradas.map((cuenta) => (
+              <Card key={cuenta.id} className="hover:shadow-md transition-shadow">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <User className="h-5 w-5 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{cuenta.proveedor}</h3>
+                          <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
+                        </div>
+                      </div>
+                      {getEstadoBadge(cuenta.estado)}
+                    </div>
+
+                    <div className="text-center py-4">
+                      <div className="text-2xl font-bold text-primary">
+                        ${cuenta.total.toLocaleString()}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{cuenta.mes}</p>
+                    </div>
+
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <span>Enviado: {cuenta.fechaEnvio}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground" />
+                        <span>2 documentos adjuntos</span>
+                      </div>
+                    </div>
+
+                    {cuenta.estado === "Rechazado" && (
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-destructive font-medium mb-1">
+                          <XCircle className="h-4 w-4" />
+                          Rechazado
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {cuenta.motivo}
+                        </p>
+                      </div>
+                    )}
+
+                    <Button 
+                      onClick={() => handleRevisar(cuenta)}
+                      className="w-full"
+                      disabled={cuenta.estado !== "Pendiente Revisión"}
+                      variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
+                    >
+                      <FileCheck className="h-4 w-4 mr-2" />
+                      {cuenta.estado === "Pendiente Revisión" ? "Revisar" : "Ver Detalles"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       {/* Modal de Revisión Administrativa */}
       <Dialog open={showRevisionModal} onOpenChange={setShowRevisionModal}>
