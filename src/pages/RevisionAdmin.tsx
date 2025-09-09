@@ -550,58 +550,151 @@ export default function RevisionAdmin() {
               <Card key={cuenta.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {/* 3-column layout - adapted for card */}
+                    <div className="space-y-3">
+                      {/* Provider info */}
+                      <div className="flex items-start gap-3">
+                        <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                           <User className="h-5 w-5 text-primary" />
                         </div>
-                        <div>
-                          <h3 className="font-semibold">{cuenta.proveedor}</h3>
-                          <p className="text-sm text-muted-foreground">ID: {cuenta.idFactura}</p>
+                        <div className="space-y-1 flex-1">
+                          <h3 className="font-semibold text-lg">{cuenta.proveedor}</h3>
+                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <span>ID: {cuenta.idFactura}</span>
+                            <div className="flex items-center gap-2">
+                              <FileText className="h-4 w-4" />
+                              <span>2 documentos</span>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      {getEstadoBadge(cuenta.estado)}
-                    </div>
 
-                    <div className="text-center py-4">
-                      <div className="text-2xl font-bold text-primary">
-                        ${cuenta.total.toLocaleString()}
+                      {/* Date info */}
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CalendarDays className="h-4 w-4 text-muted-foreground" />
+                          <span>{cuenta.mes}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span>Enviado: {cuenta.fechaEnvio}</span>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">{cuenta.mes}</p>
-                    </div>
 
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span>Enviado: {cuenta.fechaEnvio}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-muted-foreground" />
-                        <span>2 documentos adjuntos</span>
+                      {/* Amount and status - right aligned */}
+                      <div className="space-y-2 text-right">
+                        <div className="text-2xl font-bold text-primary">
+                          ${cuenta.total.toLocaleString()}
+                        </div>
+                        <div className="flex justify-end">
+                          {getEstadoBadge(cuenta.estado)}
+                        </div>
                       </div>
                     </div>
 
                     {cuenta.estado === "Rechazado" && (
-                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-                        <div className="flex items-center gap-2 text-destructive font-medium mb-1">
+                      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+                        <div className="flex items-center gap-2 text-destructive font-medium mb-2">
                           <XCircle className="h-4 w-4" />
                           Rechazado
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {cuenta.motivo}
+                        <p className="text-sm text-muted-foreground mb-1">
+                          <strong>Motivo:</strong> {cuenta.motivo}
                         </p>
+                        <p className="text-sm text-muted-foreground mb-1">
+                          <strong>Fecha de rechazo:</strong> {cuenta.fechaRechazo}
+                        </p>
+                        <div className="flex items-center gap-2 text-warning">
+                          <AlertTriangle className="h-4 w-4" />
+                          <span className="text-sm font-medium">Plazo para subsanar: {cuenta.plazoSubsanar}</span>
+                        </div>
                       </div>
                     )}
 
-                    <Button 
-                      onClick={() => handleRevisar(cuenta)}
-                      className="w-full"
-                      disabled={cuenta.estado !== "Pendiente Revisión"}
-                      variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
-                    >
-                      <FileCheck className="h-4 w-4 mr-2" />
-                      {cuenta.estado === "Pendiente Revisión" ? "Revisar" : "Ver Detalles"}
-                    </Button>
+                    {/* Document actions section */}
+                    <div className="w-full">
+                      <div className="grid grid-cols-1 gap-4 p-4 bg-muted/50 rounded-lg border">
+                        {/* Cuenta de Cobro */}
+                        <div className="text-center">
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <FileText className="h-5 w-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Cuenta de Cobro (PDF)</p>
+                              <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.cuentaCobro}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleVerDocumento("Cuenta de Cobro")}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDescargar("Cuenta de Cobro")}
+                              >
+                                <Download className="h-4 w-4 mr-1" />
+                                Descargar
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Planilla Seguridad Social */}
+                        <div className="text-center">
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
+                              <FileCheck className="h-5 w-5 text-success" />
+                            </div>
+                            <div>
+                              <p className="font-medium">Planilla Seguridad Social</p>
+                              <p className="text-sm text-muted-foreground break-all">{cuenta.documentos.planillaSeguridad}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleVerDocumento("Planilla de Seguridad Social")}
+                              >
+                                <Eye className="h-4 w-4 mr-1" />
+                                Ver
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDescargar("Planilla de Seguridad Social")}
+                              >
+                                <Download className="h-4 w-4 mr-1" />
+                                Descargar
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Revisar y Aprobar/Rechazar */}
+                        <div className="text-center">
+                          <div className="flex flex-col items-center justify-center gap-3">
+                            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <FileCheck className="h-5 w-5 text-primary" />
+                            </div>
+                            <p className="font-medium">Revisar y Aprobar/Rechazar</p>
+                            <Button
+                              onClick={() => handleRevisar(cuenta)}
+                              disabled={cuenta.estado !== "Pendiente Revisión"}
+                              variant={cuenta.estado === "Pendiente Revisión" ? "default" : "outline"}
+                            >
+                              <FileCheck className="h-4 w-4 mr-2" />
+                              Ver Detalles
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
