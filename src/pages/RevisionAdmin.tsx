@@ -310,10 +310,7 @@ export default function RevisionAdmin() {
         {/* Filters */}
         <div className="flex flex-col lg:flex-row gap-4">
           <Card className="flex-1">
-            <CardHeader>
-              <CardTitle className="text-lg">Filtros</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="filtro-proveedor">Proveedor</Label>
