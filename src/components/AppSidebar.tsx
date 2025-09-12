@@ -199,7 +199,7 @@ export function AppSidebar() {
 
   const getNavClasses = (isActiveItem: boolean) =>
     isActiveItem 
-      ? "bg-blue-600 text-white hover:bg-blue-700" 
+      ? "bg-primary text-primary-foreground hover:bg-primary/90" 
       : "hover:bg-accent hover:text-accent-foreground"
 
   return (
@@ -208,7 +208,7 @@ export function AppSidebar() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-blue-600 grid place-content-center text-white font-bold">⛟</div>
+            <div className="h-9 w-9 rounded-xl bg-primary grid place-content-center text-primary-foreground font-bold">⛟</div>
             {!collapsed && (
               <div>
                 <div className="text-sm font-semibold leading-none">Sistema Transportes</div>
@@ -234,7 +234,7 @@ export function AppSidebar() {
                   <CollapsibleTrigger asChild>
                     <Button
                       variant="ghost"
-                      className={`w-full justify-between rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${hasActiveChild(item.subItems) ? 'bg-blue-600 text-white' : ''}`}
+                      className={`w-full justify-between rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${hasActiveChild(item.subItems) ? 'bg-primary text-primary-foreground' : ''}`}
                     >
                       <div className="flex items-center">
                         <item.icon className="h-4 w-4 mr-2" />
@@ -255,7 +255,7 @@ export function AppSidebar() {
                           key={subItem.title}
                           variant={isActive(subItem.url!) ? "secondary" : "ghost"}
                           asChild
-                          className={`w-full justify-start rounded-xl ${isActive(subItem.url!) ? "bg-blue-600 text-white" : ""}`}
+                          className={`w-full justify-start rounded-xl ${isActive(subItem.url!) ? "bg-primary text-primary-foreground" : ""}`}
                         >
                           <NavLink to={subItem.url!}>
                             <subItem.icon className="h-4 w-4 mr-2" />
@@ -271,7 +271,7 @@ export function AppSidebar() {
                 <Button
                   variant={isActive(item.url!) ? "secondary" : "ghost"}
                   asChild
-                  className={`w-full justify-start rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${isActive(item.url!) ? "bg-blue-600 text-white" : ""}`}
+                  className={`w-full justify-start rounded-xl ${collapsed ? "px-0 flex justify-center" : ""} ${isActive(item.url!) ? "bg-primary text-primary-foreground" : ""}`}
                 >
                   <NavLink to={item.url!}>
                     <item.icon className="h-4 w-4 mr-2" />
