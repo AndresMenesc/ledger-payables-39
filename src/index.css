@@ -76,9 +76,9 @@ Colores profesionales que transmiten confianza y claridad */
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 218 39% 80%;
+    --sidebar-accent: 229 43% 20%;
 
-    --sidebar-accent-foreground: 221 34% 40%;
+    --sidebar-accent-foreground: 0 0% 100%;
 
     --sidebar-border: 218 39% 65%;
 
@@ -139,8 +139,8 @@ Colores profesionales que transmiten confianza y claridad */
     --sidebar-foreground: 221 35% 95%;
     --sidebar-primary: 221 34% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 218 39% 50%;
-    --sidebar-accent-foreground: 221 35% 95%;
+    --sidebar-accent: 229 43% 20%;
+    --sidebar-accent-foreground: 0 0% 100%;
     --sidebar-border: 218 39% 30%;
     --sidebar-ring: 221 34% 50%;
   }
@@ -153,5 +153,8 @@ Colores profesionales que transmiten confianza y claridad */
 
   body {
     @apply bg-background text-foreground;
+    font-size: 0.875rem;
+    line-height: 1.43;
+    font-weight: 400;
   }
 }
