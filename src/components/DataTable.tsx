@@ -103,10 +103,10 @@ export function DataTable({
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-border rounded-lg bg-card shadow-sm">
+      <CardHeader className="border-b border-border bg-card">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+          <CardTitle className="text-xl font-semibold text-card-foreground">{title}</CardTitle>
           
           <div className="flex flex-col sm:flex-row gap-2">
             {searchable && (
@@ -116,7 +116,7 @@ export function DataTable({
                   placeholder="Buscar..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full sm:w-64"
+                  className="pl-10 w-full sm:w-64 border-input bg-background text-foreground placeholder:text-muted-foreground"
                 />
               </div>
             )}
@@ -124,7 +124,7 @@ export function DataTable({
             <div className="flex gap-2">
               {statusFilter && (
                 <select 
-                  className="px-3 py-1.5 text-sm border border-input bg-background rounded-md"
+                  className="px-3 py-1.5 text-sm border border-input bg-background text-foreground rounded-md focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onChange={(e) => onStatusFilterChange?.(e.target.value)}
                 >
                   <option value="todos">Todos los estados</option>
@@ -157,17 +157,17 @@ export function DataTable({
         )}
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="bg-card p-6">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-border">
+              <tr className="border-b border-border bg-muted/30">
                 {columns.map((column) => (
                   <th
                     key={column.key}
                     className={cn(
-                      "text-left py-3 px-4 font-medium text-muted-foreground",
-                      column.sortable && "cursor-pointer hover:text-foreground",
+                      "text-left py-4 px-4 font-semibold text-muted-foreground text-sm uppercase tracking-wide",
+                      column.sortable && "cursor-pointer hover:text-foreground transition-colors",
                       column.className
                     )}
                     onClick={() => column.sortable && handleSort(column.key)}
@@ -198,7 +198,7 @@ export function DataTable({
                   </th>
                 ))}
                 {actions && (
-                  <th className="text-left py-3 px-4 font-medium text-muted-foreground">
+                  <th className="text-left py-4 px-4 font-semibold text-muted-foreground text-sm uppercase tracking-wide">
                     Acciones
                   </th>
                 )}
@@ -207,9 +207,9 @@ export function DataTable({
             
             <tbody>
               {paginatedData.map((row, index) => (
-                <tr key={index} className="border-b border-border hover:bg-accent/50 transition-colors">
+                <tr key={index} className="border-b border-border hover:bg-accent/50 transition-colors group">
                   {columns.map((column) => (
-                    <td key={column.key} className={cn("py-3 px-4", column.className)}>
+                    <td key={column.key} className={cn("py-4 px-4 text-card-foreground font-medium", column.className)}>
                       {renderCell 
                         ? renderCell(column.key, row[column.key], row)
                         : defaultRenderCell(column.key, row[column.key], row)
@@ -217,7 +217,7 @@ export function DataTable({
                     </td>
                   ))}
                   {actions && (
-                    <td className="py-3 px-4">
+                    <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
                         {actions(row)}
                       </div>
@@ -230,7 +230,7 @@ export function DataTable({
         </div>
         
         {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground">
               Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, sortedData.length)} de {sortedData.length} resultados
             </p>

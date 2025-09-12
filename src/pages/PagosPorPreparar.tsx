@@ -418,10 +418,10 @@ export default function PagosPorPreparar() {
   )
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Servicios de Transporte - Pagos por Preparar</h1>
-        <p className="text-muted-foreground">Gestiona las cuentas de cobro de servicios de transporte enviadas por los proveedores</p>
+    <div className="p-6 space-y-6 bg-background min-h-screen">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold text-foreground">Servicios de Transporte - Pagos por Preparar</h1>
+        <p className="text-muted-foreground text-base">Gestiona las cuentas de cobro de servicios de transporte enviadas por los proveedores</p>
       </div>
 
       <DataTable
