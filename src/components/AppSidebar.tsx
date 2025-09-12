@@ -208,12 +208,14 @@ export function AppSidebar() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="h-9 w-9 rounded-xl bg-primary grid place-content-center text-primary-foreground font-bold">⛟</div>
-            {!collapsed && (
-              <div>
-                <div className="text-sm font-semibold leading-none">Sistema Transportes</div>
-                <div className="text-xs text-muted-foreground">Gestión v1.0</div>
-              </div>
+            {!collapsed ? (
+              <img 
+                src="/src/assets/estarter-logo.png" 
+                alt="Estarter Logo" 
+                className="h-8 w-auto"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-xl bg-primary grid place-content-center text-primary-foreground font-bold text-xs">E</div>
             )}
           </div>
           <Button size="icon" variant="ghost" onClick={() => setCollapsed(!collapsed)}>
