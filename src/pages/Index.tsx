@@ -274,6 +274,42 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* Acciones rápidas */}
+        <Card className="rounded-2xl border">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Acciones Rápidas</CardTitle>
+            <p className="text-sm text-muted-foreground">Accede rápidamente a las funciones más utilizadas</p>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Button 
+                className="h-16 flex flex-col gap-2 rounded-xl" 
+                variant="outline"
+                onClick={() => handleCardClick('/pagos-preparar')}
+              >
+                <Package className="h-6 w-6" />
+                <span>Crear Nuevo Lote</span>
+              </Button>
+              <Button 
+                className="h-16 flex flex-col gap-2 rounded-xl" 
+                variant="outline"
+                onClick={() => handleCardClick('/cuenta-cobro')}
+              >
+                <FileText className="h-6 w-6" />
+                <span>Generar Reporte</span>
+              </Button>
+              <Button 
+                className="h-16 flex flex-col gap-2 rounded-xl" 
+                variant="outline"
+                onClick={() => handleCardClick('/prestamos')}
+              >
+                <CreditCard className="h-6 w-6" />
+                <span>Gestionar Préstamos</span>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Métricas principales */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Metric 
@@ -524,41 +560,6 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Acciones rápidas */}
-        <Card className="rounded-2xl border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Acciones Rápidas</CardTitle>
-            <p className="text-sm text-muted-foreground">Accede rápidamente a las funciones más utilizadas</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <Button 
-                className="h-16 flex flex-col gap-2 rounded-xl" 
-                variant="outline"
-                onClick={() => handleCardClick('/pagos-preparar')}
-              >
-                <Package className="h-6 w-6" />
-                <span>Crear Nuevo Lote</span>
-              </Button>
-              <Button 
-                className="h-16 flex flex-col gap-2 rounded-xl" 
-                variant="outline"
-                onClick={() => handleCardClick('/cuenta-cobro')}
-              >
-                <FileText className="h-6 w-6" />
-                <span>Generar Reporte</span>
-              </Button>
-              <Button 
-                className="h-16 flex flex-col gap-2 rounded-xl" 
-                variant="outline"
-                onClick={() => handleCardClick('/prestamos')}
-              >
-                <CreditCard className="h-6 w-6" />
-                <span>Gestionar Préstamos</span>
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </main>
 
       {/* Modal de confirmación para cambio de mes */}
