@@ -209,19 +209,19 @@ export default function PagosPorPreparar() {
         </div>
 
         {/* Información General de la Cuenta */}
-        <Card>
+        <Card className="border-border rounded-lg">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-card-foreground">
+              <Building2 className="h-5 w-5 text-primary" />
               Información General
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
+          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Proveedor</p>
-              <p className="font-medium">{selectedCuenta.proveedor}</p>
+              <p className="font-medium text-card-foreground">{selectedCuenta.proveedor}</p>
             </div>
-            <div>
+            <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Estado</p>
               <Badge variant={
                 selectedCuenta.estado === 'pendiente' ? 'pending-light' :
@@ -233,11 +233,11 @@ export default function PagosPorPreparar() {
                  selectedCuenta.estado === 'en_proceso' ? 'En Proceso' : 'Rechazado'}
               </Badge>
             </div>
-            <div>
+            <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Fecha Recepción</p>
-              <p className="font-medium">{new Date(selectedCuenta.fecha_recepcion).toLocaleDateString('es-CO')}</p>
+              <p className="font-medium text-card-foreground">{new Date(selectedCuenta.fecha_recepcion).toLocaleDateString('es-CO')}</p>
             </div>
-            <div>
+            <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Valor Total</p>
               <p className="text-lg font-bold text-primary">
                 {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor_total)}
@@ -251,13 +251,13 @@ export default function PagosPorPreparar() {
           <h2 className="text-xl font-semibold">Servicios Asociados</h2>
           
           {selectedCuenta.servicios.map((servicio: any, index: number) => (
-            <Card key={index} className="border-l-4 border-l-primary">
+            <Card key={index} className="border-l-4 border-l-primary rounded-lg border-border">
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="flex items-center gap-3 mb-3">
                       <Truck className="h-5 w-5 text-primary" />
-                      <h3 className="text-lg font-semibold">{servicio.descripcion}</h3>
+                      <h3 className="text-lg font-semibold text-card-foreground">{servicio.descripcion}</h3>
                       <Badge variant={
                         servicio.estado === 'pendiente' ? 'pending-light' :
                         servicio.estado === 'aprobado' ? 'success-light' : 'destructive'
@@ -298,13 +298,13 @@ export default function PagosPorPreparar() {
                 </div>
 
                 {/* Detalles del Viaje */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-md border border-border">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <MapPin className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-xs text-muted-foreground">Ruta</p>
-                        <p className="font-medium">{servicio.origen} → {servicio.destino}</p>
+                        <p className="font-medium text-card-foreground">{servicio.origen} → {servicio.destino}</p>
                       </div>
                     </div>
                     
@@ -312,7 +312,7 @@ export default function PagosPorPreparar() {
                       <Clock className="h-4 w-4 text-muted-foreground" />
                       <div>
                         <p className="text-xs text-muted-foreground">Fecha y Hora</p>
-                        <p className="font-medium">{servicio.fecha} - {servicio.hora}</p>
+                        <p className="font-medium text-card-foreground">{servicio.fecha} - {servicio.hora}</p>
                       </div>
                     </div>
                   </div>
@@ -321,32 +321,32 @@ export default function PagosPorPreparar() {
                     {servicio.pasajeros && (
                       <div>
                         <p className="text-xs text-muted-foreground">Pasajeros</p>
-                        <p className="font-medium">{servicio.pasajeros}</p>
+                        <p className="font-medium text-card-foreground">{servicio.pasajeros}</p>
                       </div>
                     )}
                     
                     {servicio.carga && (
                       <div>
                         <p className="text-xs text-muted-foreground">Carga</p>
-                        <p className="font-medium">{servicio.carga}</p>
+                        <p className="font-medium text-card-foreground">{servicio.carga}</p>
                       </div>
                     )}
                     
                     <div>
                       <p className="text-xs text-muted-foreground">Vehículo</p>
-                      <p className="font-medium">{servicio.vehiculo}</p>
+                      <p className="font-medium text-card-foreground">{servicio.vehiculo}</p>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     <div>
                       <p className="text-xs text-muted-foreground">Distancia</p>
-                      <p className="font-medium">{servicio.distancia}</p>
+                      <p className="font-medium text-card-foreground">{servicio.distancia}</p>
                     </div>
                     
                     <div>
                       <p className="text-xs text-muted-foreground">Duración</p>
-                      <p className="font-medium">{servicio.duracion}</p>
+                      <p className="font-medium text-card-foreground">{servicio.duracion}</p>
                     </div>
                     
                     {servicio.observaciones && (
@@ -367,17 +367,17 @@ export default function PagosPorPreparar() {
 
   const summary = (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card>
+      <Card className="border-border rounded-lg">
         <CardContent className="p-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             <div>
               <p className="text-sm text-muted-foreground">Mes Seleccionado</p>
               <Select value={mesSeleccionado} onValueChange={setMesSeleccionado}>
-                <SelectTrigger className="w-40">
+                <SelectTrigger className="w-40 border-input">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="border-border bg-popover">
                   <SelectItem value="2024-01">Enero 2024</SelectItem>
                   <SelectItem value="2024-02">Febrero 2024</SelectItem>
                   <SelectItem value="2024-03">Marzo 2024</SelectItem>
@@ -388,7 +388,7 @@ export default function PagosPorPreparar() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="border-border rounded-lg">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">Pendientes</p>
           <p className="text-xl font-semibold text-pending">
@@ -397,7 +397,7 @@ export default function PagosPorPreparar() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="border-border rounded-lg">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">En Proceso</p>
           <p className="text-xl font-semibold text-warning">
@@ -406,7 +406,7 @@ export default function PagosPorPreparar() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="border-border rounded-lg">
         <CardContent className="p-4">
           <p className="text-sm text-muted-foreground">Rechazadas</p>
           <p className="text-xl font-semibold text-destructive">
