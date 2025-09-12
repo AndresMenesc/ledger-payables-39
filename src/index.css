@@ -8,33 +8,33 @@ Colores profesionales que transmiten confianza y claridad */
 @layer base {
   :root {
     /* Fondo y texto principal */
-    --background: 0 0% 98%;
-    --foreground: 215 25% 15%;
+    --background: 221 35% 95%;
+    --foreground: 221 34% 40%;
 
     /* Tarjetas y contenedores */
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card-foreground: 221 34% 40%;
 
     /* Popover y tooltips */
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover-foreground: 221 34% 40%;
 
     /* Azul corporativo principal */
-    --primary: 213 94% 50%;
+    --primary: 221 34% 40%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 213 94% 45%;
+    --primary-hover: 221 34% 35%;
 
     /* Gris secundario profesional */
-    --secondary: 215 15% 95%;
-    --secondary-foreground: 215 25% 25%;
+    --secondary: 218 39% 85%;
+    --secondary-foreground: 221 34% 40%;
 
     /* Elementos deshabilitados */
-    --muted: 215 15% 95%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 218 39% 85%;
+    --muted-foreground: 221 34% 50%;
 
     /* Azul claro para acentos */
-    --accent: 213 100% 96%;
-    --accent-foreground: 213 94% 35%;
+    --accent: 218 39% 90%;
+    --accent-foreground: 221 34% 40%;
 
     /* Rojo para rechazos y errores */
     --destructive: 0 75% 60%;
@@ -49,9 +49,9 @@ Colores profesionales que transmiten confianza y claridad */
     --warning-foreground: 0 0% 100%;
     --warning-light: 38 92% 95%;
 
-    --pending: 213 94% 50%;
+    --pending: 221 34% 40%;
     --pending-foreground: 0 0% 100%;
-    --pending-light: 213 100% 96%;
+    --pending-light: 221 35% 95%;
 
     /* Colores del sistema de conductores */
     --emerald-600: 160 84% 39%;
@@ -62,52 +62,52 @@ Colores profesionales que transmiten confianza y claridad */
     --blue-600: 221 83% 53%;
 
     /* Bordes y campos */
-    --border: 215 15% 88%;
-    --input: 215 15% 88%;
-    --ring: 213 94% 50%;
+    --border: 218 39% 80%;
+    --input: 218 39% 80%;
+    --ring: 221 34% 40%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 0 0% 98%;
+    --sidebar-background: 218 39% 72%;
 
-    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-foreground: 221 34% 40%;
 
-    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary: 221 34% 40%;
 
     --sidebar-primary-foreground: 0 0% 98%;
 
-    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent: 218 39% 80%;
 
-    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-accent-foreground: 221 34% 40%;
 
-    --sidebar-border: 220 13% 91%;
+    --sidebar-border: 218 39% 65%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 221 34% 40%;
   }
 
   .dark {
     /* Modo oscuro para el sistema contable */
-    --background: 215 30% 8%;
-    --foreground: 215 15% 95%;
+    --background: 221 35% 15%;
+    --foreground: 221 35% 95%;
 
-    --card: 215 30% 10%;
-    --card-foreground: 215 15% 95%;
+    --card: 221 35% 20%;
+    --card-foreground: 221 35% 95%;
 
-    --popover: 215 30% 10%;
-    --popover-foreground: 215 15% 95%;
+    --popover: 221 35% 20%;
+    --popover-foreground: 221 35% 95%;
 
-    --primary: 213 94% 55%;
+    --primary: 221 34% 50%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 213 94% 50%;
+    --primary-hover: 221 34% 45%;
 
-    --secondary: 215 20% 15%;
-    --secondary-foreground: 215 15% 85%;
+    --secondary: 221 35% 25%;
+    --secondary-foreground: 221 35% 85%;
 
-    --muted: 215 20% 15%;
-    --muted-foreground: 215 15% 65%;
+    --muted: 221 35% 25%;
+    --muted-foreground: 221 35% 65%;
 
-    --accent: 215 20% 15%;
-    --accent-foreground: 213 94% 55%;
+    --accent: 221 35% 25%;
+    --accent-foreground: 221 34% 50%;
 
     --destructive: 0 75% 65%;
     --destructive-foreground: 0 0% 100%;
@@ -120,9 +120,9 @@ Colores profesionales que transmiten confianza y claridad */
     --warning-foreground: 0 0% 100%;
     --warning-light: 38 92% 15%;
 
-    --pending: 213 94% 55%;
+    --pending: 221 34% 50%;
     --pending-foreground: 0 0% 100%;
-    --pending-light: 213 100% 15%;
+    --pending-light: 221 35% 15%;
 
     /* Colores del sistema de conductores - modo oscuro */
     --emerald-600: 160 84% 49%;
@@ -132,17 +132,17 @@ Colores profesionales que transmiten confianza y claridad */
     --red-600: 0 84% 70%;
     --blue-600: 221 83% 63%;
 
-    --border: 215 20% 20%;
-    --input: 215 20% 20%;
-    --ring: 213 94% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 221 35% 30%;
+    --input: 221 35% 30%;
+    --ring: 221 34% 50%;
+    --sidebar-background: 218 39% 40%;
+    --sidebar-foreground: 221 35% 95%;
+    --sidebar-primary: 221 34% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 218 39% 50%;
+    --sidebar-accent-foreground: 221 35% 95%;
+    --sidebar-border: 218 39% 30%;
+    --sidebar-ring: 221 34% 50%;
   }
 }
 
