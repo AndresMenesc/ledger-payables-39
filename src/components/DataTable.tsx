@@ -213,25 +213,25 @@ export function DataTable({
               </thead>
               
               <tbody>
-                {paginatedData.map((row, index) => (
-                  <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors group">
-                    {columns.map((column) => (
-                      <td key={column.key} className={cn("py-4 px-4 text-card-foreground font-medium", column.className)}>
-                        {renderCell 
-                          ? renderCell(column.key, row[column.key], row)
-                          : defaultRenderCell(column.key, row[column.key], row)
-                        }
-                      </td>
-                    ))}
-                    {actions && (
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-2">
-                          {actions(row)}
-                        </div>
-                      </td>
-                    )}
-                  </tr>
-                ))}
+                 {paginatedData.map((row, index) => (
+                   <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors group">
+                     {columns.map((column) => (
+                       <td key={column.key} className={cn("py-6 px-4 text-card-foreground font-medium", column.className)}>
+                         {renderCell 
+                           ? renderCell(column.key, row[column.key], row)
+                           : defaultRenderCell(column.key, row[column.key], row)
+                         }
+                       </td>
+                     ))}
+                     {actions && (
+                       <td className="py-6 px-4">
+                         <div className="flex items-center gap-2">
+                           {actions(row)}
+                         </div>
+                       </td>
+                     )}
+                   </tr>
+                 ))}
               </tbody>
             </table>
           </div>

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { Separator } from "@/components/ui/separator"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { 
   TrendingUp, TrendingDown, DollarSign, Clock, CheckCircle, 
@@ -310,255 +311,272 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* Métricas principales */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Metric 
-            icon={DollarSign}
-            label="Valor Total Bruto"
-            value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalBruto)}
-            sub={`+${resumenFinanciero.variacionMensual}% vs mes anterior`}
-            onClick={() => handleCardClick('/pagos-preparar')}
-          />
-          <Metric 
-            icon={TrendingDown}
-            label="Total Descuentos"
-            value={`-${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalDescuentos)}`}
-            sub="Retenciones y multas aplicadas"
-            onClick={() => handleCardClick('/pagos-procesar')}
-          />
-          <Metric 
-            icon={CheckCircle}
-            label="Valor Neto"
-            value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalNeto)}
-            sub="Valor final a pagar"
-            onClick={() => handleCardClick('/pagados')}
-          />
-          <Metric 
-            icon={CreditCard}
-            label="Préstamos Activos"
-            value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalPrestamos)}
-            sub="Anticipos y préstamos vigentes"
-            onClick={() => handleCardClick('/prestamos')}
-          />
-        </div>
+        {/* Tabs para organizar el contenido */}
+        <Tabs defaultValue="evaluacion" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 rounded-2xl bg-muted/30 p-1">
+            <TabsTrigger value="evaluacion" className="rounded-xl">Evaluación Mensual</TabsTrigger>
+            <TabsTrigger value="lotes" className="rounded-xl">Estado de Lotes</TabsTrigger>
+            <TabsTrigger value="modulos" className="rounded-xl">Estado por Módulo</TabsTrigger>
+            <TabsTrigger value="servicios" className="rounded-xl">Servicios de Transporte por Tipo</TabsTrigger>
+          </TabsList>
 
-        {/* Alertas importantes */}
-        <Card className="rounded-2xl border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Alertas Importantes</CardTitle>
-            <p className="text-sm text-muted-foreground">Situaciones que requieren atención inmediata</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {alertas.map((alerta, index) => {
-                const IconComponent = alerta.icono
-                return (
-                  <Card 
-                    key={index} 
-                    className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow rounded-2xl ${
-                      alerta.tipo === 'warning' ? 'border-l-warning bg-warning/5' :
-                      alerta.tipo === 'error' ? 'border-l-destructive bg-destructive/5' :
-                      'border-l-blue-500 bg-blue-50/50'
-                    }`}
-                    onClick={() => handleAlertClick(alerta.tipo)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-3">
-                        <IconComponent className={`h-5 w-5 ${
-                          alerta.tipo === 'warning' ? 'text-warning' :
-                          alerta.tipo === 'error' ? 'text-destructive' :
-                          'text-blue-600'
-                        }`} />
-                        <div className="flex-1">
-                          <h4 className="font-medium text-sm">{alerta.titulo}</h4>
-                          <p className="text-xs text-muted-foreground">{alerta.descripcion}</p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
+          {/* Tab: Evaluación Mensual */}
+          <TabsContent value="evaluacion" className="space-y-6">
+            {/* Métricas principales */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Metric 
+                icon={DollarSign}
+                label="Valor Total Bruto"
+                value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalBruto)}
+                sub={`+${resumenFinanciero.variacionMensual}% vs mes anterior`}
+                onClick={() => handleCardClick('/pagos-preparar')}
+              />
+              <Metric 
+                icon={TrendingDown}
+                label="Total Descuentos"
+                value={`-${new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalDescuentos)}`}
+                sub="Retenciones y multas aplicadas"
+                onClick={() => handleCardClick('/pagos-procesar')}
+              />
+              <Metric 
+                icon={CheckCircle}
+                label="Valor Neto"
+                value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalNeto)}
+                sub="Valor final a pagar"
+                onClick={() => handleCardClick('/pagados')}
+              />
+              <Metric 
+                icon={CreditCard}
+                label="Préstamos Activos"
+                value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(resumenFinanciero.totalPrestamos)}
+                sub="Anticipos y préstamos vigentes"
+                onClick={() => handleCardClick('/prestamos')}
+              />
+            </div>
+
+            {/* Evolución Mensual */}
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <BarChart3 className="h-5 w-5" />
+                  Evolución Mensual de Pagos
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">Comparativa de valores pagados vs pendientes por mes</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {datosGraficas.porMes.map((item, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium">{item.mes}</span>
+                      <span className="text-sm text-muted-foreground">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.valor)}
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      <Progress 
+                        value={(item.pagado / maxValor) * 100} 
+                        className="h-2 bg-muted rounded-xl"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Pagado: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pagado)}</span>
+                        <span>Pendiente: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pendiente)}</span>
                       </div>
+                    </div>
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Estado de Lotes */}
+          <TabsContent value="lotes" className="space-y-6">
+            {/* Alertas importantes */}
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Alertas Importantes</CardTitle>
+                <p className="text-sm text-muted-foreground">Situaciones que requieren atención inmediata</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {alertas.map((alerta, index) => {
+                    const IconComponent = alerta.icono
+                    return (
+                      <Card 
+                        key={index} 
+                        className={`border-l-4 cursor-pointer hover:shadow-md transition-shadow rounded-2xl ${
+                          alerta.tipo === 'warning' ? 'border-l-warning bg-warning/5' :
+                          alerta.tipo === 'error' ? 'border-l-destructive bg-destructive/5' :
+                          'border-l-blue-500 bg-blue-50/50'
+                        }`}
+                        onClick={() => handleAlertClick(alerta.tipo)}
+                      >
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-3">
+                            <IconComponent className={`h-5 w-5 ${
+                              alerta.tipo === 'warning' ? 'text-warning' :
+                              alerta.tipo === 'error' ? 'text-destructive' :
+                              'text-blue-600'
+                            }`} />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">{alerta.titulo}</h4>
+                              <p className="text-xs text-muted-foreground">{alerta.descripcion}</p>
+                            </div>
+                            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Estado de lotes */}
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <PieChartIcon className="h-5 w-5" />
+                  Estado de Lotes
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">Distribución de lotes por estado de procesamiento</p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {datosGraficas.porEstado.map((item, index) => (
+                  <div key={index} className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full" 
+                          style={{ backgroundColor: item.color }}
+                        ></div>
+                        <span className="text-sm font-medium">{item.name}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-sm text-muted-foreground">{item.value}</span>
+                        <span className="text-xs text-muted-foreground">({item.porcentaje}%)</span>
+                      </div>
+                    </div>
+                    <Progress 
+                      value={item.porcentaje} 
+                      className="h-2 rounded-xl"
+                      style={{ 
+                        '--progress-foreground': item.color 
+                      } as React.CSSProperties}
+                    />
+                  </div>
+                ))}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Tab: Estado por Módulo */}
+          <TabsContent value="modulos" className="space-y-6">
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Estado por Módulo</CardTitle>
+                <p className="text-sm text-muted-foreground">Resumen rápido de cada módulo del sistema</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-aprobar')}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Clock className="h-5 w-5 text-warning" />
+                        <h3 className="font-medium text-sm">Por Aprobar</h3>
+                      </div>
+                      <div className="text-2xl font-bold text-warning mb-1">{estadoLotes.pendientesAprobacion}</div>
+                      <p className="text-xs text-muted-foreground mb-3">Lotes pendientes</p>
+                      <Button variant="outline" size="sm" className="w-full rounded-xl">
+                        Ver Detalles
+                      </Button>
                     </CardContent>
                   </Card>
-                )
-              })}
-            </div>
-          </CardContent>
-        </Card>
 
-        {/* Gráficas principales */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-          {/* Evolución Mensual */}
-          <Card className="rounded-2xl border">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <BarChart3 className="h-5 w-5" />
-                Evolución Mensual de Pagos
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">Comparativa de valores pagados vs pendientes por mes</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {datosGraficas.porMes.map((item, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium">{item.mes}</span>
-                    <span className="text-sm text-muted-foreground">
-                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(item.valor)}
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    <Progress 
-                      value={(item.pagado / maxValor) * 100} 
-                      className="h-2 bg-muted rounded-xl"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Pagado: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pagado)}</span>
-                      <span>Pendiente: {new Intl.NumberFormat('es-CO', { notation: 'compact', style: 'currency', currency: 'COP' }).format(item.pendiente)}</span>
-                    </div>
-                  </div>
+                  <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-procesar')}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Package className="h-5 w-5 text-blue-600" />
+                        <h3 className="font-medium text-sm">En Proceso</h3>
+                      </div>
+                      <div className="text-2xl font-bold text-blue-600 mb-1">{estadoLotes.enProceso}</div>
+                      <p className="text-xs text-muted-foreground mb-3">Lotes en gestión</p>
+                      <Button variant="outline" size="sm" className="w-full rounded-xl">
+                        Ver Detalles
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/lotes-aprobados')}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <CheckCircle className="h-5 w-5 text-success" />
+                        <h3 className="font-medium text-sm">Aprobados</h3>
+                      </div>
+                      <div className="text-2xl font-bold text-success mb-1">{estadoLotes.aprobados}</div>
+                      <p className="text-xs text-muted-foreground mb-3">Lotes aprobados</p>
+                      <Button variant="outline" size="sm" className="w-full rounded-xl">
+                        Ver Detalles
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagados')}>
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <DollarSign className="h-5 w-5 text-green-600" />
+                        <h3 className="font-medium text-sm">Pagados</h3>
+                      </div>
+                      <div className="text-2xl font-bold text-green-600 mb-1">{estadoLotes.pagados}</div>
+                      <p className="text-xs text-muted-foreground mb-3">Lotes pagados</p>
+                      <Button variant="outline" size="sm" className="w-full rounded-xl">
+                        Ver Detalles
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-          {/* Estado de lotes */}
-          <Card className="rounded-2xl border">
-            <CardHeader className="pb-2">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <PieChartIcon className="h-5 w-5" />
-                Estado de Lotes
-              </CardTitle>
-              <p className="text-sm text-muted-foreground">Distribución de lotes por estado de procesamiento</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {datosGraficas.porEstado.map((item, index) => (
-                <div key={index} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: item.color }}
-                      ></div>
-                      <span className="text-sm font-medium">{item.name}</span>
-                    </div>
-                    <div className="flex gap-2">
-                      <span className="text-sm text-muted-foreground">{item.value}</span>
-                      <span className="text-xs text-muted-foreground">({item.porcentaje}%)</span>
-                    </div>
-                  </div>
-                  <Progress 
-                    value={item.porcentaje} 
-                    className="h-2 rounded-xl"
-                    style={{ 
-                      '--progress-foreground': item.color 
-                    } as React.CSSProperties}
-                  />
+          {/* Tab: Servicios de Transporte por Tipo */}
+          <TabsContent value="servicios" className="space-y-6">
+            <Card className="rounded-2xl border">
+              <CardHeader className="pb-2">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Truck className="h-5 w-5" />
+                  Servicios de Transporte por Tipo
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">Distribución y rendimiento por categoría de servicio</p>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                  {datosGraficas.tiposServicio.map((servicio, index) => (
+                    <Card key={index} className="rounded-xl border bg-accent/20 hover:bg-accent/30 transition-colors cursor-pointer">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-medium text-sm">{servicio.tipo}</h4>
+                          <Badge variant="secondary" className="rounded-md">{servicio.cantidad}</Badge>
+                        </div>
+                        <p className="text-xl font-bold text-primary">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Promedio: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor / servicio.cantidad)}
+                        </p>
+                        <div className="mt-3">
+                          <Progress 
+                            value={(servicio.valor / Math.max(...datosGraficas.tiposServicio.map(s => s.valor))) * 100} 
+                            className="h-2 rounded-xl"
+                          />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              ))}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Estado detallado por módulo */}
-        <Card className="rounded-2xl border">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">Estado por Módulo</CardTitle>
-            <p className="text-sm text-muted-foreground">Resumen rápido de cada módulo del sistema</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-aprobar')}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Clock className="h-5 w-5 text-warning" />
-                    <h3 className="font-medium text-sm">Por Aprobar</h3>
-                  </div>
-                  <div className="text-2xl font-bold text-warning mb-1">{estadoLotes.pendientesAprobacion}</div>
-                  <p className="text-xs text-muted-foreground mb-3">Lotes pendientes</p>
-                  <Button variant="outline" size="sm" className="w-full rounded-xl">
-                    Ver Detalles
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagos-procesar')}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Package className="h-5 w-5 text-blue-600" />
-                    <h3 className="font-medium text-sm">En Proceso</h3>
-                  </div>
-                  <div className="text-2xl font-bold text-blue-600 mb-1">{estadoLotes.enProceso}</div>
-                  <p className="text-xs text-muted-foreground mb-3">Lotes en gestión</p>
-                  <Button variant="outline" size="sm" className="w-full rounded-xl">
-                    Ver Detalles
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/lotes-aprobados')}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <CheckCircle className="h-5 w-5 text-success" />
-                    <h3 className="font-medium text-sm">Aprobados</h3>
-                  </div>
-                  <div className="text-2xl font-bold text-success mb-1">{estadoLotes.aprobados}</div>
-                  <p className="text-xs text-muted-foreground mb-3">Lotes aprobados</p>
-                  <Button variant="outline" size="sm" className="w-full rounded-xl">
-                    Ver Detalles
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card className="rounded-xl border hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleCardClick('/pagados')}>
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-3 mb-3">
-                    <DollarSign className="h-5 w-5 text-green-600" />
-                    <h3 className="font-medium text-sm">Pagados</h3>
-                  </div>
-                  <div className="text-2xl font-bold text-green-600 mb-1">{estadoLotes.pagados}</div>
-                  <p className="text-xs text-muted-foreground mb-3">Lotes pagados</p>
-                  <Button variant="outline" size="sm" className="w-full rounded-xl">
-                    Ver Detalles
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Servicios de transporte por tipo */}
-        <Card className="rounded-2xl border">
-          <CardHeader className="pb-2">
-            <CardTitle className="flex items-center gap-2 text-base">
-              <Truck className="h-5 w-5" />
-              Servicios de Transporte por Tipo
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">Distribución y rendimiento por categoría de servicio</p>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              {datosGraficas.tiposServicio.map((servicio, index) => (
-                <Card key={index} className="rounded-xl border bg-accent/20 hover:bg-accent/30 transition-colors cursor-pointer">
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-sm">{servicio.tipo}</h4>
-                      <Badge variant="secondary" className="rounded-md">{servicio.cantidad}</Badge>
-                    </div>
-                    <p className="text-xl font-bold text-primary">
-                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Promedio: {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor / servicio.cantidad)}
-                    </p>
-                    <div className="mt-3">
-                      <Progress 
-                        value={(servicio.valor / Math.max(...datosGraficas.tiposServicio.map(s => s.valor))) * 100} 
-                        className="h-2 rounded-xl"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
 
       </main>
 
