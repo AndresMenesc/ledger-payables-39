@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 
 interface Column {
@@ -103,10 +104,13 @@ export function DataTable({
   }
 
   return (
-    <Card className="border-border rounded-lg bg-card shadow-sm">
-      <CardHeader className="border-b border-border bg-card">
+    <Card className="rounded-2xl border">
+      <CardHeader className="pb-2">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <CardTitle className="text-xl font-semibold text-card-foreground">{title}</CardTitle>
+          <div>
+            <CardTitle className="text-base">{title}</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Gestiona y visualiza todas las cuentas de cobro del sistema</p>
+          </div>
           
           <div className="flex flex-col sm:flex-row gap-2">
             {searchable && (
@@ -116,7 +120,7 @@ export function DataTable({
                   placeholder="Buscar..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 w-full sm:w-64 border-input bg-background text-foreground placeholder:text-muted-foreground"
+                  className="pl-10 w-full sm:w-64 border-input bg-background text-foreground placeholder:text-muted-foreground rounded-xl"
                 />
               </div>
             )}
@@ -124,7 +128,7 @@ export function DataTable({
             <div className="flex gap-2">
               {statusFilter && (
                 <select 
-                  className="px-3 py-1.5 text-sm border border-input bg-background text-foreground rounded-md focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  className="px-3 py-1.5 text-sm border border-input bg-background text-foreground rounded-xl focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   onChange={(e) => onStatusFilterChange?.(e.target.value)}
                 >
                   <option value="todos">Todos los estados</option>
@@ -134,14 +138,14 @@ export function DataTable({
               )}
               
               {filterable && (
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="rounded-xl">
                   <Filter className="h-4 w-4 mr-2" />
                   Filtros
                 </Button>
               )}
               
               {exportable && (
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="rounded-xl">
                   <Download className="h-4 w-4 mr-2" />
                   Exportar
                 </Button>
@@ -157,21 +161,24 @@ export function DataTable({
         )}
       </CardHeader>
       
-      <CardContent className="bg-card p-6">
+      <CardContent>
+        <Separator className="my-4" />
+        
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {columns.map((column) => (
-                  <th
-                    key={column.key}
-                    className={cn(
-                      "text-left py-4 px-4 font-semibold text-muted-foreground text-sm uppercase tracking-wide",
-                      column.sortable && "cursor-pointer hover:text-foreground transition-colors",
-                      column.className
-                    )}
-                    onClick={() => column.sortable && handleSort(column.key)}
-                  >
+          <div className="rounded-xl border overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-muted/30">
+                  {columns.map((column) => (
+                    <th
+                      key={column.key}
+                      className={cn(
+                        "text-left py-4 px-4 font-semibold text-muted-foreground text-sm uppercase tracking-wide",
+                        column.sortable && "cursor-pointer hover:text-foreground transition-colors",
+                        column.className
+                      )}
+                      onClick={() => column.sortable && handleSort(column.key)}
+                    >
                     <div className="flex items-center gap-2">
                       {column.label}
                       {column.sortable && (
@@ -197,36 +204,37 @@ export function DataTable({
                     </div>
                   </th>
                 ))}
-                {actions && (
-                  <th className="text-left py-4 px-4 font-semibold text-muted-foreground text-sm uppercase tracking-wide">
-                    Acciones
-                  </th>
-                )}
-              </tr>
-            </thead>
-            
-            <tbody>
-              {paginatedData.map((row, index) => (
-                <tr key={index} className="border-b border-border hover:bg-accent/50 transition-colors group">
-                  {columns.map((column) => (
-                    <td key={column.key} className={cn("py-4 px-4 text-card-foreground font-medium", column.className)}>
-                      {renderCell 
-                        ? renderCell(column.key, row[column.key], row)
-                        : defaultRenderCell(column.key, row[column.key], row)
-                      }
-                    </td>
-                  ))}
                   {actions && (
-                    <td className="py-4 px-4">
-                      <div className="flex items-center gap-2">
-                        {actions(row)}
-                      </div>
-                    </td>
+                    <th className="text-left py-4 px-4 font-semibold text-muted-foreground text-sm uppercase tracking-wide">
+                      Acciones
+                    </th>
                   )}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              
+              <tbody>
+                {paginatedData.map((row, index) => (
+                  <tr key={index} className="border-b border-border hover:bg-muted/50 transition-colors group">
+                    {columns.map((column) => (
+                      <td key={column.key} className={cn("py-4 px-4 text-card-foreground font-medium", column.className)}>
+                        {renderCell 
+                          ? renderCell(column.key, row[column.key], row)
+                          : defaultRenderCell(column.key, row[column.key], row)
+                        }
+                      </td>
+                    ))}
+                    {actions && (
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2">
+                          {actions(row)}
+                        </div>
+                      </td>
+                    )}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
         
         {totalPages > 1 && (
@@ -239,6 +247,7 @@ export function DataTable({
               <Button
                 variant="outline"
                 size="sm"
+                className="rounded-xl"
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
               >
@@ -255,6 +264,7 @@ export function DataTable({
                       key={page}
                       variant={currentPage === page ? "default" : "outline"}
                       size="sm"
+                      className="rounded-xl"
                       onClick={() => setCurrentPage(page)}
                     >
                       {page}
@@ -266,6 +276,7 @@ export function DataTable({
               <Button
                 variant="outline"
                 size="sm"
+                className="rounded-xl"
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
               >

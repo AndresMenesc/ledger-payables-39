@@ -161,6 +161,7 @@ export default function PagosPorPreparar() {
     <Button 
       variant="outline" 
       size="sm"
+      className="rounded-xl"
       onClick={() => {
         setSelectedCuenta(row)
         setShowDetail(true)
@@ -173,211 +174,238 @@ export default function PagosPorPreparar() {
 
   if (showDetail && selectedCuenta) {
     return (
-      <div className="p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowDetail(false)}
-            >
-              ← Volver
-            </Button>
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Servicios de Transporte</h1>
-              <p className="text-muted-foreground">
-                Cuenta: {selectedCuenta.numero} - {selectedCuenta.proveedor}
-              </p>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="p-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="rounded-xl"
+                onClick={() => setShowDetail(false)}
+              >
+                ← Volver
+              </Button>
+              <div>
+                <h1 className="text-2xl font-semibold tracking-tight">Servicios de Transporte</h1>
+                <p className="text-sm text-muted-foreground">
+                  Cuenta: {selectedCuenta.numero} - {selectedCuenta.proveedor}
+                </p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="success"
+                className="rounded-xl"
+                onClick={() => handleSendForApproval(selectedCuenta.id)}
+              >
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Enviar para Aprobación
+              </Button>
+              <Button 
+                variant="destructive"
+                className="rounded-xl"
+                onClick={() => handleRejectCuenta(selectedCuenta.id)}
+              >
+                <XCircle className="h-4 w-4 mr-2" />
+                Rechazar Cuenta
+              </Button>
             </div>
           </div>
-          <div className="flex gap-2">
-            <Button 
-              variant="success"
-              onClick={() => handleSendForApproval(selectedCuenta.id)}
-            >
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Enviar para Aprobación
-            </Button>
-            <Button 
-              variant="destructive"
-              onClick={() => handleRejectCuenta(selectedCuenta.id)}
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Rechazar Cuenta
-            </Button>
+
+          {/* Información General de la Cuenta */}
+          <Card className="rounded-2xl border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-card-foreground">
+                <Building2 className="h-5 w-5 text-primary" />
+                Información General
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Proveedor</p>
+                <p className="font-medium text-card-foreground">{selectedCuenta.proveedor}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Estado</p>
+                <Badge variant={
+                  selectedCuenta.estado === 'pendiente' ? 'pending-light' :
+                  selectedCuenta.estado === 'aprobado' ? 'success-light' :
+                  selectedCuenta.estado === 'en_proceso' ? 'warning-light' : 'destructive'
+                }>
+                  {selectedCuenta.estado === 'pendiente' ? 'Pendiente' :
+                   selectedCuenta.estado === 'aprobado' ? 'Aprobado' :
+                   selectedCuenta.estado === 'en_proceso' ? 'En Proceso' : 'Rechazado'}
+                </Badge>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Fecha Recepción</p>
+                <p className="font-medium text-card-foreground">{new Date(selectedCuenta.fecha_recepcion).toLocaleDateString('es-CO')}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm text-muted-foreground">Valor Total</p>
+                <p className="text-lg font-bold text-primary">
+                  {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor_total)}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Listado de Servicios */}
+          <div className="space-y-4">
+            <h2 className="text-xl font-semibold">Servicios Asociados</h2>
+            
+            {selectedCuenta.servicios.map((servicio: any, index: number) => (
+              <Card key={index} className="border-l-4 border-l-primary rounded-2xl border-border">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <Truck className="h-5 w-5 text-primary" />
+                        <h3 className="text-lg font-semibold text-card-foreground">{servicio.descripcion}</h3>
+                        <Badge variant={
+                          servicio.estado === 'pendiente' ? 'pending-light' :
+                          servicio.estado === 'aprobado' ? 'success-light' : 'destructive'
+                        }>
+                          {servicio.estado === 'pendiente' ? 'Pendiente' :
+                           servicio.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}
+                        </Badge>
+                      </div>
+                      <p className="text-2xl font-bold text-primary mb-4">
+                        {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
+                      </p>
+                    </div>
+                    
+                    {servicio.estado === 'pendiente' && (
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="success"
+                          className="rounded-xl"
+                          onClick={() => handleApproveService(selectedCuenta.id, index)}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Aprobar
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="destructive"
+                          className="rounded-xl"
+                          onClick={() => handleRejectService(selectedCuenta.id, index)}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Rechazar
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="warning"
+                          className="rounded-xl"
+                        >
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Corregir
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Detalles del Viaje */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-xl border border-border">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Ruta</p>
+                          <p className="font-medium text-card-foreground">{servicio.origen} → {servicio.destino}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        <div>
+                          <p className="text-xs text-muted-foreground">Fecha y Hora</p>
+                          <p className="font-medium text-card-foreground">{servicio.fecha} - {servicio.hora}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {servicio.pasajeros && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Pasajeros</p>
+                          <p className="font-medium text-card-foreground">{servicio.pasajeros}</p>
+                        </div>
+                      )}
+                      
+                      {servicio.carga && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Carga</p>
+                          <p className="font-medium text-card-foreground">{servicio.carga}</p>
+                        </div>
+                      )}
+                      
+                      <div>
+                        <p className="text-xs text-muted-foreground">Vehículo</p>
+                        <p className="font-medium text-card-foreground">{servicio.vehiculo}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-xs text-muted-foreground">Distancia</p>
+                        <p className="font-medium text-card-foreground">{servicio.distancia}</p>
+                      </div>
+                      
+                      <div>
+                        <p className="text-xs text-muted-foreground">Duración</p>
+                        <p className="font-medium text-card-foreground">{servicio.duracion}</p>
+                      </div>
+                      
+                      {servicio.observaciones && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Observaciones</p>
+                          <p className="font-medium text-destructive">{servicio.observaciones}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
-        </div>
-
-        {/* Información General de la Cuenta */}
-        <Card className="border-border rounded-lg">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-card-foreground">
-              <Building2 className="h-5 w-5 text-primary" />
-              Información General
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Proveedor</p>
-              <p className="font-medium text-card-foreground">{selectedCuenta.proveedor}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Estado</p>
-              <Badge variant={
-                selectedCuenta.estado === 'pendiente' ? 'pending-light' :
-                selectedCuenta.estado === 'aprobado' ? 'success-light' :
-                selectedCuenta.estado === 'en_proceso' ? 'warning-light' : 'destructive'
-              }>
-                {selectedCuenta.estado === 'pendiente' ? 'Pendiente' :
-                 selectedCuenta.estado === 'aprobado' ? 'Aprobado' :
-                 selectedCuenta.estado === 'en_proceso' ? 'En Proceso' : 'Rechazado'}
-              </Badge>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Fecha Recepción</p>
-              <p className="font-medium text-card-foreground">{new Date(selectedCuenta.fecha_recepcion).toLocaleDateString('es-CO')}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-sm text-muted-foreground">Valor Total</p>
-              <p className="text-lg font-bold text-primary">
-                {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(selectedCuenta.valor_total)}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Listado de Servicios */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Servicios Asociados</h2>
-          
-          {selectedCuenta.servicios.map((servicio: any, index: number) => (
-            <Card key={index} className="border-l-4 border-l-primary rounded-lg border-border">
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Truck className="h-5 w-5 text-primary" />
-                      <h3 className="text-lg font-semibold text-card-foreground">{servicio.descripcion}</h3>
-                      <Badge variant={
-                        servicio.estado === 'pendiente' ? 'pending-light' :
-                        servicio.estado === 'aprobado' ? 'success-light' : 'destructive'
-                      }>
-                        {servicio.estado === 'pendiente' ? 'Pendiente' :
-                         servicio.estado === 'aprobado' ? 'Aprobado' : 'Rechazado'}
-                      </Badge>
-                    </div>
-                    <p className="text-2xl font-bold text-primary mb-4">
-                      {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(servicio.valor)}
-                    </p>
-                  </div>
-                  
-                  {servicio.estado === 'pendiente' && (
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="success"
-                        onClick={() => handleApproveService(selectedCuenta.id, index)}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Aprobar
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive"
-                        onClick={() => handleRejectService(selectedCuenta.id, index)}
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Rechazar
-                      </Button>
-                      <Button size="sm" variant="warning">
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Corregir
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Detalles del Viaje */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-muted/30 p-4 rounded-md border border-border">
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Ruta</p>
-                        <p className="font-medium text-card-foreground">{servicio.origen} → {servicio.destino}</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-muted-foreground" />
-                      <div>
-                        <p className="text-xs text-muted-foreground">Fecha y Hora</p>
-                        <p className="font-medium text-card-foreground">{servicio.fecha} - {servicio.hora}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    {servicio.pasajeros && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Pasajeros</p>
-                        <p className="font-medium text-card-foreground">{servicio.pasajeros}</p>
-                      </div>
-                    )}
-                    
-                    {servicio.carga && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Carga</p>
-                        <p className="font-medium text-card-foreground">{servicio.carga}</p>
-                      </div>
-                    )}
-                    
-                    <div>
-                      <p className="text-xs text-muted-foreground">Vehículo</p>
-                      <p className="font-medium text-card-foreground">{servicio.vehiculo}</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs text-muted-foreground">Distancia</p>
-                      <p className="font-medium text-card-foreground">{servicio.distancia}</p>
-                    </div>
-                    
-                    <div>
-                      <p className="text-xs text-muted-foreground">Duración</p>
-                      <p className="font-medium text-card-foreground">{servicio.duracion}</p>
-                    </div>
-                    
-                    {servicio.observaciones && (
-                      <div>
-                        <p className="text-xs text-muted-foreground">Observaciones</p>
-                        <p className="font-medium text-destructive">{servicio.observaciones}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
       </div>
     )
   }
 
+// Componente Metric siguiendo el patrón de Proveedores
+const Metric = ({ icon: Icon, label, value, sub }: any) => (
+  <Card className="rounded-2xl border">
+    <CardContent className="p-5 flex items-center gap-4">
+      <div className="h-10 w-10 rounded-xl bg-blue-600/10 text-blue-700 grid place-content-center">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-2xl font-semibold leading-none tracking-tight">{value}</div>
+        <div className="text-xs text-muted-foreground">{label}</div>
+        {sub && <div className="text-[11px] mt-1 text-muted-foreground">{sub}</div>}
+      </div>
+    </CardContent>
+  </Card>
+);
+
   const summary = (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <Card className="border-border rounded-lg">
+      <Card className="rounded-2xl border">
         <CardContent className="p-4">
           <div className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-primary" />
             <div>
               <p className="text-sm text-muted-foreground">Mes Seleccionado</p>
               <Select value={mesSeleccionado} onValueChange={setMesSeleccionado}>
-                <SelectTrigger className="w-40 border-input">
+                <SelectTrigger className="w-40 border-input rounded-xl">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-border bg-popover">
+                <SelectContent className="border-border bg-popover rounded-xl">
                   <SelectItem value="2024-01">Enero 2024</SelectItem>
                   <SelectItem value="2024-02">Febrero 2024</SelectItem>
                   <SelectItem value="2024-03">Marzo 2024</SelectItem>
@@ -388,49 +416,48 @@ export default function PagosPorPreparar() {
         </CardContent>
       </Card>
       
-      <Card className="border-border rounded-lg">
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">Pendientes</p>
-          <p className="text-xl font-semibold text-pending">
-            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPorEstado.pendiente)}
-          </p>
-        </CardContent>
-      </Card>
+      <Metric 
+        icon={AlertTriangle} 
+        label="Pendientes" 
+        value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPorEstado.pendiente)}
+        sub={`${filteredData.filter(c => c.estado === 'pendiente').length} cuentas`}
+      />
       
-      <Card className="border-border rounded-lg">
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">En Proceso</p>
-          <p className="text-xl font-semibold text-warning">
-            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPorEstado.en_proceso)}
-          </p>
-        </CardContent>
-      </Card>
+      <Metric 
+        icon={Clock} 
+        label="En Proceso" 
+        value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPorEstado.en_proceso)}
+        sub={`${filteredData.filter(c => c.estado === 'en_proceso').length} cuentas`}
+      />
       
-      <Card className="border-border rounded-lg">
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">Rechazadas</p>
-          <p className="text-xl font-semibold text-destructive">
-            {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPorEstado.rechazado)}
-          </p>
-        </CardContent>
-      </Card>
+      <Metric 
+        icon={XCircle} 
+        label="Rechazadas" 
+        value={new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP' }).format(totalPorEstado.rechazado)}
+        sub={`${filteredData.filter(c => c.estado === 'rechazado').length} cuentas`}
+      />
     </div>
   )
 
   return (
-    <div className="p-6 space-y-6 bg-background min-h-screen">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold text-foreground">Servicios de Transporte - Pagos por Preparar</h1>
-        <p className="text-muted-foreground text-base">Gestiona las cuentas de cobro de servicios de transporte enviadas por los proveedores</p>
+    <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Header + CTAs */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between p-6 pb-0">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Servicios de Transporte - Pagos por Preparar</h1>
+          <p className="text-sm text-muted-foreground">Gestiona las cuentas de cobro de servicios de transporte enviadas por los proveedores</p>
+        </div>
       </div>
 
-      <DataTable
-        title="Cuentas de Cobro - Servicios de Transporte"
-        columns={columns}
-        data={filteredData}
-        actions={actions}
-        summary={summary}
-      />
+      <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <DataTable
+          title="Cuentas de Cobro - Servicios de Transporte"
+          columns={columns}
+          data={filteredData}
+          actions={actions}
+          summary={summary}
+        />
+      </main>
     </div>
   )
 }
