@@ -427,15 +427,15 @@ export default function Portafolios() {
               {pdfType === "ejecutivos" ? "Portafolio de Ejecutivos" : "Portafolio de Rutas"}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 bg-gray-100 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
+          <div className="flex-1 bg-muted rounded-xl p-8 min-h-[500px] flex items-center justify-center">
             <div className="text-center space-y-4">
-              <FileText className="h-16 w-16 text-gray-400 mx-auto" />
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-700">Vista previa de PDF</h3>
-                <p className="text-gray-500">
+                <h3 className="text-lg font-semibold text-foreground">Vista previa de PDF</h3>
+                <p className="text-muted-foreground">
                   {pdfType === "ejecutivos" ? "Portafolio de Ejecutivos" : "Portafolio de Rutas"}
                 </p>
-                <p className="text-sm text-gray-400 mt-2">
+                <p className="text-sm text-muted-foreground mt-2">
                   Contenido del documento {pdfType === "ejecutivos" ? "ejecutivos" : "de rutas"}
                 </p>
               </div>

@@ -578,7 +578,7 @@ export default function PQR() {
                 
                 <div>
                   <Label className="text-sm font-medium">Descripción</Label>
-                  <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                  <div className="mt-2 p-3 bg-muted rounded-xl">
                     <p className="text-sm">{pqrSeleccionada.descripcion}</p>
                   </div>
                 </div>
@@ -905,13 +905,13 @@ export default function PQR() {
             </TabsList>
             
             <TabsContent value="pqr" className="space-y-4 mt-6">
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-muted rounded-xl p-4">
                 <h4 className="font-medium mb-2">Detalle PQR</h4>
                 <div className="space-y-2 text-sm">
                   <p><strong>Tipo:</strong> {pqrSeleccionada?.tipo}</p>
                   <p><strong>Solicitante:</strong> {pqrSeleccionada?.solicitante}</p>
                   <p><strong>Descripción:</strong></p>
-                  <p className="bg-white p-3 rounded border">{pqrSeleccionada?.descripcion}</p>
+                  <p className="bg-card p-3 rounded-xl border">{pqrSeleccionada?.descripcion}</p>
                 </div>
               </div>
             </TabsContent>

@@ -177,11 +177,13 @@ export default function CuentaCobro() {
   const getEstadoBadge = (estado: string) => {
     switch (estado) {
       case "EN REVISION":
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 rounded-md">EN REVISIÓN ⚠</Badge>
+        return <Badge variant="warning-light" className="rounded-md">EN REVISIÓN ⚠</Badge>
       case "APROBADO":
-        return <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md">APROBADO ✓</Badge>
+        return <Badge variant="success-light" className="rounded-md">APROBADO ✓</Badge>
       case "RECHAZADO":
-        return <Badge variant="secondary" className="bg-red-100 text-red-800 hover:bg-red-100 rounded-md">RECHAZADO ✗</Badge>
+        return <Badge variant="destructive" className="rounded-md">RECHAZADO ✗</Badge>
+      case "PENDIENTE":
+        return <Badge variant="pending-light" className="rounded-md">PENDIENTE</Badge>
       default:
         return <Badge variant="outline">{estado}</Badge>
     }
@@ -203,11 +205,11 @@ export default function CuentaCobro() {
   const getEstadoLoteBadge = (estado: string) => {
     switch (estado) {
       case "EN PREPARACION":
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md">EN PREPARACIÓN</Badge>
+        return <Badge variant="pending-light" className="rounded-md">EN PREPARACIÓN</Badge>
       case "EN REVISION":
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 rounded-md">EN REVISIÓN</Badge>
+        return <Badge variant="warning-light" className="rounded-md">EN REVISIÓN</Badge>
       case "PENDIENTE":
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-md">PENDIENTE</Badge>
+        return <Badge variant="pending-light" className="rounded-md">PENDIENTE</Badge>
       default:
         return <Badge variant="outline">{estado}</Badge>
     }
@@ -250,7 +252,7 @@ export default function CuentaCobro() {
             <Card className="rounded-2xl border">
               <CardContent className="p-6">
                 <p className="text-sm text-yellow-600 font-medium">Estado</p>
-                <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 hover:bg-yellow-100 mt-2 rounded-md">EN REVISIÓN</Badge>
+                <Badge variant="warning-light" className="rounded-md">EN REVISIÓN</Badge>
               </CardContent>
             </Card>
             <Card className="rounded-2xl border">
@@ -315,9 +317,9 @@ export default function CuentaCobro() {
                         <TableCell>{servicio.valorLiquidacion}</TableCell>
                         <TableCell>{servicio.valorContratista}</TableCell>
                         <TableCell>
-                          <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100 rounded-md">
-                            {servicio.diferencia}
-                          </Badge>
+                        <Badge variant="success-light" className="rounded-md">
+                          {servicio.diferencia}
+                        </Badge>
                         </TableCell>
                         <TableCell>
                           <CheckCircle className="h-5 w-5 text-green-500" />
@@ -377,7 +379,7 @@ export default function CuentaCobro() {
                       className={`border rounded-xl p-4 cursor-pointer transition-all hover:shadow-md ${
                         loteSeleccionado === lote.numero 
                           ? 'border-primary bg-primary/5' 
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-border hover:border-input'
                       }`}
                       onClick={() => setLoteSeleccionado(lote.numero)}
                     >
@@ -535,7 +537,7 @@ export default function CuentaCobro() {
               <CardContent>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                     <Input
                       placeholder="Buscar por número, contratista o estado"
                       value={busqueda}

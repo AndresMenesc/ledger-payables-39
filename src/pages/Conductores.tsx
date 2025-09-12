@@ -240,7 +240,7 @@ export default function ConductoresPage() {
                     {/* Documents grid like vehicle */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       {(c.documentos ?? []).map((doc, j) => (
-                        <div key={j} className="rounded-lg border p-2 bg-background">
+                        <div key={j} className="rounded-xl border p-2 bg-background">
                           <div className={`text-sm font-medium ${toneFromStatus(doc.status) === "success" ? "text-emerald-600" : toneFromStatus(doc.status) === "warning" ? "text-amber-600" : "text-rose-600"}`}>{doc.label}</div>
                           <div className="text-[11px] text-muted-foreground">{doc.fecha}</div>
                         </div>

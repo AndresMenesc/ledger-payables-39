@@ -240,8 +240,8 @@ export default function Dashboard() {
                         Gestión de Cuentas de Cobro
                       </AlertDialogTitle>
                       <AlertDialogDescription className="text-left space-y-3">
-                        <p className="text-gray-600">
-                          Mes habilitado actualmente: <span className="font-semibold text-blue-700">{obtenerNombreMes(mesHabilitadoCuentaCobro)}</span>
+                        <p className="text-muted-foreground">
+                          Mes habilitado actualmente: <span className="font-semibold text-primary">{obtenerNombreMes(mesHabilitadoCuentaCobro)}</span>
                         </p>
                         <Card className="rounded-xl bg-blue-50 p-3 border-l-4 border-blue-400">
                           <div>

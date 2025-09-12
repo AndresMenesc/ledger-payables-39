@@ -608,9 +608,9 @@ export default function CuentaCobroProveedor() {
                             <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ Cert. Bancaria</Badge>
                           )}
                           {proveedor.documentos.segSocial ? (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ Seg. Social</Badge>
+                            <Badge variant="success-light" className="rounded-md text-xs">✓ Seg. Social</Badge>
                           ) : (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-md text-xs">✗ Seg. Social</Badge>
+                            <Badge variant="pending-light" className="rounded-md text-xs">✗ Seg. Social</Badge>
                           )}
                         </div>
                       </div>
@@ -679,9 +679,9 @@ export default function CuentaCobroProveedor() {
                             <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ Cert. Bancaria</Badge>
                           )}
                           {proveedor.documentos.segSocial ? (
-                            <Badge variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-100 rounded-md text-xs">✓ Seg. Social</Badge>
+                            <Badge variant="success-light" className="rounded-md text-xs">✓ Seg. Social</Badge>
                           ) : (
-                            <Badge variant="secondary" className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-md text-xs">✗ Seg. Social</Badge>
+                            <Badge variant="pending-light" className="rounded-md text-xs">✗ Seg. Social</Badge>
                           )}
                         </div>
                       </div>

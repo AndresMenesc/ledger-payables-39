@@ -148,14 +148,14 @@ export default function Cotizaciones() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-        <div className="flex items-center gap-2">
-          <FileText className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold">Cotizaciones</h1>
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold tracking-tight">Cotizaciones</h1>
+          <p className="text-sm text-muted-foreground">Gestiona y administra las cotizaciones del sistema</p>
         </div>
         
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button className="flex items-center gap-2 rounded-xl">
               <Plus className="h-4 w-4" />
               Nueva Cotización
             </Button>
@@ -233,12 +233,12 @@ export default function Cotizaciones() {
                 
                 <div className="space-y-2">
                   <Label htmlFor="soportePdf">Soporte PDF</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                  <div className="border-2 border-dashed border-border rounded-xl p-6 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                         <Plus className="h-4 w-4" />
                       </div>
-                      <p className="text-sm text-gray-600">Seleccione un archivo</p>
+                      <p className="text-sm text-muted-foreground">Seleccione un archivo</p>
                     </div>
                   </div>
                 </div>
@@ -326,7 +326,7 @@ export default function Cotizaciones() {
                 <h3 className="text-lg font-semibold">Resumen de Traslados</h3>
                 
                 {traslados.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-muted-foreground">
                     <p>No hay traslados agregados. Vaya a la pestaña "Traslado" para agregar servicios.</p>
                   </div>
                 ) : (
@@ -373,7 +373,7 @@ export default function Cotizaciones() {
       </div>
 
       {/* Search and Filter */}
-      <Card>
+      <Card className="rounded-2xl border">
         <CardContent className="p-4">
           <div className="flex gap-4">
             <div className="relative flex-1">
@@ -382,17 +382,17 @@ export default function Cotizaciones() {
                 placeholder="Buscar por cliente o número..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
+                className="pl-9 rounded-xl"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-48">
+              <SelectTrigger className="w-48 rounded-xl">
                 <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4" />
                   <SelectValue placeholder="Filtrar por estado" />
                 </div>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="rounded-xl">
                 <SelectItem value="all">Todos los estados</SelectItem>
                 <SelectItem value="Enviada">Enviada</SelectItem>
                 <SelectItem value="Pendiente">Pendiente</SelectItem>
@@ -404,15 +404,16 @@ export default function Cotizaciones() {
       </Card>
 
       {/* Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Lista de Cotizaciones</CardTitle>
+      <Card className="rounded-2xl border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Lista de Cotizaciones</CardTitle>
+          <p className="text-sm text-muted-foreground">Gestiona y visualiza todas las cotizaciones del sistema</p>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="rounded-xl border overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b">
+                <tr className="bg-muted/30">
                   <th className="text-left p-2 font-medium">Número</th>
                   <th className="text-left p-2 font-medium">Cliente</th>
                   <th className="text-left p-2 font-medium">Fecha Solicitud</th>
@@ -552,14 +553,14 @@ export default function Cotizaciones() {
               Vista previa - {selectedCotizacionPdf?.numero}
             </DialogTitle>
           </DialogHeader>
-          <div className="flex-1 bg-gray-100 rounded-lg p-8 min-h-[500px] flex items-center justify-center">
+          <div className="flex-1 bg-muted rounded-xl p-8 min-h-[500px] flex items-center justify-center">
             <div className="text-center space-y-4">
-              <FileText className="h-16 w-16 text-gray-400 mx-auto" />
+              <FileText className="h-16 w-16 text-muted-foreground mx-auto" />
               <div>
-                <h3 className="text-lg font-semibold text-gray-700">Vista previa de PDF</h3>
-                <p className="text-gray-500">Cotización: {selectedCotizacionPdf?.numero}</p>
-                <p className="text-gray-500">Cliente: {selectedCotizacionPdf?.cliente}</p>
-                <p className="text-gray-500">Valor: ${selectedCotizacionPdf?.valorTotal.toLocaleString()}</p>
+                <h3 className="text-lg font-semibold text-foreground">Vista previa de PDF</h3>
+                <p className="text-muted-foreground">Cotización: {selectedCotizacionPdf?.numero}</p>
+                <p className="text-muted-foreground">Cliente: {selectedCotizacionPdf?.cliente}</p>
+                <p className="text-muted-foreground">Valor: ${selectedCotizacionPdf?.valorTotal.toLocaleString()}</p>
               </div>
             </div>
           </div>
