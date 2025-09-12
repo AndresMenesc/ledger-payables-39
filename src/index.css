@@ -20,9 +20,9 @@ Colores profesionales que transmiten confianza y claridad */
     --popover-foreground: 221 34% 40%;
 
     /* Azul corporativo principal */
-    --primary: 219 72% 24%;
+    --primary: 210 72% 24%;
     --primary-foreground: 0 0% 100%;
-    --primary-hover: 219 72% 20%;
+    --primary-hover: 210 72% 20%;
 
     /* Gris secundario profesional */
     --secondary: 218 39% 85%;
@@ -72,7 +72,7 @@ Colores profesionales que transmiten confianza y claridad */
 
     --sidebar-foreground: 221 34% 40%;
 
-    --sidebar-primary: 219 72% 24%;
+    --sidebar-primary: 210 72% 24%;
 
     --sidebar-primary-foreground: 0 0% 100%;
 
@@ -137,7 +137,7 @@ Colores profesionales que transmiten confianza y claridad */
     --ring: 221 34% 50%;
     --sidebar-background: 218 39% 40%;
     --sidebar-foreground: 221 35% 95%;
-    --sidebar-primary: 219 72% 24%;
+    --sidebar-primary: 210 72% 24%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 229 43% 20%;
     --sidebar-accent-foreground: 0 0% 100%;
