@@ -53,32 +53,53 @@ const rows = [
     email: "contacto@transportesandinos.com",
     estado: "activo",
     user: { blocked: false, lastLogin: "2024-08-30 15:30" },
+    vehiculos: [
+      { placa: "ABC123", conductor: "Juan Carlos Pérez" },
+      { placa: "DEF456", conductor: "Juan Carlos Pérez" }
+    ],
+    conductores: [
+      { nombre: "Juan Carlos Pérez", cedula: "12345678", telefono: "+57 300 123 4567" }
+    ]
   },
   {
     id: "2",
-    code: "PROV-002",
+    code: "PROV-002", 
     name: "Logística del Pacífico Ltda",
     nit: "800987654-2",
     phone: "+57 320 9876543",
     email: "maria.gonzalez@logpacifica.com",
     estado: "activo",
     user: { blocked: true, lastLogin: "2024-08-30 15:30" },
+    vehiculos: [
+      { placa: "XYZ789", conductor: "María José García" }
+    ],
+    conductores: [
+      { nombre: "María José García", cedula: "87654321", telefono: "+57 315 987 6543" }
+    ]
   },
   {
     id: "3",
     code: "PROV-003",
     name: "Flota Norte S.A.S",
-    nit: "900555888-3",
+    nit: "900555888-3", 
     phone: "+57 315 5558888",
     email: "roberto@flotanorte.com",
     estado: "inactivo",
     user: { blocked: false, lastLogin: "2024-09-02 09:20" },
+    vehiculos: [
+      { placa: "GHI123", conductor: "Carlos Andrés Rodríguez" }
+    ],
+    conductores: [
+      { nombre: "Carlos Andrés Rodríguez", cedula: "11223344", telefono: "+57 301 555 7890" }
+    ]
   },
 ];
 
 export default function Proveedores() {
   const { toast } = useToast();
   const [view, setView] = useState<"list" | "cards">("list");
+  const [selectedProvider, setSelectedProvider] = useState<any>(null);
+  const [showProviderDetails, setShowProviderDetails] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean
     title: string
@@ -146,6 +167,11 @@ export default function Proveedores() {
         setConfirmDialog({ ...confirmDialog, open: false });
       }
     });
+  };
+
+  const handleVerDetalle = (provider: any) => {
+    setSelectedProvider(provider);
+    setShowProviderDetails(true);
   };
 
   return (
@@ -256,7 +282,7 @@ export default function Proveedores() {
                               <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
                                 Último login: {r.user.lastLogin}
                               </div>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleVerDetalle(r)}>
                                 <FileText className="mr-2 h-4 w-4" />
                                 Ver Detalle
                               </DropdownMenuItem>
@@ -358,7 +384,7 @@ export default function Proveedores() {
                             <div className="px-2 py-1.5 text-xs text-muted-foreground border-b">
                               Último login: {r.user.lastLogin}
                             </div>
-                            <DropdownMenuItem>Ver Detalle</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleVerDetalle(r)}>Ver Detalle</DropdownMenuItem>
                             <DropdownMenuItem>Editar</DropdownMenuItem>
                             <DropdownMenuItem>Gestionar Documentos</DropdownMenuItem>
                             {r.estado === "activo" ? (
@@ -376,7 +402,10 @@ export default function Proveedores() {
                             <DropdownMenuItem 
                               onClick={() => handleEliminar(r)}
                               className="text-destructive"
-                            >Eliminar</DropdownMenuItem>
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Eliminar
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -435,6 +464,95 @@ export default function Proveedores() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Provider Details Dialog */}
+      {selectedProvider && (
+        <AlertDialog open={showProviderDetails} onOpenChange={setShowProviderDetails}>
+          <AlertDialogContent className="max-w-4xl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>Detalle del Proveedor: {selectedProvider.name}</AlertDialogTitle>
+            </AlertDialogHeader>
+            
+            <div className="space-y-6">
+              {/* Provider Info */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/30 rounded-lg">
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Código</div>
+                  <div className="text-sm">{selectedProvider.code}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">NIT</div>
+                  <div className="text-sm">{selectedProvider.nit}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Teléfono</div>
+                  <div className="text-sm">{selectedProvider.phone}</div>
+                </div>
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">Estado</div>
+                  <Badge className={`text-xs w-fit ${selectedProvider.estado === "activo" ? "bg-green-600 text-white" : "bg-red-600 text-white"}`}>
+                    {selectedProvider.estado}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* Vehicles Section */}
+              <div>
+                <h4 className="text-lg font-semibold mb-3">Vehículos ({selectedProvider.vehiculos.length})</h4>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Placa</TableHead>
+                        <TableHead>Conductor Asignado</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedProvider.vehiculos.map((vehiculo: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell className="font-medium">{vehiculo.placa}</TableCell>
+                          <TableCell>{vehiculo.conductor}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+
+              {/* Drivers Section */}
+              <div>
+                <h4 className="text-lg font-semibold mb-3">Conductores ({selectedProvider.conductores.length})</h4>
+                <div className="border rounded-lg overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nombre</TableHead>
+                        <TableHead>Cédula</TableHead>
+                        <TableHead>Teléfono</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedProvider.conductores.map((conductor: any, idx: number) => (
+                        <TableRow key={idx}>
+                          <TableCell className="font-medium">{conductor.nombre}</TableCell>
+                          <TableCell>{conductor.cedula}</TableCell>
+                          <TableCell>{conductor.telefono}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </div>
+            </div>
+
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowProviderDetails(false)}>
+                Cerrar
+              </AlertDialogCancel>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }

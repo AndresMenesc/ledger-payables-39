@@ -33,6 +33,7 @@ interface Vehiculo {
   estado: "activo" | "inactivo";
   fechaCreacion: string;
   fechaActualizacion: string;
+  conductorAsignado?: string; // Driver name
   usuarioBloqueo?: {
     bloqueado: boolean;
     fechaBloqueo?: string;
@@ -87,6 +88,7 @@ const mockVehiculos: Vehiculo[] = [
     estado: "activo",
     fechaCreacion: "2024-01-15",
     fechaActualizacion: "2024-01-15",
+    conductorAsignado: "Juan Carlos Pérez",
     usuarioBloqueo: {
       bloqueado: false,
       ultimoLogin: "2024-01-14 10:30:00"
@@ -107,6 +109,7 @@ const mockVehiculos: Vehiculo[] = [
     estado: "inactivo",
     fechaCreacion: "2024-01-10",
     fechaActualizacion: "2024-01-20",
+    conductorAsignado: "María José García",
     usuarioBloqueo: {
       bloqueado: true,
       fechaBloqueo: "2024-01-20 15:45:00",
@@ -119,6 +122,48 @@ const mockVehiculos: Vehiculo[] = [
       soat: "2024-08-30",
       polizaContractual: "2024-12-05",
       polizaExtraContractual: "2024-11-18"
+    }
+  },
+  {
+    id: "3",
+    placa: "DEF456",
+    proveedor: "Transportes del Valle",
+    estado: "activo",
+    fechaCreacion: "2024-01-12",
+    fechaActualizacion: "2024-01-12",
+    conductorAsignado: "Juan Carlos Pérez",
+    usuarioBloqueo: {
+      bloqueado: false,
+      ultimoLogin: "2024-01-11 14:20:00"
+    },
+    documentos: {
+      revisionPreventiva: "2025-01-31",
+      tecnomecanica: "2025-02-28",
+      tarjetaOperacion: "2025-07-15",
+      soat: "2025-01-20",
+      polizaContractual: "2025-04-10",
+      polizaExtraContractual: "2025-02-25"
+    }
+  },
+  {
+    id: "4",
+    placa: "GHI123",
+    proveedor: "Rápido Express",
+    estado: "activo",
+    fechaCreacion: "2024-01-08",
+    fechaActualizacion: "2024-01-08",
+    conductorAsignado: "Carlos Andrés Rodríguez",
+    usuarioBloqueo: {
+      bloqueado: false,
+      ultimoLogin: "2024-01-13 16:20:00"
+    },
+    documentos: {
+      revisionPreventiva: "2025-03-31",
+      tecnomecanica: "2025-04-30",
+      tarjetaOperacion: "2025-08-15",
+      soat: "2025-02-20",
+      polizaContractual: "2025-05-10",
+      polizaExtraContractual: "2025-03-25"
     }
   }
 ];
@@ -345,6 +390,9 @@ export default function Vehiculos() {
           <div>
             <div className="font-medium">{vehiculo.placa}</div>
             <div className="text-sm text-muted-foreground">{vehiculo.proveedor}</div>
+            {vehiculo.conductorAsignado && (
+              <div className="text-xs text-blue-600 font-medium">👤 {vehiculo.conductorAsignado}</div>
+            )}
           </div>
         );
       case "revisionPreventiva":
@@ -559,6 +607,7 @@ export default function Vehiculos() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Vehículo</TableHead>
+                      <TableHead>Conductor Asignado</TableHead>
                       <TableHead>Revisión Preventiva</TableHead>
                       <TableHead>Tecno</TableHead>
                       <TableHead>Tarjeta de Operación</TableHead>
@@ -574,6 +623,15 @@ export default function Vehiculos() {
                         <TableCell>
                           <div className="font-medium">{v.placa}</div>
                           <div className="text-xs text-muted-foreground">{v.proveedor}</div>
+                        </TableCell>
+                        <TableCell>
+                          {v.conductorAsignado ? (
+                            <div className="text-sm font-medium text-blue-600">
+                              👤 {v.conductorAsignado}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">Sin asignar</span>
+                          )}
                         </TableCell>
                         {["revisionPreventiva", "tecnomecanica", "tarjetaOperacion", "soat", "polizaContractual", "polizaExtraContractual"].map((docType) => {
                           const fecha = v.documentos[docType as keyof typeof v.documentos];

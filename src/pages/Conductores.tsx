@@ -49,6 +49,7 @@ interface Conductor {
   telefono: string;
   documentos?: Documento[];
   lastAccess: string;
+  vehiculosAsignados: string[]; // Array of vehicle plates
 }
 
 const conductoresSeed: Conductor[] = [
@@ -65,6 +66,7 @@ const conductoresSeed: Conductor[] = [
       { label: "Exámenes Psicosensométricos", fecha: "14/12/2024", status: "Vencido" },
     ],
     lastAccess: "2024-01-14 10:30:00",
+    vehiculosAsignados: ["ABC123", "DEF456"],
   },
   {
     nombre: "María José García",
@@ -79,6 +81,7 @@ const conductoresSeed: Conductor[] = [
       { label: "Exámenes Psicosensométricos", fecha: "09/09/2024", status: "Vencido" },
     ],
     lastAccess: "2024-01-19 08:15:00",
+    vehiculosAsignados: ["XYZ789"],
   },
   {
     nombre: "Carlos Andrés Rodríguez",
@@ -93,6 +96,7 @@ const conductoresSeed: Conductor[] = [
       { label: "Exámenes Psicosensométricos", fecha: "21/08/2024", status: "Vencido" },
     ],
     lastAccess: "2024-01-13 16:20:00",
+    vehiculosAsignados: ["GHI123"],
   },
 ];
 
@@ -155,6 +159,7 @@ export default function ConductoresPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Conductor</TableHead>
+                        <TableHead>Vehículos Asignados</TableHead>
                         <TableHead>Seguridad Social</TableHead>
                         <TableHead>Licencia de Conducción</TableHead>
                         <TableHead>Exámenes Psicosensométricos</TableHead>
@@ -169,6 +174,19 @@ export default function ConductoresPage() {
                             <div className="font-medium">{c.nombre}</div>
                             <div className="text-xs text-muted-foreground">{c.proveedor}</div>
                             <div className="text-[11px] text-muted-foreground">Último acceso: {c.lastAccess}</div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex flex-col gap-1">
+                              {c.vehiculosAsignados.length > 0 ? (
+                                c.vehiculosAsignados.map((placa, idx) => (
+                                  <Badge key={idx} variant="outline" className="text-xs w-fit">
+                                    {placa}
+                                  </Badge>
+                                ))
+                              ) : (
+                                <span className="text-xs text-muted-foreground">Sin vehículos</span>
+                              )}
+                            </div>
                           </TableCell>
                           {(c.documentos ?? []).map((doc, j) => (
                             <TableCell key={j}>
@@ -236,15 +254,34 @@ export default function ConductoresPage() {
                     </div>
                   </div>
 
-                  <CardContent className="p-4">
+                  <CardContent className="p-4 space-y-4">
+                    {/* Assigned vehicles */}
+                    <div>
+                      <div className="text-sm font-medium mb-2">Vehículos Asignados</div>
+                      <div className="flex flex-wrap gap-2">
+                        {c.vehiculosAsignados.length > 0 ? (
+                          c.vehiculosAsignados.map((placa, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">
+                              {placa}
+                            </Badge>
+                          ))
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Sin vehículos asignados</span>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Documents grid like vehicle */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {(c.documentos ?? []).map((doc, j) => (
-                        <div key={j} className="rounded-xl border p-2 bg-background">
-                          <div className={`text-sm font-medium ${toneFromStatus(doc.status) === "success" ? "text-emerald-600" : toneFromStatus(doc.status) === "warning" ? "text-amber-600" : "text-rose-600"}`}>{doc.label}</div>
-                          <div className="text-[11px] text-muted-foreground">{doc.fecha}</div>
-                        </div>
-                      ))}
+                    <div>
+                      <div className="text-sm font-medium mb-2">Documentos</div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {(c.documentos ?? []).map((doc, j) => (
+                          <div key={j} className="rounded-xl border p-2 bg-background">
+                            <div className={`text-sm font-medium ${toneFromStatus(doc.status) === "success" ? "text-emerald-600" : toneFromStatus(doc.status) === "warning" ? "text-amber-600" : "text-rose-600"}`}>{doc.label}</div>
+                            <div className="text-[11px] text-muted-foreground">{doc.fecha}</div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
