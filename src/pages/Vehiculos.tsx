@@ -391,7 +391,7 @@ export default function Vehiculos() {
             <div className="font-medium">{vehiculo.placa}</div>
             <div className="text-sm text-muted-foreground">{vehiculo.proveedor}</div>
             {vehiculo.conductorAsignado && (
-              <div className="text-xs text-blue-600 font-medium">👤 {vehiculo.conductorAsignado}</div>
+              <div className="text-xs text-blue-600 font-medium">{vehiculo.conductorAsignado}</div>
             )}
           </div>
         );
@@ -626,9 +626,7 @@ export default function Vehiculos() {
                         </TableCell>
                         <TableCell>
                           {v.conductorAsignado ? (
-                            <div className="text-sm font-medium text-blue-600">
-                              👤 {v.conductorAsignado}
-                            </div>
+                            <div className="font-medium">{v.conductorAsignado}</div>
                           ) : (
                             <span className="text-xs text-muted-foreground">Sin asignar</span>
                           )}
