@@ -29,6 +29,9 @@ import Documentacion from "./pages/Documentacion";
 import CuentaCobroProveedor from "./pages/CuentaCobroProveedor";
 import RevisionAdmin from "./pages/RevisionAdmin";
 import Anticipos from "./pages/Anticipos";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import ForgotPassword from "./pages/ForgotPassword";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -46,33 +49,39 @@ const App = () => (
               {/* Main Content */}
               <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
                 <div className="max-w-full mx-auto">
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="pagos-preparar" element={<PagosPorPreparar />} />
-                  <Route path="pagos-procesar" element={<PagosPorProcesar />} />
-                  <Route path="pagos-aprobar" element={<PagosPorAprobar />} />
-                  <Route path="pagados" element={<Pagados />} />
-                  <Route path="sin-lote" element={<SinLote />} />
-                  <Route path="lotes-aprobados" element={<LotesAprobados />} />
-                   <Route path="cuenta-cobro" element={<CuentaCobro />} />
-                  <Route path="cuenta-cobro-proveedor" element={<CuentaCobroProveedor />} />
-                  <Route path="pqr" element={<PQR />} />
-                  <Route path="proveedores" element={<Proveedores />} />
-                  <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
-                  <Route path="conductores" element={<Conductores />} />
-                  <Route path="vehiculos" element={<Vehiculos />} />
-                  <Route path="fuec" element={<FUEC />} />
-                  <Route path="prestamos" element={<Prestamos />} />
-                  <Route path="liquidaciones" element={<Liquidaciones />} />
-                  <Route path="facturas" element={<Facturas />} />
-                  <Route path="generar-cuenta-cobro" element={<GenerarCuentaCobro />} />
-                   <Route path="documentacion" element={<Documentacion />} />
-                   <Route path="cotizaciones" element={<Cotizaciones />} />
-                   <Route path="portafolios" element={<Portafolios />} />
-                   <Route path="revision-admin" element={<RevisionAdmin />} />
-                   <Route path="anticipos" element={<Anticipos />} />
-                   <Route path="*" element={<NotFound />} />
-                </Routes>
+                 <Routes>
+                   {/* Auth Routes */}
+                   <Route path="/login" element={<Login />} />
+                   <Route path="/register" element={<Register />} />
+                   <Route path="/forgot-password" element={<ForgotPassword />} />
+                   
+                   {/* Main App Routes */}
+                   <Route path="/" element={<Dashboard />} />
+                   <Route path="pagos-preparar" element={<PagosPorPreparar />} />
+                   <Route path="pagos-procesar" element={<PagosPorProcesar />} />
+                   <Route path="pagos-aprobar" element={<PagosPorAprobar />} />
+                   <Route path="pagados" element={<Pagados />} />
+                   <Route path="sin-lote" element={<SinLote />} />
+                   <Route path="lotes-aprobados" element={<LotesAprobados />} />
+                    <Route path="cuenta-cobro" element={<CuentaCobro />} />
+                   <Route path="cuenta-cobro-proveedor" element={<CuentaCobroProveedor />} />
+                   <Route path="pqr" element={<PQR />} />
+                   <Route path="proveedores" element={<Proveedores />} />
+                   <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
+                   <Route path="conductores" element={<Conductores />} />
+                   <Route path="vehiculos" element={<Vehiculos />} />
+                   <Route path="fuec" element={<FUEC />} />
+                   <Route path="prestamos" element={<Prestamos />} />
+                   <Route path="liquidaciones" element={<Liquidaciones />} />
+                   <Route path="facturas" element={<Facturas />} />
+                   <Route path="generar-cuenta-cobro" element={<GenerarCuentaCobro />} />
+                    <Route path="documentacion" element={<Documentacion />} />
+                    <Route path="cotizaciones" element={<Cotizaciones />} />
+                    <Route path="portafolios" element={<Portafolios />} />
+                    <Route path="revision-admin" element={<RevisionAdmin />} />
+                    <Route path="anticipos" element={<Anticipos />} />
+                    <Route path="*" element={<NotFound />} />
+                 </Routes>
                 </div>
               </main>
             </div>
