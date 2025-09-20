@@ -50,10 +50,10 @@ const App = () => (
               <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
                 <div className="max-w-full mx-auto">
                  <Routes>
-                   {/* Auth Routes */}
-                   <Route path="/login" element={<Login />} />
-                   <Route path="/register" element={<Register />} />
-                   <Route path="/forgot-password" element={<ForgotPassword />} />
+                    {/* Auth Routes */}
+                    <Route path="/ingresar" element={<Login />} />
+                    <Route path="/registro" element={<Register />} />
+                    <Route path="/resetear-contrasena" element={<ForgotPassword />} />
                    
                    {/* Main App Routes */}
                    <Route path="/" element={<Dashboard />} />

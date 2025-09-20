@@ -143,7 +143,7 @@ const Login = () => {
 
                 <div className="flex items-center justify-end">
                   <Link
-                    to="/forgot-password"
+                    to="/resetear-contrasena"
                     className="text-sm text-primary hover:text-primary/80 transition-colors"
                   >
                     ¿Olvidaste tu contraseña?
@@ -172,7 +172,7 @@ const Login = () => {
                   <p className="text-sm text-muted-foreground">
                     ¿No tienes una cuenta?{" "}
                     <Link
-                      to="/register"
+                      to="/registro"
                       className="font-medium text-primary hover:text-primary/80 transition-colors"
                     >
                       Regístrate aquí

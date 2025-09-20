@@ -65,7 +65,7 @@ const Register = () => {
       }
 
       toast.success("¡Cuenta creada exitosamente! Ya puedes iniciar sesión.");
-      navigate("/login");
+      navigate("/ingresar");
     } catch (err) {
       setError("Ocurrió un error inesperado. Inténtalo de nuevo.");
     } finally {
@@ -231,7 +231,7 @@ const Register = () => {
                   <p className="text-sm text-muted-foreground">
                     ¿Ya tienes una cuenta?{" "}
                     <Link
-                      to="/login"
+                      to="/ingresar"
                       className="font-medium text-primary hover:text-primary/80 transition-colors"
                     >
                       Inicia sesión aquí

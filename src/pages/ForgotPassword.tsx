@@ -83,7 +83,7 @@ const ForgotPassword = () => {
                   </p>
                 </div>
                 <div className="pt-4">
-                  <Link to="/login">
+                  <Link to="/ingresar">
                     <Button className="w-full">
                       <ArrowLeft className="mr-2 h-4 w-4" />
                       Volver al inicio de sesión
@@ -171,7 +171,7 @@ const ForgotPassword = () => {
 
                 <div className="text-center pt-4 border-t border-border">
                   <Link
-                    to="/login"
+                    to="/ingresar"
                     className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center"
                   >
                     <ArrowLeft className="mr-1 h-3 w-3" />
