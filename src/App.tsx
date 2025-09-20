@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Index";
@@ -36,57 +36,75 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
+const AppLayout = ({ children }: { children: React.ReactNode }) => {
+  const location = useLocation();
+  const isAuthPage = ['/ingresar', '/registro', '/resetear-contrasena'].includes(location.pathname);
+
+  if (isAuthPage) {
+    return (
+      <div className="min-h-screen">
+        {children}
+      </div>
+    );
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full">
+        <AppSidebar />
+        <div className="flex-1 flex flex-col min-w-0">
+          <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
+            <div className="max-w-full mx-auto">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <SidebarProvider>
-          <div className="min-h-screen flex w-full">
-            <AppSidebar />
-            <div className="flex-1 flex flex-col min-w-0">
-              {/* Main Content */}
-              <main className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
-                <div className="max-w-full mx-auto">
-                 <Routes>
-                    {/* Auth Routes */}
-                    <Route path="/ingresar" element={<Login />} />
-                    <Route path="/registro" element={<Register />} />
-                    <Route path="/resetear-contrasena" element={<ForgotPassword />} />
-                   
-                   {/* Main App Routes */}
-                   <Route path="/" element={<Dashboard />} />
-                   <Route path="pagos-preparar" element={<PagosPorPreparar />} />
-                   <Route path="pagos-procesar" element={<PagosPorProcesar />} />
-                   <Route path="pagos-aprobar" element={<PagosPorAprobar />} />
-                   <Route path="pagados" element={<Pagados />} />
-                   <Route path="sin-lote" element={<SinLote />} />
-                   <Route path="lotes-aprobados" element={<LotesAprobados />} />
-                    <Route path="cuenta-cobro" element={<CuentaCobro />} />
-                   <Route path="cuenta-cobro-proveedor" element={<CuentaCobroProveedor />} />
-                   <Route path="pqr" element={<PQR />} />
-                   <Route path="proveedores" element={<Proveedores />} />
-                   <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
-                   <Route path="conductores" element={<Conductores />} />
-                   <Route path="vehiculos" element={<Vehiculos />} />
-                   <Route path="fuec" element={<FUEC />} />
-                   <Route path="prestamos" element={<Prestamos />} />
-                   <Route path="liquidaciones" element={<Liquidaciones />} />
-                   <Route path="facturas" element={<Facturas />} />
-                   <Route path="generar-cuenta-cobro" element={<GenerarCuentaCobro />} />
-                    <Route path="documentacion" element={<Documentacion />} />
-                    <Route path="cotizaciones" element={<Cotizaciones />} />
-                    <Route path="portafolios" element={<Portafolios />} />
-                    <Route path="revision-admin" element={<RevisionAdmin />} />
-                    <Route path="anticipos" element={<Anticipos />} />
-                    <Route path="*" element={<NotFound />} />
-                 </Routes>
-                </div>
-              </main>
-            </div>
-          </div>
-        </SidebarProvider>
+        <AppLayout>
+          <Routes>
+            {/* Auth Routes */}
+            <Route path="/ingresar" element={<Login />} />
+            <Route path="/registro" element={<Register />} />
+            <Route path="/resetear-contrasena" element={<ForgotPassword />} />
+           
+           {/* Main App Routes */}
+           <Route path="/" element={<Dashboard />} />
+           <Route path="pagos-preparar" element={<PagosPorPreparar />} />
+           <Route path="pagos-procesar" element={<PagosPorProcesar />} />
+           <Route path="pagos-aprobar" element={<PagosPorAprobar />} />
+           <Route path="pagados" element={<Pagados />} />
+           <Route path="sin-lote" element={<SinLote />} />
+           <Route path="lotes-aprobados" element={<LotesAprobados />} />
+            <Route path="cuenta-cobro" element={<CuentaCobro />} />
+           <Route path="cuenta-cobro-proveedor" element={<CuentaCobroProveedor />} />
+           <Route path="pqr" element={<PQR />} />
+           <Route path="proveedores" element={<Proveedores />} />
+           <Route path="validacion-proveedores" element={<ValidacionProveedores />} />
+           <Route path="conductores" element={<Conductores />} />
+           <Route path="vehiculos" element={<Vehiculos />} />
+           <Route path="fuec" element={<FUEC />} />
+           <Route path="prestamos" element={<Prestamos />} />
+           <Route path="liquidaciones" element={<Liquidaciones />} />
+           <Route path="facturas" element={<Facturas />} />
+           <Route path="generar-cuenta-cobro" element={<GenerarCuentaCobro />} />
+            <Route path="documentacion" element={<Documentacion />} />
+            <Route path="cotizaciones" element={<Cotizaciones />} />
+            <Route path="portafolios" element={<Portafolios />} />
+            <Route path="revision-admin" element={<RevisionAdmin />} />
+            <Route path="anticipos" element={<Anticipos />} />
+            <Route path="*" element={<NotFound />} />
+         </Routes>
+        </AppLayout>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
